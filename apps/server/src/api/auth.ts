@@ -29,7 +29,8 @@ authRouter.post("/token", async (req, res) => {
   }
   try {
     const claims = await resolveWorkspaceForEmail(email);
-    res.json({ ...signAccessToken(claims), token_type: "Bearer" });
+    const { token, expiresIn } = signAccessToken(claims);
+    res.json({ access_token: token, expires_in: expiresIn, token_type: "Bearer" });
   } catch (err) {
     if (err instanceof WorkspaceResolutionError) {
       res.json({ needsOnboarding: true, email });
@@ -55,7 +56,8 @@ authRouter.post("/onboarding", async (req, res) => {
   }
   try {
     const claims = await createWorkspace(email, companyName.trim(), domain);
-    res.status(201).json({ ...signAccessToken(claims), token_type: "Bearer" });
+    const { token, expiresIn } = signAccessToken(claims);
+    res.status(201).json({ access_token: token, expires_in: expiresIn, token_type: "Bearer" });
   } catch (err) {
     if (err instanceof WorkspaceResolutionError) {
       res.status(409).json({ error: err.message });
