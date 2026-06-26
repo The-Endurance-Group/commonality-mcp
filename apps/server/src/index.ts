@@ -15,7 +15,11 @@ import { mountStatic } from "./static.js";
 
 const app = express();
 
-app.use(helmet());
+// CSP is disabled (only this directive) because the React app loads Clerk's SDK
+// from *.clerk.accounts.dev and connects to Clerk's API; helmet's default
+// script-src 'self' would block it. All other helmet protections stay on.
+// TODO: replace with a tightened CSP that allowlists the exact Clerk origins.
+app.use(helmet({ contentSecurityPolicy: false }));
 app.use(
   cors({
     origin: config.corsAllowlist,
