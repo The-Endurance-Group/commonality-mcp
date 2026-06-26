@@ -8,6 +8,7 @@ import { discoveryRouter } from "./oauth/discovery.js";
 import { oauthRouter } from "./oauth/routes.js";
 import { mcpRouter } from "./mcp/server.js";
 import { apiRouter } from "./api/index.js";
+import { authRouter } from "./api/auth.js";
 import { handleWebhookEvent } from "./services/stripe.js";
 import { logger as log } from "./logger.js";
 import { mountStatic } from "./static.js";
@@ -49,7 +50,10 @@ app.use("/.well-known", discoveryRouter);
 app.use("/oauth", oauthRouter);
 // 3. MCP JSON-RPC (requires Bearer JWT)
 app.use("/mcp", mcpRouter);
-// 4. REST API for the React app (requires Bearer JWT)
+// 4. REST API for the React app
+//    4a. Session exchange (Clerk -> Commonality JWT) — must precede the gated router.
+app.use("/api/auth", authRouter);
+//    4b. Everything else (requires Bearer Commonality JWT)
 app.use("/api", apiRouter);
 // 5. Health check
 app.get("/healthz", (_req, res) => {

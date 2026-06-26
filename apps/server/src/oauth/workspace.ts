@@ -79,6 +79,31 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Signab
   );
 }
 
+/**
+ * Create a brand-new workspace with this email as its admin (onboarding).
+ * Rejects if the email already belongs to a workspace.
+ */
+export async function createWorkspace(
+  rawEmail: string,
+  companyName: string,
+  domain?: string,
+): Promise<SignableClaims> {
+  const email = rawEmail.toLowerCase().trim();
+  const { data: existing } = await db().from("users").select("id").eq("email", email).maybeSingle();
+  if (existing) throw new WorkspaceResolutionError("You already belong to a workspace.");
+
+  const { data: company, error } = await db()
+    .from("companies")
+    .insert({ name: companyName, domain: domain?.toLowerCase().trim() || null, plan: "free" })
+    .select("id, plan")
+    .single<CompanyRow>();
+  if (error || !company) {
+    throw new WorkspaceResolutionError(`Could not create workspace: ${error?.message ?? "unknown"}`);
+  }
+  const user = await createUser(company.id, email, "admin");
+  return toClaims(user, company, email);
+}
+
 async function getCompany(companyId: string): Promise<CompanyRow> {
   const { data, error } = await db()
     .from("companies")
