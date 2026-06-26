@@ -49,6 +49,11 @@ export const config = {
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY ?? "",
   clerkIssuerUrl: optional("CLERK_ISSUER_URL", ""),
 
+  // Stripe. Disabled by default (STRIPE_ENABLED) so a live key can sit unused.
+  stripeEnabled: process.env.STRIPE_ENABLED === "true",
+  // Where Stripe redirects back to after checkout/portal (the web app origin).
+  webAppUrl: optional("WEB_APP_URL", optional("PUBLIC_BASE_URL", "http://localhost:8080")),
+
   // Lazily required — only the subsystems that use them call required().
   // Kept as getters so the server can boot for healthz without every secret set.
   get jwtSecret() {
@@ -68,6 +73,15 @@ export const config = {
   },
   get clerkOAuthClientSecret() {
     return required("CLERK_OAUTH_CLIENT_SECRET");
+  },
+  get stripeSecretKey() {
+    return required("STRIPE_SECRET_KEY");
+  },
+  get stripeWebhookSecret() {
+    return required("STRIPE_WEBHOOK_SECRET");
+  },
+  get stripePriceProMonthly() {
+    return required("STRIPE_PRICE_PRO_MONTHLY");
   },
 } as const;
 

@@ -8,6 +8,8 @@ import { discoveryRouter } from "./oauth/discovery.js";
 import { oauthRouter } from "./oauth/routes.js";
 import { mcpRouter } from "./mcp/server.js";
 import { apiRouter } from "./api/index.js";
+import { handleWebhookEvent } from "./services/stripe.js";
+import { logger as log } from "./logger.js";
 import { mountStatic } from "./static.js";
 
 const app = express();
@@ -21,9 +23,23 @@ app.use(
 );
 app.use(pinoHttp({ logger }));
 
-// NOTE (Phase 8): the Stripe webhook route must be mounted with
-// express.raw() BEFORE express.json() so the raw body is available for
-// signature verification. It will be added above this json() line.
+// Stripe webhook — MUST be mounted with the raw body BEFORE express.json() so
+// the signature can be verified against the exact bytes Stripe sent.
+app.post("/api/billing/webhook", express.raw({ type: "application/json" }), async (req, res) => {
+  const signature = req.header("stripe-signature");
+  if (!signature) {
+    res.status(400).json({ error: "missing signature" });
+    return;
+  }
+  try {
+    await handleWebhookEvent(req.body as Buffer, signature);
+    res.json({ received: true });
+  } catch (err) {
+    log.warn({ err }, "stripe webhook rejected");
+    res.status(400).json({ error: "invalid webhook" });
+  }
+});
+
 app.use(express.json({ limit: "5mb" }));
 
 // Mount order per the build brief:
