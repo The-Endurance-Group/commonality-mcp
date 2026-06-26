@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Link } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 
 interface Usage { plan: string; used: number; limit: number; remaining: number }
@@ -27,9 +28,14 @@ export function Dashboard() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-ink">Team roster</h2>
-          <button className="btn-secondary" disabled={reEnrich.isPending} onClick={() => reEnrich.mutate()}>
-            {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
-          </button>
+          <div className="flex gap-2">
+            <Link to="/onboarding" className="btn-primary">
+              Import team
+            </Link>
+            <button className="btn-secondary" disabled={reEnrich.isPending || employees.length === 0} onClick={() => reEnrich.mutate()}>
+              {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
+            </button>
+          </div>
         </div>
         <div className="overflow-hidden rounded-xl border bg-white">
           <table className="w-full text-sm">
@@ -42,7 +48,7 @@ export function Dashboard() {
             </thead>
             <tbody>
               {employees.length === 0 ? (
-                <tr><td className="px-4 py-6 text-gray-400" colSpan={3}>No team members yet.</td></tr>
+                <tr><td className="px-4 py-6 text-gray-400" colSpan={3}>No team members yet — click “Import team” to add your roster.</td></tr>
               ) : (
                 employees.map((e) => (
                   <tr key={e.id} className="border-t">
