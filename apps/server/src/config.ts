@@ -1,4 +1,25 @@
-import "dotenv/config";
+import { existsSync } from "node:fs";
+import path from "node:path";
+import dotenv from "dotenv";
+
+// Load the nearest .env by walking up from cwd. In this monorepo the server is
+// launched from apps/server but .env lives at the repo root, so cwd-only loading
+// (dotenv's default) would miss it. In production (Railway) there's no .env and
+// real env vars are already present — this is a harmless no-op there.
+function loadEnv(): void {
+  let dir = process.cwd();
+  for (let i = 0; i < 6; i++) {
+    const candidate = path.join(dir, ".env");
+    if (existsSync(candidate)) {
+      dotenv.config({ path: candidate });
+      return;
+    }
+    const parent = path.dirname(dir);
+    if (parent === dir) break;
+    dir = parent;
+  }
+}
+loadEnv();
 
 /** Read a required env var, throwing at boot if missing. */
 function required(name: string): string {
