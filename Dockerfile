@@ -15,6 +15,11 @@ RUN pnpm install --frozen-lockfile
 FROM node:22-alpine AS build
 WORKDIR /app
 RUN corepack enable
+# Vite inlines VITE_* env at build time. Railway passes service variables as
+# build args, so declare it here and expose it to the web build. (Publishable
+# key = public; safe to bake into the client bundle. Stays in this stage only.)
+ARG VITE_CLERK_PUBLISHABLE_KEY
+ENV VITE_CLERK_PUBLISHABLE_KEY=$VITE_CLERK_PUBLISHABLE_KEY
 COPY --from=deps /app/node_modules ./node_modules
 COPY --from=deps /app/packages/shared/node_modules ./packages/shared/node_modules
 COPY --from=deps /app/apps/server/node_modules ./apps/server/node_modules
