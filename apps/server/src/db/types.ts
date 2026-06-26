@@ -41,28 +41,52 @@ export type Database = {
     Tables: {
       companies: {
         Row: {
+          context: string | null
           created_at: string
           domain: string | null
+          hubspot_api_key: string | null
+          icp_profile: Json | null
           id: string
+          linkedin_company_url: string | null
           name: string
           plan: Database["public"]["Enums"]["plan_tier"]
+          salesforce_client_id: string | null
+          salesforce_client_secret: string | null
+          salesforce_instance_url: string | null
           stripe_customer_id: string | null
+          website: string | null
         }
         Insert: {
+          context?: string | null
           created_at?: string
           domain?: string | null
+          hubspot_api_key?: string | null
+          icp_profile?: Json | null
           id?: string
+          linkedin_company_url?: string | null
           name: string
           plan?: Database["public"]["Enums"]["plan_tier"]
+          salesforce_client_id?: string | null
+          salesforce_client_secret?: string | null
+          salesforce_instance_url?: string | null
           stripe_customer_id?: string | null
+          website?: string | null
         }
         Update: {
+          context?: string | null
           created_at?: string
           domain?: string | null
+          hubspot_api_key?: string | null
+          icp_profile?: Json | null
           id?: string
+          linkedin_company_url?: string | null
           name?: string
           plan?: Database["public"]["Enums"]["plan_tier"]
+          salesforce_client_id?: string | null
+          salesforce_client_secret?: string | null
+          salesforce_instance_url?: string | null
           stripe_customer_id?: string | null
+          website?: string | null
         }
         Relationships: []
       }
@@ -172,6 +196,51 @@ export type Database = {
             columns: ["invited_by"]
             isOneToOne: false
             referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      linkedin_connections: {
+        Row: {
+          company_id: string
+          connected_on: string | null
+          employee_id: string
+          full_name: string | null
+          id: string
+          linkedin_url: string | null
+          uploaded_at: string
+        }
+        Insert: {
+          company_id: string
+          connected_on?: string | null
+          employee_id: string
+          full_name?: string | null
+          id?: string
+          linkedin_url?: string | null
+          uploaded_at?: string
+        }
+        Update: {
+          company_id?: string
+          connected_on?: string | null
+          employee_id?: string
+          full_name?: string | null
+          id?: string
+          linkedin_url?: string | null
+          uploaded_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "linkedin_connections_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "linkedin_connections_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
             referencedColumns: ["id"]
           },
         ]
