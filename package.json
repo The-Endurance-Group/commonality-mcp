@@ -1,0 +1,17 @@
+{
+  "name": "commonality",
+  "version": "0.1.0",
+  "private": true,
+  "description": "MCP-native Commonality — sales intelligence as a Claude connector",
+  "packageManager": "pnpm@10.12.3",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev:server": "pnpm --filter server dev",
+    "dev:web": "pnpm --filter web dev",
+    "build": "pnpm --filter shared build && pnpm --filter server build && pnpm --filter web build",
+    "typecheck": "pnpm -r typecheck",
+    "test": "pnpm -r test"
+  }
+}
