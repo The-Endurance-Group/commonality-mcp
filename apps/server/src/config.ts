@@ -23,6 +23,11 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
 
+  // Clerk (OAuth IdP). Publishable + issuer are non-secret; the OAuth-application
+  // client id/secret are what we use as a relying party delegating sign-in to Clerk.
+  clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY ?? "",
+  clerkIssuerUrl: optional("CLERK_ISSUER_URL", ""),
+
   // Lazily required — only the subsystems that use them call required().
   // Kept as getters so the server can boot for healthz without every secret set.
   get jwtSecret() {
@@ -33,6 +38,15 @@ export const config = {
   },
   get supabaseServiceRoleKey() {
     return required("SUPABASE_SERVICE_ROLE_KEY");
+  },
+  get clerkSecretKey() {
+    return required("CLERK_SECRET_KEY");
+  },
+  get clerkOAuthClientId() {
+    return required("CLERK_OAUTH_CLIENT_ID");
+  },
+  get clerkOAuthClientSecret() {
+    return required("CLERK_OAUTH_CLIENT_SECRET");
   },
 } as const;
 

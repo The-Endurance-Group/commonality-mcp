@@ -1,20 +1,9 @@
 import type { NextFunction, Request, Response } from "express";
-import jwt from "jsonwebtoken";
-import { z } from "zod";
 import { config } from "../config.js";
 import { logger } from "../logger.js";
+import { type AuthUser, verifyAccessToken } from "../oauth/jwt.js";
 
-/** Claims we sign into every Commonality JWT. */
-export const jwtClaimsSchema = z.object({
-  sub: z.string(),
-  company_id: z.string().uuid(),
-  user_id: z.string().uuid(),
-  role: z.enum(["admin", "member"]),
-  plan: z.enum(["free", "pro"]),
-  email: z.string().email(),
-});
-
-export type AuthUser = z.infer<typeof jwtClaimsSchema>;
+export type { AuthUser } from "../oauth/jwt.js";
 
 declare global {
   // eslint-disable-next-line @typescript-eslint/no-namespace
@@ -25,16 +14,14 @@ declare global {
   }
 }
 
-const RESOURCE_METADATA_URL =
-  "https://commonality.co/.well-known/oauth-protected-resource";
+function resourceMetadataUrl(): string {
+  return `${config.publicBaseUrl.replace(/\/$/, "")}/.well-known/oauth-protected-resource`;
+}
 
 function unauthorized(res: Response): void {
   res
     .status(401)
-    .set(
-      "WWW-Authenticate",
-      `Bearer resource_metadata="${RESOURCE_METADATA_URL}"`,
-    )
+    .set("WWW-Authenticate", `Bearer resource_metadata="${resourceMetadataUrl()}"`)
     .json({ error: "unauthorized" });
 }
 
@@ -56,8 +43,7 @@ export function requireAuth(
   }
 
   try {
-    const decoded = jwt.verify(token, config.jwtSecret);
-    req.user = jwtClaimsSchema.parse(decoded);
+    req.user = verifyAccessToken(token);
     next();
   } catch (err) {
     logger.debug({ err }, "JWT verification failed");
