@@ -9,7 +9,12 @@ export interface Claims {
 
 function decode(token: string): Claims | null {
   try {
-    return JSON.parse(atob(token.split(".")[1])) as Claims;
+    const part = token.split(".")[1];
+    if (!part) return null;
+    // JWT payloads are base64url (- and _, no padding); atob needs base64.
+    const b64 = part.replace(/-/g, "+").replace(/_/g, "/");
+    const padded = b64.padEnd(b64.length + ((4 - (b64.length % 4)) % 4), "=");
+    return JSON.parse(atob(padded)) as Claims;
   } catch {
     return null;
   }

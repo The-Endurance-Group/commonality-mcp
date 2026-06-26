@@ -1,7 +1,14 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
-import { Link } from "react-router-dom";
+import { Link, Navigate } from "react-router-dom";
+import { useAuthStore } from "../lib/store";
 
 export function Marketing() {
+  // Once the session has resolved, send signed-in users straight to their
+  // workspace — first-timers to onboarding, returning users to the dashboard.
+  const { ready, token, needsOnboarding } = useAuthStore();
+  if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
+  if (ready && token) return <Navigate to="/dashboard" replace />;
+
   return (
     <div className="min-h-screen">
       <header className="mx-auto flex max-w-5xl items-center justify-between px-6 py-5">
