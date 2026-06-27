@@ -35,7 +35,7 @@ export async function buildClerkAuthorizeUrl(state: string): Promise<string> {
     client_id: config.clerkOAuthClientId,
     redirect_uri: clerkRedirectUri(),
     response_type: "code",
-    scope: "openid email profile",
+    scope: config.clerkOAuthScopes,
     state,
   });
   return `${oidc.authorization_endpoint}?${params.toString()}`;

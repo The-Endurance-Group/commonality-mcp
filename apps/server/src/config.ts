@@ -48,6 +48,9 @@ export const config = {
   // client id/secret are what we use as a relying party delegating sign-in to Clerk.
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY ?? "",
   clerkIssuerUrl: optional("CLERK_ISSUER_URL", ""),
+  // Scopes requested from the Clerk OAuth application. Clerk OAuth apps use
+  // `email`/`profile` (not the OIDC `openid` scope); override via env if needed.
+  clerkOAuthScopes: optional("CLERK_OAUTH_SCOPES", "email profile"),
 
   // Stripe. Disabled by default (STRIPE_ENABLED) so a live key can sit unused.
   stripeEnabled: process.env.STRIPE_ENABLED === "true",
