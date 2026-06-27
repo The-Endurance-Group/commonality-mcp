@@ -46,6 +46,9 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
 });
 
 app.use(express.json({ limit: "5mb" }));
+// OAuth token/registration requests arrive as application/x-www-form-urlencoded
+// per the OAuth 2.0 spec — parse those too so /oauth/token reads grant_type etc.
+app.use(express.urlencoded({ extended: true }));
 
 // Mount order per the build brief:
 // 1. OAuth discovery
