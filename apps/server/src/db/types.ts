@@ -271,6 +271,32 @@ export type Database = {
           },
         ]
       }
+      prospect_unlocks: {
+        Row: {
+          company_id: string
+          linkedin_url: string
+          unlocked_at: string
+        }
+        Insert: {
+          company_id: string
+          linkedin_url: string
+          unlocked_at?: string
+        }
+        Update: {
+          company_id?: string
+          linkedin_url?: string
+          unlocked_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "prospect_unlocks_company_id_fkey"
+            columns: ["company_id"]
+            isOneToOne: false
+            referencedRelation: "companies"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       users: {
         Row: {
           company_id: string

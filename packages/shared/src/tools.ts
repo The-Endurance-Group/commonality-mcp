@@ -38,6 +38,12 @@ export interface McpToolResult {
 
 export interface ToolHandler<Args = Record<string, unknown>> {
   usesQuota?: boolean;
+  /**
+   * For quota tools, an optional per-call billing key (e.g. a prospect URL).
+   * When the same (company, key) has already been charged, the call is free.
+   * Return null to always charge (e.g. open-ended searches).
+   */
+  billingKey?(args: Args): string | null;
   run(args: Args, ctx: ToolContext): Promise<McpToolResult>;
 }
 

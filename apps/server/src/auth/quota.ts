@@ -56,6 +56,32 @@ export async function incrementUsage(companyId: string): Promise<number> {
   return (data as number) ?? 0;
 }
 
+/** Normalize a LinkedIn URL so re-looks of the same prospect match. */
+export function normalizeProspectUrl(url: string): string {
+  return url.trim().toLowerCase().replace(/\/+$/, "");
+}
+
+/** Has this company already paid to analyze this prospect? */
+export async function isProspectUnlocked(companyId: string, url: string): Promise<boolean> {
+  const { data } = await db()
+    .from("prospect_unlocks")
+    .select("company_id")
+    .eq("company_id", companyId)
+    .eq("linkedin_url", normalizeProspectUrl(url))
+    .maybeSingle();
+  return !!data;
+}
+
+/** Record that this company has unlocked this prospect (idempotent). */
+export async function recordProspectUnlock(companyId: string, url: string): Promise<void> {
+  await db()
+    .from("prospect_unlocks")
+    .upsert(
+      { company_id: companyId, linkedin_url: normalizeProspectUrl(url) },
+      { onConflict: "company_id,linkedin_url", ignoreDuplicates: true },
+    );
+}
+
 /** Friendly upgrade message returned as a tool result when at limit. */
 export function quotaExceededMessage(status: QuotaStatus, plan: "free" | "pro"): string {
   if (plan === "free") {

@@ -17,7 +17,12 @@ export const push_to_crm: ToolHandler<Args> = {
     const hasHubspot = !!company.hubspot_api_key;
     const hasSalesforce = !!(company.salesforce_instance_url && company.salesforce_client_id && company.salesforce_client_secret);
     const target = args.target ?? (hasHubspot ? "hubspot" : hasSalesforce ? "salesforce" : undefined);
-    if (!target) return text("No CRM is connected. Add HubSpot or Salesforce credentials in your dashboard → Integrations.", true);
+    if (!target) {
+      return text(
+        "No CRM is connected to Commonality. Easiest path: connect HubSpot or Salesforce as a native Claude connector, then ask me to analyze the prospect here and log the findings there.",
+        true,
+      );
+    }
 
     const { enriched, results } = await analyzeProspectUrl(args.url, ctx);
     const top = results[0];

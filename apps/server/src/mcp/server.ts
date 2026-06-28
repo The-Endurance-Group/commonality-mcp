@@ -1,7 +1,13 @@
 import type { McpToolResult, ToolContext, ToolName } from "@commonality/shared";
 import { Router, type Router as RouterType } from "express";
 import { requireAuth } from "../auth/middleware.js";
-import { checkQuota, incrementUsage, quotaExceededMessage } from "../auth/quota.js";
+import {
+  checkQuota,
+  incrementUsage,
+  isProspectUnlocked,
+  quotaExceededMessage,
+  recordProspectUnlock,
+} from "../auth/quota.js";
 import { logger } from "../logger.js";
 import { HANDLERS, TOOL_DEFS } from "./registry.js";
 
@@ -47,11 +53,18 @@ async function handleToolCall(
     return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
   }
 
-  // Quota gate — at limit returns a friendly message, never throws.
+  // Billing: a quota tool may expose a per-call key (e.g. a prospect URL). If
+  // this company already unlocked that key, the call is free — no quota check,
+  // no charge. Otherwise gate on quota; at limit returns a friendly message.
+  const billingKey = handler.usesQuota ? handler.billingKey?.(args) ?? null : null;
+  let alreadyUnlocked = false;
   if (handler.usesQuota) {
-    const status = await checkQuota(ctx);
-    if (!status.allowed) {
-      return { content: [{ type: "text", text: quotaExceededMessage(status, ctx.plan) }], isError: true };
+    if (billingKey) alreadyUnlocked = await isProspectUnlocked(ctx.company_id, billingKey);
+    if (!alreadyUnlocked) {
+      const status = await checkQuota(ctx);
+      if (!status.allowed) {
+        return { content: [{ type: "text", text: quotaExceededMessage(status, ctx.plan) }], isError: true };
+      }
     }
   }
 
@@ -66,12 +79,14 @@ async function handleToolCall(
     };
   }
 
-  // Increment only on a successful (non-error) result. No charge on failures.
-  if (handler.usesQuota && !result.isError) {
+  // Charge only on a successful (non-error) result that wasn't already unlocked.
+  // Record the unlock so re-analysing the same prospect is free next time.
+  if (handler.usesQuota && !result.isError && !alreadyUnlocked) {
     try {
+      if (billingKey) await recordProspectUnlock(ctx.company_id, billingKey);
       await incrementUsage(ctx.company_id);
     } catch (err) {
-      logger.error({ err, tool: name }, "increment_usage failed (result already returned)");
+      logger.error({ err, tool: name }, "billing update failed (result already returned)");
     }
   }
   return result;
