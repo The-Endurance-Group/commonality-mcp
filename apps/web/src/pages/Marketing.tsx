@@ -293,7 +293,8 @@ export function Marketing() {
 
       {/* Why cold outreach is broken */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <div className="grid gap-8 sm:grid-cols-3">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Why cold outreach is broken</h2>
+        <div className="mt-10 grid gap-8 sm:grid-cols-3">
           {stats.map((s, i) => (
             <div
               key={s.label}
