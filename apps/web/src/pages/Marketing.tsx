@@ -160,33 +160,75 @@ const socialMapPaths = [
   { name: "Alex P.", signal: "Both live in Portland, ME", x: 550, strongest: false },
 ];
 
+const mobileFanX = [-50, -17, 17, 50];
+
 function SocialMapMobile() {
+  const colX = 170;
+  const rowGap = 78;
+  const rowStart = 36;
+  const prospectY = rowStart + rowGap * socialMapPaths.length + 40;
+  const rows = socialMapPaths.map((p, i) => ({
+    ...p,
+    x: colX + mobileFanX[i],
+    y: rowStart + i * rowGap,
+  }));
+  const orderedLines = [...rows.filter((p) => !p.strongest), ...rows.filter((p) => p.strongest)];
+
   return (
-    <div className="mx-auto max-w-sm space-y-2 sm:hidden">
-      {socialMapPaths.map((p) => (
-        <div
-          key={p.name}
-          className={`flex items-center gap-3 rounded-lg p-3 ${
-            p.strongest ? "bg-tint-brand" : "border border-gray-100 bg-white"
-          }`}
-        >
-          <div
-            className={`h-9 w-9 shrink-0 rounded-full ${p.strongest ? "bg-brand" : "bg-gray-100"}`}
+    <div className="mx-auto max-w-xs sm:hidden">
+      <svg
+        viewBox={`0 0 340 ${prospectY + 60}`}
+        className="mx-auto h-auto w-full"
+        aria-hidden="true"
+      >
+        {orderedLines.map((p, i) => (
+          <line
+            key={`line-${p.name}`}
+            x1={p.x}
+            y1={p.y + 22}
+            x2={colX}
+            y2={prospectY - 22}
+            stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
+            strokeWidth={p.strongest ? 3 : 1.5}
+            className={p.strongest ? "sm-line sm-line-strong" : "sm-line"}
+            style={{ animationDelay: `${i * 0.3}s` }}
           />
-          <div className="text-left">
-            <p className="text-sm font-semibold text-ink">{p.name}</p>
-            <p className={`text-xs ${p.strongest ? "text-brand" : "text-lavender"}`}>{p.signal}</p>
-          </div>
-        </div>
-      ))}
-      <div className="text-center text-lavender">↓</div>
-      <div className="flex items-center gap-3 rounded-lg bg-tint-accent p-3">
-        <div className="h-9 w-9 shrink-0 rounded-full bg-accent" />
-        <div className="text-left">
-          <p className="text-sm font-semibold text-ink">Jane Doe</p>
-          <p className="text-xs text-lavender">VP Sales, Acme</p>
-        </div>
-      </div>
+        ))}
+
+        <g transform={`translate(${colX}, ${prospectY})`}>
+          <circle r="22" fill="#65B6AE" />
+          <text x="0" y="40" fontSize="14" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
+            Jane Doe
+          </text>
+          <text x="0" y="57" fontSize="12" fill="#645D69" textAnchor="middle">
+            VP Sales, Acme
+          </text>
+        </g>
+
+        {rows.map((p) => (
+          <g key={p.name} transform={`translate(${p.x}, ${p.y})`}>
+            <circle
+              r="20"
+              fill={p.strongest ? "#C45E89" : "#FBEAF1"}
+              stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
+              strokeWidth="1.5"
+              className={p.strongest ? "sm-node-strong" : ""}
+            />
+            <text x="0" y="-30" fontSize="14" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
+              {p.name}
+            </text>
+            <text
+              x="0"
+              y="-14"
+              fontSize="12"
+              fill={p.strongest ? "#C45E89" : "#645D69"}
+              textAnchor="middle"
+            >
+              {p.signal}
+            </text>
+          </g>
+        ))}
+      </svg>
     </div>
   );
 }
