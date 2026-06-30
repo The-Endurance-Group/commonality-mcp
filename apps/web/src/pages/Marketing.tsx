@@ -50,52 +50,43 @@ function Icon({ name, className = "text-brand" }: { name: string; className?: st
   );
 }
 
-function NetworkGraphic() {
-  const nodes: [number, number][] = [
-    [60, 60],
-    [200, 30],
-    [340, 70],
-    [110, 150],
-    [260, 160],
-    [380, 130],
-  ];
-  const edges: [number, number][] = [
-    [0, 1],
-    [1, 2],
-    [0, 3],
-    [1, 4],
-    [2, 5],
-    [3, 4],
-    [4, 5],
-  ];
+function TypingDots() {
   return (
-    <svg viewBox="0 0 420 200" className="mx-auto w-full max-w-xl" aria-hidden="true">
-      {edges.map(([a, b], i) => (
-        <line
+    <div className="animate-chat-2 flex w-fit gap-1 rounded-lg bg-gray-100 px-3 py-2.5">
+      {[0, 1, 2].map((i) => (
+        <span
           key={i}
-          x1={nodes[a][0]}
-          y1={nodes[a][1]}
-          x2={nodes[b][0]}
-          y2={nodes[b][1]}
-          stroke="white"
-          strokeOpacity="0.5"
-          strokeWidth="2"
-          className="animate-line"
-          style={{ animationDelay: `${i * 0.15}s` }}
+          className="h-1.5 w-1.5 animate-bounce rounded-full bg-lavender"
+          style={{ animationDelay: `${i * 150}ms` }}
         />
       ))}
-      {nodes.map(([x, y], i) => (
-        <circle
-          key={i}
-          cx={x}
-          cy={y}
-          r="9"
-          fill="white"
-          className="animate-node"
-          style={{ animationDelay: `${i * 0.3}s` }}
-        />
-      ))}
-    </svg>
+    </div>
+  );
+}
+
+function ChatMock() {
+  return (
+    <div className="mx-auto max-w-md rounded-lg bg-white p-4 text-left shadow-2xl">
+      <div className="mb-3 flex items-center gap-2 border-b border-gray-100 pb-3">
+        <div className="flex gap-1.5">
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+        </div>
+        <span className="text-xs font-medium text-lavender">Claude</span>
+      </div>
+
+      <div className="relative space-y-2.5 text-sm">
+        <div className="animate-chat-1 ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink">
+          Find a warm path to Jane Doe, VP Sales at Acme
+        </div>
+        <TypingDots />
+        <div className="animate-chat-3 w-fit max-w-[90%] rounded-lg rounded-bl-sm bg-tint-brand px-3 py-2">
+          <p className="font-medium text-ink">Found it — Sarah Kim</p>
+          <p className="text-xs text-lavender">1st-degree LinkedIn · Stanford '14</p>
+        </div>
+      </div>
+    </div>
   );
 }
 
@@ -186,8 +177,8 @@ export function Marketing() {
           <p className="mt-3 text-sm text-white/70">No credit card · 10 searches free</p>
         </div>
 
-        <div className="mx-auto mt-12 max-w-2xl animate-float">
-          <NetworkGraphic />
+        <div className="mx-auto mt-12 max-w-md animate-float">
+          <ChatMock />
         </div>
       </section>
 
