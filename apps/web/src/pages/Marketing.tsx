@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuthStore } from "../lib/store";
 
@@ -28,6 +28,12 @@ const ICON_PATHS: Record<string, string> = {
   history: "M3 12a9 9 0 1 0 3-6.7 M3 5v5h5",
   sync: "M21 12a9 9 0 0 1-15.3 6.3M3 12a9 9 0 0 1 15.3-6.3 M21 5v5h-5 M3 19v-5h5",
   route: "M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M19 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M5 17v-3a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4",
+  building: "M3 21h18 M5 21V7l7-4 7 4v14 M9 9h1 M9 13h1 M14 9h1 M14 13h1",
+  users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
+  check: "M20 6 9 17l-5-5",
+  message:
+    "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
+  mail: "M3 6h18v12H3z M3 6l9 7 9-7",
 };
 
 function Icon({ name, className = "text-brand" }: { name: string; className?: string }) {
@@ -136,162 +142,57 @@ function ChatMock() {
   );
 }
 
-function StepCompany() {
-  return (
-    <div className="space-y-2">
-      <div className="rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-lavender">
-        Acme Inc.
-      </div>
-      <div className="flex items-center justify-between rounded-lg bg-tint-brand px-3 py-2 text-sm font-medium text-brand">
-        Acme Inc. — 84 employees
-        <CheckIcon />
-      </div>
-    </div>
-  );
-}
-
-function StepFind() {
-  const names = ["JD", "SK", "MT", "RL", "AP"];
-  return (
-    <div className="flex flex-wrap justify-center gap-2">
-      {names.map((n, i) => (
-        <div
-          key={n}
-          className="animate-fade-up flex h-10 w-10 items-center justify-center rounded-full bg-tint-accent text-xs font-semibold text-accent"
-          style={{ animationDelay: `${i * 0.12}s` }}
-        >
-          {n}
-        </div>
-      ))}
-    </div>
-  );
-}
-
-function StepRoster() {
-  return (
-    <div className="space-y-2 text-sm">
-      <div className="flex items-center justify-between rounded-lg bg-tint-accent px-3 py-2 text-ink">
-        Jordan D. <CheckIcon className="text-accent" />
-      </div>
-      <div className="flex items-center justify-between rounded-lg bg-tint-brand px-3 py-2 text-ink">
-        Sam K. <CheckIcon className="text-brand" />
-      </div>
-      <div className="flex items-center justify-between rounded-lg bg-gray-100 px-3 py-2 text-lavender line-through">
-        Wrong contact <span className="text-xs">removed</span>
-      </div>
-    </div>
-  );
-}
-
-function StepCapital() {
-  const tags = ["🎓 Stanford", "🏢 Salesforce", "📍 Austin"];
-  return (
-    <div className="flex flex-col items-center gap-3">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand font-semibold text-white">
-        SK
-      </div>
-      <div className="flex flex-wrap justify-center gap-2">
-        {tags.map((t, i) => (
-          <span
-            key={t}
-            className="animate-fade-up rounded-full bg-tint-purple px-3 py-1 text-xs font-medium text-purple"
-            style={{ animationDelay: `${i * 0.15}s` }}
-          >
-            {t}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
-
-function StepConnect() {
-  return (
-    <div className="flex items-center justify-center gap-3">
-      <div className="rounded-lg bg-tint-brand px-4 py-3 text-sm font-semibold text-brand">
-        Commonality
-      </div>
-      <CheckIcon className="text-accent" />
-      <div className="rounded-lg bg-tint-accent px-4 py-3 text-sm font-semibold text-accent">
-        Claude / ChatGPT
-      </div>
-    </div>
-  );
-}
-
-function StepAsk() {
-  return (
-    <div className="ml-auto w-fit max-w-[90%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-left text-sm text-ink">
-      Best way to get a meeting with Jane Doe at Acme?
-    </div>
-  );
-}
-
-function StepAnswer() {
-  return (
-    <div className="space-y-2 text-left text-sm">
-      <div className="w-fit max-w-[95%] rounded-lg rounded-bl-sm bg-tint-brand px-3 py-2">
-        <p className="font-medium text-ink">Go through Sam K. — 1st-degree LinkedIn</p>
-      </div>
-      <div className="flex flex-wrap gap-2">
-        <span className="rounded-full bg-tint-purple px-3 py-1 text-xs font-medium text-purple">
-          Email drafted
-        </span>
-        <span className="rounded-full bg-tint-purple px-3 py-1 text-xs font-medium text-purple">
-          Call prep ready
-        </span>
-      </div>
-    </div>
-  );
-}
-
-const tourSteps = [
-  { label: "Pick your company", Visual: StepCompany },
-  { label: "We find your team on LinkedIn", Visual: StepFind },
-  { label: "You confirm the roster", Visual: StepRoster },
-  { label: "We map social capital", Visual: StepCapital },
-  { label: "Connect to Claude or ChatGPT", Visual: StepConnect },
-  { label: "Ask AI for the best way in", Visual: StepAsk },
-  { label: "Get the path, email & call prep", Visual: StepAnswer },
+const pipelineSteps = [
+  { label: "Pick your company", icon: "building" },
+  { label: "Find your team on LinkedIn", icon: "users" },
+  { label: "Confirm the roster", icon: "check" },
+  { label: "Map social capital", icon: "network" },
+  { label: "Connect your AI", icon: "link" },
+  { label: "Ask the best way in", icon: "message" },
+  { label: "Get path + email", icon: "mail" },
 ];
 
-function ProductTour() {
+function PipelineGraphic() {
   const [step, setStep] = useState(0);
-  const paused = useRef(false);
 
   useEffect(() => {
-    const id = setInterval(() => {
-      if (!paused.current) setStep((s) => (s + 1) % tourSteps.length);
-    }, 2600);
+    const id = setInterval(() => setStep((s) => (s + 1) % pipelineSteps.length), 1700);
     return () => clearInterval(id);
   }, []);
 
-  const Visual = tourSteps[step].Visual;
-
   return (
-    <div
-      className="mx-auto max-w-md"
-      onMouseEnter={() => (paused.current = true)}
-      onMouseLeave={() => (paused.current = false)}
-    >
-      <div className="flex min-h-[180px] flex-col items-center justify-center rounded-lg bg-white p-6 shadow-xl">
-        <div key={step} className="animate-fade-up w-full">
-          <Visual />
-        </div>
-      </div>
-      <p className="mt-4 text-sm font-medium text-ink">{tourSteps[step].label}</p>
-      <div className="mt-3 flex justify-center gap-1.5">
-        {tourSteps.map((s, i) => (
-          <button
-            key={s.label}
-            type="button"
-            aria-label={`Go to step ${i + 1}`}
-            onClick={() => setStep(i)}
-            className={`h-1.5 rounded-full transition-all ${
-              i === step ? "w-6 bg-brand" : "w-1.5 bg-gray-200"
-            }`}
-          />
-        ))}
+    <div className="mx-auto max-w-3xl overflow-x-auto px-1 pb-2">
+      <div className="relative flex min-w-[620px] items-start justify-between">
+        <div className="absolute left-0 right-0 top-6 h-0.5 bg-gray-200" />
+        <div
+          className="absolute left-0 top-6 h-0.5 bg-brand transition-all duration-700 ease-in-out"
+          style={{ width: `${(step / (pipelineSteps.length - 1)) * 100}%` }}
+        />
+        {pipelineSteps.map((s, i) => {
+          const status = i < step ? "done" : i === step ? "active" : "upcoming";
+          return (
+            <div key={s.label} className="relative z-10 flex flex-1 flex-col items-center px-1 text-center">
+              <div
+                className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300 ${
+                  status === "done"
+                    ? "border-brand bg-brand"
+                    : status === "active"
+                      ? "scale-110 border-brand bg-white shadow-lg"
+                      : "border-gray-200 bg-white"
+                }`}
+              >
+                {status === "done" ? (
+                  <CheckIcon className="text-white" />
+                ) : (
+                  <Icon name={s.icon} className={status === "active" ? "text-brand" : "text-gray-300"} />
+                )}
+              </div>
+              <p className={`mt-2 text-xs font-medium ${status === "upcoming" ? "text-gray-300" : "text-ink"}`}>
+                {s.label}
+              </p>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
@@ -404,7 +305,7 @@ export function Marketing() {
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
 
         <div className="mt-10">
-          <ProductTour />
+          <PipelineGraphic />
         </div>
 
         <div className="mt-10">
