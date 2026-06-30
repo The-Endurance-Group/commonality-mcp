@@ -29,7 +29,6 @@ const ICON_PATHS: Record<string, string> = {
   route: "M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M19 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M5 17v-3a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4",
   building: "M3 21h18 M5 21V7l7-4 7 4v14 M9 9h1 M9 13h1 M14 9h1 M14 13h1",
   users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
-  check: "M20 6 9 17l-5-5",
   message:
     "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
   mail: "M3 6h18v12H3z M3 6l9 7 9-7",
@@ -161,28 +160,25 @@ const capitalSignals = [
   { label: "Location", icon: "pin" },
 ];
 
-const setupSteps: { who: "You" | "We"; label: string; icon: string }[] = [
-  { who: "You", label: "Tell us your company", icon: "building" },
-  { who: "We", label: "Find your team on LinkedIn", icon: "users" },
-  { who: "You", label: "Confirm the roster", icon: "check" },
-  { who: "We", label: "Map the social capital", icon: "network" },
-  { who: "You", label: "Connect to your AI", icon: "link" },
+const setupSteps = [
+  { label: "Tell us your company", icon: "building" },
+  { label: "We find your team — you confirm", icon: "users" },
+  { label: "Connect to your AI", icon: "link" },
 ];
 
-const askSteps: { who: "You" | "We"; label: string; icon: string }[] = [
-  { who: "You", label: "Ask about a person or company", icon: "message" },
-  { who: "We", label: "Hand back the path", icon: "mail" },
-  { who: "We", label: "Help with outreach + strategy", icon: "pencil" },
+const askSteps = [
+  { label: "Ask about a person or company", icon: "message" },
+  { label: "Get the path, intro, and strategy", icon: "mail" },
 ];
 
 function PipelineGraphic({
   steps,
   startAt = 1,
 }: {
-  steps: { who: "You" | "We"; label: string; icon: string }[];
+  steps: { label: string; icon: string }[];
   startAt?: number;
 }) {
-  const gridCols = steps.length > 3 ? "grid-cols-2 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-3";
+  const gridCols = steps.length === 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-3";
 
   return (
     <div className={`mx-auto grid max-w-3xl gap-3 ${gridCols}`}>
@@ -194,13 +190,6 @@ function PipelineGraphic({
         >
           <span className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
             {startAt + i}
-          </span>
-          <span
-            className={`absolute right-2 top-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
-              s.who === "You" ? "bg-tint-accent text-accent" : "bg-tint-brand text-brand"
-            }`}
-          >
-            {s.who}
           </span>
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
             <Icon name={s.icon} className="" />
@@ -418,7 +407,7 @@ export function Marketing() {
           Then ask anytime — about a person or a company
         </p>
         <div className="mt-4">
-          <PipelineGraphic steps={askSteps} startAt={6} />
+          <PipelineGraphic steps={askSteps} startAt={4} />
         </div>
         <p className="mt-4 text-sm text-lavender">
           New prospect or new target account — just ask.
