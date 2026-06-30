@@ -212,12 +212,42 @@ const stats = [
 ];
 
 const features = [
-  { title: "Team network map", icon: "network" },
-  { title: "1st-degree LinkedIn", icon: "zap" },
-  { title: "Claude & ChatGPT drafts", icon: "link" },
-  { title: "Pipeline tracking", icon: "history" },
-  { title: "HubSpot & Salesforce sync", icon: "sync" },
-  { title: "Lead routing", icon: "route" },
+  {
+    title: "Team network map",
+    desc: "See every shared connection across your whole team",
+    icon: "network",
+    tint: "bg-tint-brand text-brand",
+  },
+  {
+    title: "1st-degree LinkedIn",
+    desc: "Direct connections surface first — your strongest path in",
+    icon: "zap",
+    tint: "bg-tint-accent text-accent",
+  },
+  {
+    title: "AI-drafted outreach",
+    desc: "Claude or ChatGPT writes the intro, grounded in the connection",
+    icon: "link",
+    tint: "bg-tint-purple text-purple",
+  },
+  {
+    title: "Pipeline tracking",
+    desc: "Never lose track of a warm intro or follow-up",
+    icon: "history",
+    tint: "bg-tint-brand text-brand",
+  },
+  {
+    title: "CRM sync",
+    desc: "Two-way sync with HubSpot and Salesforce",
+    icon: "sync",
+    tint: "bg-tint-accent text-accent",
+  },
+  {
+    title: "Lead routing",
+    desc: "Auto-route prospects to the rep with the best connection",
+    icon: "route",
+    tint: "bg-tint-purple text-purple",
+  },
 ];
 
 const testimonials = [
@@ -336,21 +366,28 @@ export function Marketing() {
       </section>
 
       {/* Features */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
-          Built to help sales teams identify warm paths in to top prospects using the AI Platform
-          they're already in
-        </h2>
+      <section className="mx-auto max-w-content px-6 py-16">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Everything you need to work warm</h2>
+          <p className="mt-2 text-lavender">
+            Built for sales teams selling through the AI platform they already use.
+          </p>
+        </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <div
               key={f.title}
-              className="animate-fade-up flex flex-col items-center gap-2 rounded-lg bg-tint-accent p-6 transition hover:scale-105"
+              className="animate-fade-up flex items-start gap-4 rounded-lg border border-gray-100 p-5 text-left transition hover:scale-105 hover:shadow-md"
               style={{ animationDelay: `${i * 0.08}s` }}
             >
-              <Icon name={f.icon} className="text-accent" />
-              <div className="text-sm font-medium text-ink">{f.title}</div>
+              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${f.tint}`}>
+                <Icon name={f.icon} className="" />
+              </div>
+              <div>
+                <div className="text-sm font-semibold text-ink">{f.title}</div>
+                <div className="mt-1 text-sm text-lavender">{f.desc}</div>
+              </div>
             </div>
           ))}
         </div>
