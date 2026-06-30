@@ -154,59 +154,65 @@ function ChatMock() {
 }
 
 const socialMapPaths = [
-  { name: "Sam K.", signal: "1st-degree connection", icon: "zap", y: 40, strongest: true },
-  { name: "Devon R.", signal: "Same alma mater", icon: "school", y: 110, strongest: false },
-  { name: "Priya N.", signal: "Past company", icon: "building", y: 180, strongest: false },
-  { name: "Alex P.", signal: "Same location", icon: "pin", y: 250, strongest: false },
+  { name: "Sam K.", signal: "1st-degree LinkedIn", x: 70, strongest: true },
+  { name: "Devon R.", signal: "Wharton MBA, '16", x: 230, strongest: false },
+  { name: "Priya N.", signal: "Both at Initech", x: 390, strongest: false },
+  { name: "Alex P.", signal: "Portland, ME", x: 550, strongest: false },
 ];
 
 function SocialMapGraphic() {
-  const prospectY = 145;
-  const teamX = 70;
-  const prospectX = 530;
+  const rowY = 30;
+  const prospectY = 190;
+  const prospectX = 310;
 
   return (
     <div className="mx-auto max-w-3xl overflow-x-auto">
-      <svg viewBox="0 0 600 290" className="mx-auto h-auto w-full min-w-[560px]" aria-hidden="true">
+      <svg viewBox="0 0 620 260" className="mx-auto h-auto w-full min-w-[560px]" aria-hidden="true">
         {socialMapPaths.map((p, i) => (
           <line
             key={`line-${p.name}`}
-            x1={teamX + 18}
-            y1={p.y + 18}
-            x2={prospectX - 18}
-            y2={prospectY + 18}
+            x1={p.x}
+            y1={rowY + 22}
+            x2={prospectX}
+            y2={prospectY - 22}
             stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
             strokeWidth={p.strongest ? 3 : 1.5}
-            className={p.strongest ? "animate-pulse" : ""}
-            style={{ animationDelay: `${i * 0.1}s` }}
+            pathLength={1}
+            className={p.strongest ? "sm-line sm-line-strong" : "sm-line"}
+            style={{ animationDelay: `${i * 0.25}s` }}
           />
         ))}
 
         {socialMapPaths.map((p) => (
-          <g key={p.name} transform={`translate(${teamX}, ${p.y})`}>
+          <g key={p.name} transform={`translate(${p.x}, ${rowY})`}>
             <circle
-              cx="18"
-              cy="18"
-              r="18"
+              r="20"
               fill={p.strongest ? "#C45E89" : "#FBEAF1"}
               stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
               strokeWidth="1.5"
+              className={p.strongest ? "sm-node-strong" : ""}
             />
-            <text x="44" y="14" fontSize="13" fontWeight="600" fill="#1A1A1A">
+            <text x="0" y="40" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
               {p.name}
             </text>
-            <text x="44" y="30" fontSize="11" fill={p.strongest ? "#C45E89" : "#645D69"}>
+            <text
+              x="0"
+              y="56"
+              fontSize="11"
+              fill={p.strongest ? "#C45E89" : "#645D69"}
+              textAnchor="middle"
+            >
               {p.signal}
             </text>
           </g>
         ))}
 
-        <g transform={`translate(${prospectX - 36}, ${prospectY})`}>
-          <circle cx="18" cy="18" r="18" fill="#65B6AE" />
-          <text x="-44" y="14" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="start">
+        <g transform={`translate(${prospectX}, ${prospectY})`}>
+          <circle r="22" fill="#65B6AE" />
+          <text x="0" y="-32" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
             Jane Doe
           </text>
-          <text x="-44" y="30" fontSize="11" fill="#645D69" textAnchor="start">
+          <text x="0" y="-16" fontSize="11" fill="#645D69" textAnchor="middle">
             VP Sales, Acme
           </text>
         </g>

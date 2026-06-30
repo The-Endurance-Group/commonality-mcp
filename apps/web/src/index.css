@@ -71,12 +71,58 @@ body {
   animation: fade-in-up 0.7s ease-out both;
 }
 
+@keyframes sm-draw {
+  to {
+    stroke-dashoffset: 0;
+  }
+}
+.sm-line {
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  animation: sm-draw 1s ease-out forwards;
+}
+
+@keyframes sm-pulse-line {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.45;
+  }
+}
+.sm-line-strong {
+  animation:
+    sm-draw 1s ease-out forwards,
+    sm-pulse-line 2.4s ease-in-out 1.2s infinite;
+}
+
+@keyframes sm-pulse-node {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.12);
+  }
+}
+.sm-node-strong {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: sm-pulse-node 2.4s ease-in-out 1.2s infinite;
+}
+
 @media (prefers-reduced-motion: reduce) {
   .animate-gradient,
   .animate-float,
   .animate-fade-up,
-  .animate-bounce {
+  .animate-bounce,
+  .sm-line,
+  .sm-line-strong,
+  .sm-node-strong {
     animation: none !important;
     opacity: 1 !important;
+    stroke-dashoffset: 0 !important;
+    transform: none !important;
   }
 }
