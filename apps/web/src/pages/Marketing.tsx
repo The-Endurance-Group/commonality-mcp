@@ -161,25 +161,25 @@ const capitalSignals = [
   { label: "Location", icon: "pin" },
 ];
 
-const setupSteps = [
-  { label: "Pick your company", icon: "building" },
-  { label: "Find your team on LinkedIn", icon: "users" },
-  { label: "Confirm the roster", icon: "check" },
-  { label: "Map social capital", icon: "network" },
-  { label: "Connect your AI", icon: "link" },
+const setupSteps: { who: "You" | "We"; label: string; icon: string }[] = [
+  { who: "You", label: "Tell us your company", icon: "building" },
+  { who: "We", label: "Find your team on LinkedIn", icon: "users" },
+  { who: "You", label: "Confirm the roster", icon: "check" },
+  { who: "We", label: "Map the social capital", icon: "network" },
+  { who: "You", label: "Connect to your AI", icon: "link" },
 ];
 
-const askSteps = [
-  { label: "Ask: a person or a company", icon: "message" },
-  { label: "Get Path", icon: "mail" },
-  { label: "Outreach + Strategy", icon: "pencil" },
+const askSteps: { who: "You" | "We"; label: string; icon: string }[] = [
+  { who: "You", label: "Ask about a person or company", icon: "message" },
+  { who: "We", label: "Hand back the path", icon: "mail" },
+  { who: "We", label: "Help with outreach + strategy", icon: "pencil" },
 ];
 
 function PipelineGraphic({
   steps,
   startAt = 1,
 }: {
-  steps: { label: string; icon: string }[];
+  steps: { who: "You" | "We"; label: string; icon: string }[];
   startAt?: number;
 }) {
   const gridCols = steps.length > 3 ? "grid-cols-2 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-3";
@@ -194,6 +194,13 @@ function PipelineGraphic({
         >
           <span className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
             {startAt + i}
+          </span>
+          <span
+            className={`absolute right-2 top-2 rounded-full px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wide ${
+              s.who === "You" ? "bg-tint-accent text-accent" : "bg-tint-brand text-brand"
+            }`}
+          >
+            {s.who}
           </span>
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
             <Icon name={s.icon} className="" />
