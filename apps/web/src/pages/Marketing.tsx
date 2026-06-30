@@ -34,6 +34,8 @@ const ICON_PATHS: Record<string, string> = {
     "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
   mail: "M3 6h18v12H3z M3 6l9 7 9-7",
   pencil: "M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z",
+  school: "M22 10 12 5 2 10l10 5 10-5z M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5 M22 10v6",
+  pin: "M12 22s8-7.58 8-13a8 8 0 1 0-16 0c0 5.42 8 13 8 13z M12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
 };
 
 function Icon({ name, className = "text-brand" }: { name: string; className?: string }) {
@@ -151,6 +153,13 @@ function ChatMock() {
     </div>
   );
 }
+
+const capitalSignals = [
+  { label: "1st-degree connections", icon: "zap" },
+  { label: "Alma mater", icon: "school" },
+  { label: "Past companies", icon: "building" },
+  { label: "Location", icon: "pin" },
+];
 
 const setupSteps = [
   { label: "Pick your company", icon: "building" },
@@ -332,6 +341,58 @@ export function Marketing() {
               </p>
             </div>
           </div>
+        </div>
+      </section>
+
+      {/* How matching works */}
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+          How we find the strongest connection
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          We analyze social capital on both sides — every person on your team, and your
+          prospect — then rank every possible path.
+        </p>
+
+        <div className="mx-auto mt-10 grid max-w-3xl items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
+          <div className="rounded-lg border border-gray-100 p-6 text-left">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Your team</p>
+            <ul className="mt-4 space-y-3">
+              {capitalSignals.map((s) => (
+                <li key={s.label} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+                    <Icon name={s.icon} className="" />
+                  </div>
+                  <span className="text-sm text-ink">{s.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="flex items-center justify-center text-xs font-semibold uppercase tracking-wide text-lavender">
+            vs
+          </div>
+
+          <div className="rounded-lg border border-gray-100 p-6 text-left">
+            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
+              Your prospect
+            </p>
+            <ul className="mt-4 space-y-3">
+              {capitalSignals.map((s) => (
+                <li key={s.label} className="flex items-center gap-3">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tint-accent text-accent">
+                    <Icon name={s.icon} className="" />
+                  </div>
+                  <span className="text-sm text-ink">{s.label}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+
+        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-purple px-4 py-2 text-sm font-medium text-purple">
+          <CheckIcon className="text-purple" />
+          Strongest connection, ranked automatically
         </div>
       </section>
 
