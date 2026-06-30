@@ -1,4 +1,5 @@
 import { useAuth } from "@clerk/clerk-react";
+import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
@@ -191,20 +192,49 @@ export function Onboarding() {
   );
 }
 
-function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
-  const [name, setName] = useState("");
-  const [fileName, setFileName] = useState("");
-  const [added, setAdded] = useState<string[]>([]);
+interface RosterEmployee { id: string; name: string }
 
-  function addAnother() {
-    if (!name.trim()) return;
-    setAdded((a) => [...a, name.trim()]);
-    setName("");
-    setFileName("");
+function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
+  const roster = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => apiFetch<{ employees: RosterEmployee[] }>("/api/employees"),
+  });
+  const employees = roster.data?.employees ?? [];
+
+  const [employeeId, setEmployeeId] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [added, setAdded] = useState<{ name: string; saved: number }[]>([]);
+
+  async function addAnother(): Promise<boolean> {
+    if (!employeeId || !file) return false;
+    setBusy(true);
+    setError(null);
+    try {
+      const csv = await file.text();
+      const { saved } = await apiFetch<{ saved: number }>(`/api/employees/${employeeId}/connections`, {
+        method: "POST",
+        body: JSON.stringify({ csv }),
+      });
+      const empName = employees.find((e) => e.id === employeeId)?.name ?? "Teammate";
+      setAdded((a) => [...a, { name: empName, saved }]);
+      setEmployeeId("");
+      setFile(null);
+      return true;
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save that file");
+      return false;
+    } finally {
+      setBusy(false);
+    }
   }
 
-  function finish() {
-    if (name.trim() && fileName) addAnother();
+  async function finish() {
+    if (employeeId && file) {
+      const ok = await addAnother();
+      if (!ok) return; // stay on screen so the error is visible
+    }
     onContinue();
   }
 
@@ -226,23 +256,23 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
 
       {added.length > 0 && (
         <div className="space-y-1.5">
-          {added.map((n) => (
-            <div key={n} className="flex items-center gap-2 rounded-md bg-tint-brand px-3 py-2 text-sm text-brand">
+          {added.map((a, i) => (
+            <div key={i} className="flex items-center gap-2 rounded-md bg-tint-brand px-3 py-2 text-sm text-brand">
               <span>✓</span>
-              <span className="font-medium">{n}</span>
-              <span className="text-lavender">— connections added</span>
+              <span className="font-medium">{a.name}</span>
+              <span className="text-lavender">— {a.saved} connections added</span>
             </div>
           ))}
         </div>
       )}
 
       <Field label="Whose connections is this?">
-        <input
-          className="input"
-          placeholder="Your name or a teammate's"
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-        />
+        <select className="input" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+          <option value="">Select a teammate…</option>
+          {employees.map((e) => (
+            <option key={e.id} value={e.id}>{e.name}</option>
+          ))}
+        </select>
       </Field>
 
       <label className="block">
@@ -251,9 +281,11 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
           type="file"
           accept=".csv"
           className="input"
-          onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
         />
       </label>
+
+      {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="rounded-lg bg-tint-accent p-4 text-sm text-ink">
         Some people aren't comfortable sharing this, and that's completely okay — it's optional
@@ -262,11 +294,11 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
       </div>
 
       <div className="flex flex-wrap gap-3">
-        <button className="btn-secondary" disabled={!name.trim() || !fileName} onClick={addAnother}>
-          + Add another person
+        <button className="btn-secondary" disabled={busy || !employeeId || !file} onClick={addAnother}>
+          {busy ? "Saving…" : "+ Add another person"}
         </button>
-        <button className="btn-primary" onClick={finish}>
-          {added.length > 0 ? "Continue" : "Upload & continue"}
+        <button className="btn-primary" disabled={busy} onClick={finish}>
+          {busy ? "Saving…" : added.length > 0 ? "Continue" : "Upload & continue"}
         </button>
         <button className="btn-link" onClick={onContinue}>
           Skip for now

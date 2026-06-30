@@ -1,6 +1,8 @@
 import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
+import { insertLinkedinConnections } from "../db/queries.js";
 import { enrichRosterInBackground, importRoster, rosterStatus } from "../services/roster.js";
+import { parseConnectionsCsv } from "../services/linkedinCsv.js";
 
 export const employeesRouter: RouterType = Router();
 
@@ -55,4 +57,41 @@ employeesRouter.post("/re-enrich", async (req, res) => {
   await db().from("employees").update({ enriched_at: null }).eq("company_id", user.company_id);
   enrichRosterInBackground(user.company_id);
   res.json({ ok: true });
+});
+
+// POST /api/employees/:id/connections — upload a teammate's exported
+// Connections.csv. Any signed-in workspace member can do this for
+// themselves or a teammate; it's optional and only strengthens 1st-degree
+// warm-path matching.
+employeesRouter.post("/:id/connections", async (req, res) => {
+  const user = req.user!;
+  const { csv } = (req.body ?? {}) as { csv?: string };
+  if (!csv || typeof csv !== "string" || !csv.trim()) {
+    res.status(400).json({ error: "provide csv (raw text of Connections.csv)" });
+    return;
+  }
+
+  const { data: employee } = await db()
+    .from("employees")
+    .select("id")
+    .eq("company_id", user.company_id)
+    .eq("id", req.params.id)
+    .maybeSingle<{ id: string }>();
+  if (!employee) {
+    res.status(404).json({ error: "team member not found in your workspace" });
+    return;
+  }
+
+  const connections = parseConnectionsCsv(csv);
+  if (!connections.length) {
+    res.status(400).json({ error: "couldn't find any connections in that file — is it LinkedIn's Connections.csv?" });
+    return;
+  }
+
+  try {
+    const saved = await insertLinkedinConnections(user.company_id, employee.id, connections);
+    res.json({ saved });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "failed to save connections" });
+  }
 });

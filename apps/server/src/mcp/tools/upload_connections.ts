@@ -1,5 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { db } from "../../db/client.js";
+import { insertLinkedinConnections } from "../../db/queries.js";
 import { text } from "./_result.js";
 
 interface Conn { name?: string; url?: string; connected_on?: string }
@@ -22,19 +23,12 @@ export const upload_connections: ToolHandler<Args> = {
     const { data: emp } = await q.maybeSingle<{ id: string }>();
     if (!emp) return text("That team member isn't in your workspace roster.", true);
 
-    const rows = args.connections
-      .filter((c) => c.url || c.name)
-      .map((c) => ({
-        company_id: ctx.company_id,
-        employee_id: emp.id,
-        linkedin_url: c.url ?? null,
-        full_name: c.name ? c.name.trim().toLowerCase() : null,
-        connected_on: c.connected_on ?? null,
-      }));
-    if (!rows.length) return text("No connections had a name or url to store.", true);
-
-    const { error } = await db().from("linkedin_connections").insert(rows);
-    if (error) return text(`Couldn't save connections: ${error.message}`, true);
-    return text(`Saved ${rows.length} connections for that team member. They'll now surface as 1st-degree warm paths.`);
+    try {
+      const saved = await insertLinkedinConnections(ctx.company_id, emp.id, args.connections);
+      if (!saved) return text("No connections had a name or url to store.", true);
+      return text(`Saved ${saved} connections for that team member. They'll now surface as 1st-degree warm paths.`);
+    } catch (err) {
+      return text(`Couldn't save connections: ${err instanceof Error ? err.message : "unknown error"}`, true);
+    }
   },
 };

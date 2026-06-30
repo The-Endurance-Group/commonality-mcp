@@ -116,6 +116,28 @@ export async function findLinkedInConnectors(
   return result;
 }
 
+/** Store a team member's 1st-degree LinkedIn connections (from a CSV export). */
+export async function insertLinkedinConnections(
+  companyId: string,
+  employeeId: string,
+  connections: { name?: string; url?: string; connected_on?: string }[],
+): Promise<number> {
+  const rows = connections
+    .filter((c) => c.url || c.name)
+    .map((c) => ({
+      company_id: companyId,
+      employee_id: employeeId,
+      linkedin_url: c.url ?? null,
+      full_name: c.name ? c.name.trim().toLowerCase() : null,
+      connected_on: c.connected_on ?? null,
+    }));
+  if (!rows.length) return 0;
+
+  const { error } = await db().from("linkedin_connections").insert(rows);
+  if (error) throw new Error(error.message);
+  return rows.length;
+}
+
 /** Find a teammate in the same workspace by email. */
 export async function getTeammateByEmail(
   companyId: string,
