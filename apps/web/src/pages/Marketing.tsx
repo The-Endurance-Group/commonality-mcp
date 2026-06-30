@@ -48,9 +48,9 @@ function Icon({ name, className = "text-brand" }: { name: string; className?: st
   );
 }
 
-function TypingDots() {
+function TypingDotsRow() {
   return (
-    <div className="animate-chat-2 flex w-fit gap-1 rounded-lg bg-gray-100 px-3 py-2.5">
+    <div className="animate-fade-up flex w-fit gap-1 rounded-lg bg-gray-100 px-3 py-2.5">
       {[0, 1, 2].map((i) => (
         <span
           key={i}
@@ -62,27 +62,75 @@ function TypingDots() {
   );
 }
 
+const chatExamples = [
+  {
+    q: "Find a warm path to Jane Doe, VP Sales at Acme",
+    title: "1st-degree LinkedIn match",
+    detail: "Sam K. is already connected to Jane on LinkedIn",
+  },
+  {
+    q: "Best way into Globex Corp?",
+    title: "Two ways in",
+    detail: "Worked together at Initech · Same MBA — Wharton '16",
+  },
+  {
+    q: "Anyone close to our prospect in Portland, ME?",
+    title: "Same hometown",
+    detail: "Alex P. is also based in Portland, Maine",
+  },
+];
+
 function ChatMock() {
+  const [step, setStep] = useState(0);
+  const [phase, setPhase] = useState<"typing" | "answer">("typing");
+
+  useEffect(() => {
+    const id = setInterval(() => setStep((s) => (s + 1) % chatExamples.length), 4200);
+    return () => clearInterval(id);
+  }, []);
+
+  useEffect(() => {
+    setPhase("typing");
+    const t = setTimeout(() => setPhase("answer"), 1100);
+    return () => clearTimeout(t);
+  }, [step]);
+
+  const ex = chatExamples[step];
+
   return (
     <div className="mx-auto max-w-md rounded-lg bg-white p-4 text-left shadow-2xl">
-      <div className="mb-3 flex items-center gap-2 border-b border-gray-100 pb-3">
-        <div className="flex gap-1.5">
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-        </div>
-        <span className="text-xs font-medium text-lavender">Claude</span>
+      <div className="mb-3 flex gap-1.5 border-b border-gray-100 pb-3">
+        <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+        <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+        <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
       </div>
 
-      <div className="relative space-y-2.5 text-sm">
-        <div className="animate-chat-1 ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink">
-          Find a warm path to Jane Doe, VP Sales at Acme
+      <div className="flex min-h-[110px] flex-col justify-start gap-2.5 text-sm">
+        <div
+          key={`q-${step}`}
+          className="animate-fade-up ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink"
+        >
+          {ex.q}
         </div>
-        <TypingDots />
-        <div className="animate-chat-3 w-fit max-w-[90%] rounded-lg rounded-bl-sm bg-tint-brand px-3 py-2">
-          <p className="font-medium text-ink">Found it — Sarah Kim</p>
-          <p className="text-xs text-lavender">1st-degree LinkedIn · Stanford '14</p>
-        </div>
+        {phase === "typing" ? (
+          <TypingDotsRow />
+        ) : (
+          <div className="animate-fade-up w-fit max-w-[90%] rounded-lg rounded-bl-sm bg-tint-brand px-3 py-2">
+            <p className="font-medium text-ink">{ex.title}</p>
+            <p className="text-xs text-lavender">{ex.detail}</p>
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 flex justify-center gap-1.5">
+        {chatExamples.map((_, i) => (
+          <span
+            key={i}
+            className={`h-1.5 rounded-full transition-all ${
+              i === step ? "w-6 bg-brand" : "w-1.5 bg-gray-200"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );

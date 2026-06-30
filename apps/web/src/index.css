@@ -44,68 +44,6 @@ body {
   animation: gradient-drift 12s ease-in-out infinite;
 }
 
-@keyframes chat-msg-1 {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  3%,
-  89% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  94%,
-  100% {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-.animate-chat-1 {
-  animation: chat-msg-1 9s ease-in-out infinite;
-  opacity: 0;
-}
-
-@keyframes chat-msg-2 {
-  0% {
-    opacity: 0;
-  }
-  3%,
-  22% {
-    opacity: 1;
-  }
-  26%,
-  100% {
-    opacity: 0;
-  }
-}
-.animate-chat-2 {
-  animation: chat-msg-2 9s ease-in-out infinite;
-  animation-delay: 1s;
-  opacity: 0;
-}
-
-@keyframes chat-msg-3 {
-  0% {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  3%,
-  56% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  61%,
-  100% {
-    opacity: 0;
-    transform: translateY(-4px);
-  }
-}
-.animate-chat-3 {
-  animation: chat-msg-3 9s ease-in-out infinite;
-  animation-delay: 3s;
-  opacity: 0;
-}
-
 @keyframes float-y {
   0%,
   100% {
@@ -135,19 +73,10 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .animate-gradient,
-  .animate-chat-1,
-  .animate-chat-2,
-  .animate-chat-3,
   .animate-float,
   .animate-fade-up,
   .animate-bounce {
     animation: none !important;
-  }
-  .animate-chat-1,
-  .animate-chat-3 {
     opacity: 1 !important;
-  }
-  .animate-chat-2 {
-    display: none !important;
   }
 }
