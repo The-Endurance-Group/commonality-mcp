@@ -336,7 +336,10 @@ export function Marketing() {
 
       {/* Features */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Built for sales teams</h2>
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+          Built to help sales teams identify warm paths in to top prospects using the AI Platform
+          they're already in
+        </h2>
 
         <div className="mt-10 grid gap-4 sm:grid-cols-3">
           {features.map((f, i) => (
