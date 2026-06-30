@@ -166,19 +166,30 @@ const askSteps = [
   { label: "Outreach + Strategy", icon: "pencil" },
 ];
 
-function PipelineGraphic({ steps }: { steps: { label: string; icon: string }[] }) {
+function PipelineGraphic({
+  steps,
+  startAt = 1,
+}: {
+  steps: { label: string; icon: string }[];
+  startAt?: number;
+}) {
+  const gridCols = steps.length > 3 ? "grid-cols-2 lg:grid-cols-5" : "grid-cols-1 sm:grid-cols-3";
+
   return (
-    <div className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-3">
+    <div className={`mx-auto grid max-w-3xl gap-3 ${gridCols}`}>
       {steps.map((s, i) => (
         <div
           key={s.label}
-          className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white p-4 text-left"
+          className="animate-fade-up relative flex flex-col items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-5 text-center"
           style={{ animationDelay: `${i * 0.08}s` }}
         >
+          <span className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
+            {startAt + i}
+          </span>
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
             <Icon name={s.icon} className="" />
           </div>
-          <p className="text-sm font-medium text-ink">{s.label}</p>
+          <p className="text-xs font-medium leading-tight text-ink sm:text-sm">{s.label}</p>
         </div>
       ))}
     </div>
@@ -189,33 +200,27 @@ function PipelineGraphic({ steps }: { steps: { label: string; icon: string }[] }
 const features = [
   {
     title: "Team network map",
-    desc: "See every shared connection across your whole team",
+    desc: "Every shared connection across your team, incl. 1st-degree LinkedIn",
     icon: "network",
     tint: "bg-tint-brand text-brand",
-  },
-  {
-    title: "1st-degree LinkedIn",
-    desc: "Direct connections surface first — your strongest path in",
-    icon: "zap",
-    tint: "bg-tint-accent text-accent",
   },
   {
     title: "AI-drafted outreach",
     desc: "Claude or ChatGPT writes the intro, grounded in the connection",
     icon: "link",
-    tint: "bg-tint-purple text-purple",
+    tint: "bg-tint-accent text-accent",
   },
   {
     title: "Pipeline tracking",
     desc: "Never lose track of a warm intro or follow-up",
     icon: "history",
-    tint: "bg-tint-brand text-brand",
+    tint: "bg-tint-purple text-purple",
   },
   {
     title: "Lead routing",
     desc: "Auto-route prospects to the rep with the best connection",
     icon: "route",
-    tint: "bg-tint-purple text-purple",
+    tint: "bg-tint-brand text-brand",
   },
 ];
 
@@ -345,7 +350,7 @@ export function Marketing() {
           Then ask anytime — about a person or a company
         </p>
         <div className="mt-4">
-          <PipelineGraphic steps={askSteps} />
+          <PipelineGraphic steps={askSteps} startAt={6} />
         </div>
         <p className="mt-4 text-sm text-lavender">
           New prospect or new target account — just ask.
@@ -379,7 +384,7 @@ export function Marketing() {
           </p>
         </div>
 
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {features.map((f, i) => (
             <div
               key={f.title}
