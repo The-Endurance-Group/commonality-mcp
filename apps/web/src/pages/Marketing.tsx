@@ -1,4 +1,5 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { useAuthStore } from "../lib/store";
 
@@ -24,12 +25,9 @@ const ICON_PATHS: Record<string, string> = {
   network: "M12 2 4 7v10l8 5 8-5V7z M12 12v10 M12 12 4 7 M12 12l8-5",
   zap: "M13 2 3 14h7l-1 8 10-12h-7z",
   link: "M9 17H7a5 5 0 0 1 0-10h2 M15 7h2a5 5 0 0 1 0 10h-2 M8 12h8",
-  mail: "M3 6h18v12H3z M3 6l9 7 9-7",
   history: "M3 12a9 9 0 1 0 3-6.7 M3 5v5h5",
   sync: "M21 12a9 9 0 0 1-15.3 6.3M3 12a9 9 0 0 1 15.3-6.3 M21 5v5h-5 M3 19v-5h5",
-  users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
   route: "M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M19 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M5 17v-3a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4",
-  search: "M11 19a8 8 0 1 0 0-16 8 8 0 0 0 0 16Z M21 21l-4.35-4.35",
 };
 
 function Icon({ name, className = "text-brand" }: { name: string; className?: string }) {
@@ -90,16 +88,171 @@ function ChatMock() {
   );
 }
 
+function StepCompany() {
+  return (
+    <div className="space-y-2">
+      <div className="rounded-lg border border-gray-200 px-3 py-2 text-left text-sm text-lavender">
+        Acme Inc.
+      </div>
+      <div className="flex items-center justify-between rounded-lg bg-tint-brand px-3 py-2 text-sm font-medium text-brand">
+        Acme Inc. — 84 employees
+        <CheckIcon />
+      </div>
+    </div>
+  );
+}
+
+function StepFind() {
+  const names = ["JD", "SK", "MT", "RL", "AP"];
+  return (
+    <div className="flex flex-wrap justify-center gap-2">
+      {names.map((n, i) => (
+        <div
+          key={n}
+          className="animate-fade-up flex h-10 w-10 items-center justify-center rounded-full bg-tint-accent text-xs font-semibold text-accent"
+          style={{ animationDelay: `${i * 0.12}s` }}
+        >
+          {n}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function StepRoster() {
+  return (
+    <div className="space-y-2 text-sm">
+      <div className="flex items-center justify-between rounded-lg bg-tint-accent px-3 py-2 text-ink">
+        Jordan D. <CheckIcon className="text-accent" />
+      </div>
+      <div className="flex items-center justify-between rounded-lg bg-tint-brand px-3 py-2 text-ink">
+        Sam K. <CheckIcon className="text-brand" />
+      </div>
+      <div className="flex items-center justify-between rounded-lg bg-gray-100 px-3 py-2 text-lavender line-through">
+        Wrong contact <span className="text-xs">removed</span>
+      </div>
+    </div>
+  );
+}
+
+function StepCapital() {
+  const tags = ["🎓 Stanford", "🏢 Salesforce", "📍 Austin"];
+  return (
+    <div className="flex flex-col items-center gap-3">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-brand font-semibold text-white">
+        SK
+      </div>
+      <div className="flex flex-wrap justify-center gap-2">
+        {tags.map((t, i) => (
+          <span
+            key={t}
+            className="animate-fade-up rounded-full bg-tint-purple px-3 py-1 text-xs font-medium text-purple"
+            style={{ animationDelay: `${i * 0.15}s` }}
+          >
+            {t}
+          </span>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function StepConnect() {
+  return (
+    <div className="flex items-center justify-center gap-3">
+      <div className="rounded-lg bg-tint-brand px-4 py-3 text-sm font-semibold text-brand">
+        Commonality
+      </div>
+      <CheckIcon className="text-accent" />
+      <div className="rounded-lg bg-tint-accent px-4 py-3 text-sm font-semibold text-accent">
+        Claude / ChatGPT
+      </div>
+    </div>
+  );
+}
+
+function StepAsk() {
+  return (
+    <div className="ml-auto w-fit max-w-[90%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-left text-sm text-ink">
+      Best way to get a meeting with Jane Doe at Acme?
+    </div>
+  );
+}
+
+function StepAnswer() {
+  return (
+    <div className="space-y-2 text-left text-sm">
+      <div className="w-fit max-w-[95%] rounded-lg rounded-bl-sm bg-tint-brand px-3 py-2">
+        <p className="font-medium text-ink">Go through Sam K. — 1st-degree LinkedIn</p>
+      </div>
+      <div className="flex flex-wrap gap-2">
+        <span className="rounded-full bg-tint-purple px-3 py-1 text-xs font-medium text-purple">
+          Email drafted
+        </span>
+        <span className="rounded-full bg-tint-purple px-3 py-1 text-xs font-medium text-purple">
+          Call prep ready
+        </span>
+      </div>
+    </div>
+  );
+}
+
+const tourSteps = [
+  { label: "Pick your company", Visual: StepCompany },
+  { label: "We find your team on LinkedIn", Visual: StepFind },
+  { label: "You confirm the roster", Visual: StepRoster },
+  { label: "We map social capital", Visual: StepCapital },
+  { label: "Connect to Claude or ChatGPT", Visual: StepConnect },
+  { label: "Ask AI for the best way in", Visual: StepAsk },
+  { label: "Get the path, email & call prep", Visual: StepAnswer },
+];
+
+function ProductTour() {
+  const [step, setStep] = useState(0);
+  const paused = useRef(false);
+
+  useEffect(() => {
+    const id = setInterval(() => {
+      if (!paused.current) setStep((s) => (s + 1) % tourSteps.length);
+    }, 2600);
+    return () => clearInterval(id);
+  }, []);
+
+  const Visual = tourSteps[step].Visual;
+
+  return (
+    <div
+      className="mx-auto max-w-md"
+      onMouseEnter={() => (paused.current = true)}
+      onMouseLeave={() => (paused.current = false)}
+    >
+      <div className="flex min-h-[180px] flex-col items-center justify-center rounded-lg bg-white p-6 shadow-xl">
+        <div key={step} className="animate-fade-up w-full">
+          <Visual />
+        </div>
+      </div>
+      <p className="mt-4 text-sm font-medium text-ink">{tourSteps[step].label}</p>
+      <div className="mt-3 flex justify-center gap-1.5">
+        {tourSteps.map((s, i) => (
+          <button
+            key={s.label}
+            type="button"
+            aria-label={`Go to step ${i + 1}`}
+            onClick={() => setStep(i)}
+            className={`h-1.5 rounded-full transition-all ${
+              i === step ? "w-6 bg-brand" : "w-1.5 bg-gray-200"
+            }`}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const stats = [
   { value: "~2%", label: "cold email replies" },
   { value: "< 30%", label: "cold LinkedIn accepts" },
   { value: "5–10×", label: "better with a warm intro" },
-];
-
-const steps = [
-  { n: 1, title: "Load your team", icon: "users" },
-  { n: 2, title: "Drop in a prospect", icon: "search" },
-  { n: 3, title: "Send the warm intro", icon: "mail" },
 ];
 
 const features = [
@@ -200,21 +353,10 @@ export function Marketing() {
 
       {/* Workflow */}
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">60 seconds to a warm intro</h2>
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
 
-        <div className="mt-12 grid gap-8 sm:grid-cols-3">
-          {steps.map((step, i) => (
-            <div
-              key={step.n}
-              className="animate-fade-up flex flex-col items-center gap-3"
-              style={{ animationDelay: `${i * 0.15}s` }}
-            >
-              <div className="flex h-16 w-16 items-center justify-center rounded-full bg-tint-brand text-brand transition hover:scale-110">
-                <Icon name={step.icon} />
-              </div>
-              <h3 className="font-semibold text-ink">{step.title}</h3>
-            </div>
-          ))}
+        <div className="mt-10">
+          <ProductTour />
         </div>
 
         <div className="mt-10">
