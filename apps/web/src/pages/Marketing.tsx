@@ -26,7 +26,6 @@ const ICON_PATHS: Record<string, string> = {
   zap: "M13 2 3 14h7l-1 8 10-12h-7z",
   link: "M9 17H7a5 5 0 0 1 0-10h2 M15 7h2a5 5 0 0 1 0 10h-2 M8 12h8",
   history: "M3 12a9 9 0 1 0 3-6.7 M3 5v5h5",
-  sync: "M21 12a9 9 0 0 1-15.3 6.3M3 12a9 9 0 0 1 15.3-6.3 M21 5v5h-5 M3 19v-5h5",
   route: "M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M19 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M5 17v-3a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4",
   building: "M3 21h18 M5 21V7l7-4 7 4v14 M9 9h1 M9 13h1 M14 9h1 M14 13h1",
   users: "M17 21v-2a4 4 0 0 0-4-4H7a4 4 0 0 0-4 4v2 M9 11a4 4 0 1 0 0-8 4 4 0 0 0 0 8 M23 21v-2a4 4 0 0 0-3-3.87 M16 3.13a4 4 0 0 1 0 7.75",
@@ -243,12 +242,6 @@ const features = [
     desc: "Never lose track of a warm intro or follow-up",
     icon: "history",
     tint: "bg-tint-brand text-brand",
-  },
-  {
-    title: "CRM sync",
-    desc: "Two-way sync with HubSpot and Salesforce",
-    icon: "sync",
-    tint: "bg-tint-accent text-accent",
   },
   {
     title: "Lead routing",
