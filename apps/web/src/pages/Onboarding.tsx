@@ -163,47 +163,7 @@ export function Onboarding() {
           </Card>
         )}
 
-        {stage === "connections" && (
-          <Card
-            title="Add LinkedIn connections (optional)"
-            subtitle="This is the single strongest signal Commonality can use — a 1st-degree LinkedIn connection beats any other path in. Totally optional."
-          >
-            <div>
-              <p className="text-sm font-medium text-ink">How to export them from LinkedIn:</p>
-              <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-lavender">
-                <li>On LinkedIn, click your profile photo → <span className="font-medium text-ink">Settings &amp; Privacy</span>.</li>
-                <li>Go to the <span className="font-medium text-ink">Data privacy</span> tab → <span className="font-medium text-ink">Get a copy of your data</span>.</li>
-                <li>Select <span className="font-medium text-ink">Connections</span>, then click <span className="font-medium text-ink">Request archive</span>.</li>
-                <li>LinkedIn emails you a download link (usually within a few minutes) — download it and unzip it.</li>
-                <li>Upload the <span className="font-medium text-ink">Connections.csv</span> file here, for yourself or any teammate.</li>
-              </ol>
-            </div>
-
-            <Field label="Whose connections is this?">
-              <input className="input" placeholder="Your name or a teammate's" />
-            </Field>
-
-            <label className="block">
-              <span className="mb-1 block text-sm font-medium text-lavender">Connections.csv</span>
-              <input type="file" accept=".csv" className="input" />
-            </label>
-
-            <div className="rounded-lg bg-tint-accent p-4 text-sm text-ink">
-              Some people aren't comfortable sharing this, and that's completely okay — it's optional
-              and not required to use Commonality. You can always add it later if you or a teammate
-              changes your mind.
-            </div>
-
-            <div className="flex gap-3">
-              <button className="btn-primary" onClick={() => setStage("connector")}>
-                Upload &amp; continue
-              </button>
-              <button className="btn-secondary" onClick={() => setStage("connector")}>
-                Skip for now
-              </button>
-            </div>
-          </Card>
-        )}
+        {stage === "connections" && <ConnectionsStep onContinue={() => setStage("connector")} />}
 
         {stage === "connector" && (
           <Card
@@ -228,6 +188,91 @@ export function Onboarding() {
         )}
       </div>
     </div>
+  );
+}
+
+function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
+  const [name, setName] = useState("");
+  const [fileName, setFileName] = useState("");
+  const [added, setAdded] = useState<string[]>([]);
+
+  function addAnother() {
+    if (!name.trim()) return;
+    setAdded((a) => [...a, name.trim()]);
+    setName("");
+    setFileName("");
+  }
+
+  function finish() {
+    if (name.trim() && fileName) addAnother();
+    onContinue();
+  }
+
+  return (
+    <Card
+      title="Add LinkedIn connections (optional)"
+      subtitle="This is the single strongest signal Commonality can use — a 1st-degree LinkedIn connection beats any other path in. Totally optional."
+    >
+      <div>
+        <p className="text-sm font-medium text-ink">How to export them from LinkedIn:</p>
+        <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-lavender">
+          <li>On LinkedIn, click your profile photo → <span className="font-medium text-ink">Settings &amp; Privacy</span>.</li>
+          <li>Go to the <span className="font-medium text-ink">Data privacy</span> tab → <span className="font-medium text-ink">Get a copy of your data</span>.</li>
+          <li>Select <span className="font-medium text-ink">Connections</span>, then click <span className="font-medium text-ink">Request archive</span>.</li>
+          <li>LinkedIn emails you a download link (usually within a few minutes) — download it and unzip it.</li>
+          <li>Upload the <span className="font-medium text-ink">Connections.csv</span> file here, for yourself or any teammate.</li>
+        </ol>
+      </div>
+
+      {added.length > 0 && (
+        <div className="space-y-1.5">
+          {added.map((n) => (
+            <div key={n} className="flex items-center gap-2 rounded-md bg-tint-brand px-3 py-2 text-sm text-brand">
+              <span>✓</span>
+              <span className="font-medium">{n}</span>
+              <span className="text-lavender">— connections added</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <Field label="Whose connections is this?">
+        <input
+          className="input"
+          placeholder="Your name or a teammate's"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+      </Field>
+
+      <label className="block">
+        <span className="mb-1 block text-sm font-medium text-lavender">Connections.csv</span>
+        <input
+          type="file"
+          accept=".csv"
+          className="input"
+          onChange={(e) => setFileName(e.target.files?.[0]?.name ?? "")}
+        />
+      </label>
+
+      <div className="rounded-lg bg-tint-accent p-4 text-sm text-ink">
+        Some people aren't comfortable sharing this, and that's completely okay — it's optional
+        and not required to use Commonality. You can always add it later if you or a teammate
+        changes your mind.
+      </div>
+
+      <div className="flex flex-wrap gap-3">
+        <button className="btn-secondary" disabled={!name.trim() || !fileName} onClick={addAnother}>
+          + Add another person
+        </button>
+        <button className="btn-primary" onClick={finish}>
+          {added.length > 0 ? "Continue" : "Upload & continue"}
+        </button>
+        <button className="btn-link" onClick={onContinue}>
+          Skip for now
+        </button>
+      </div>
+    </Card>
   );
 }
 
