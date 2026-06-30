@@ -155,9 +155,9 @@ function ChatMock() {
 
 const socialMapPaths = [
   { name: "Sam K.", signal: "1st-degree LinkedIn", x: 70, strongest: true },
-  { name: "Devon R.", signal: "Wharton MBA, '16", x: 230, strongest: false },
-  { name: "Priya N.", signal: "Both at Initech", x: 390, strongest: false },
-  { name: "Alex P.", signal: "Portland, ME", x: 550, strongest: false },
+  { name: "Devon R.", signal: "Both Wharton MBA, '16", x: 230, strongest: false },
+  { name: "Priya N.", signal: "Both worked at Initech", x: 390, strongest: false },
+  { name: "Alex P.", signal: "Both live in Portland, ME", x: 550, strongest: false },
 ];
 
 function SocialMapGraphic() {
