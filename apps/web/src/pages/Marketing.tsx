@@ -153,12 +153,67 @@ function ChatMock() {
   );
 }
 
-const capitalSignals = [
-  { label: "1st-degree connections", icon: "zap" },
-  { label: "Alma mater", icon: "school" },
-  { label: "Past companies", icon: "building" },
-  { label: "Location", icon: "pin" },
+const socialMapPaths = [
+  { name: "Sam K.", signal: "1st-degree connection", icon: "zap", y: 40, strongest: true },
+  { name: "Devon R.", signal: "Same alma mater", icon: "school", y: 110, strongest: false },
+  { name: "Priya N.", signal: "Past company", icon: "building", y: 180, strongest: false },
+  { name: "Alex P.", signal: "Same location", icon: "pin", y: 250, strongest: false },
 ];
+
+function SocialMapGraphic() {
+  const prospectY = 145;
+  const teamX = 70;
+  const prospectX = 530;
+
+  return (
+    <div className="mx-auto max-w-3xl overflow-x-auto">
+      <svg viewBox="0 0 600 290" className="mx-auto h-auto w-full min-w-[560px]" aria-hidden="true">
+        {socialMapPaths.map((p, i) => (
+          <line
+            key={`line-${p.name}`}
+            x1={teamX + 18}
+            y1={p.y + 18}
+            x2={prospectX - 18}
+            y2={prospectY + 18}
+            stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
+            strokeWidth={p.strongest ? 3 : 1.5}
+            className={p.strongest ? "animate-pulse" : ""}
+            style={{ animationDelay: `${i * 0.1}s` }}
+          />
+        ))}
+
+        {socialMapPaths.map((p) => (
+          <g key={p.name} transform={`translate(${teamX}, ${p.y})`}>
+            <circle
+              cx="18"
+              cy="18"
+              r="18"
+              fill={p.strongest ? "#C45E89" : "#FBEAF1"}
+              stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
+              strokeWidth="1.5"
+            />
+            <text x="44" y="14" fontSize="13" fontWeight="600" fill="#1A1A1A">
+              {p.name}
+            </text>
+            <text x="44" y="30" fontSize="11" fill={p.strongest ? "#C45E89" : "#645D69"}>
+              {p.signal}
+            </text>
+          </g>
+        ))}
+
+        <g transform={`translate(${prospectX - 36}, ${prospectY})`}>
+          <circle cx="18" cy="18" r="18" fill="#65B6AE" />
+          <text x="-44" y="14" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="start">
+            Jane Doe
+          </text>
+          <text x="-44" y="30" fontSize="11" fill="#645D69" textAnchor="start">
+            VP Sales, Acme
+          </text>
+        </g>
+      </svg>
+    </div>
+  );
+}
 
 const setupSteps = [
   { label: "Tell us your company", icon: "building" },
@@ -350,44 +405,12 @@ export function Marketing() {
           prospect — then rank every possible path.
         </p>
 
-        <div className="mx-auto mt-10 grid max-w-3xl items-center gap-4 sm:grid-cols-[1fr_auto_1fr]">
-          <div className="rounded-lg border border-gray-100 p-6 text-left">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Your team</p>
-            <ul className="mt-4 space-y-3">
-              {capitalSignals.map((s) => (
-                <li key={s.label} className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-                    <Icon name={s.icon} className="" />
-                  </div>
-                  <span className="text-sm text-ink">{s.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="flex items-center justify-center text-xs font-semibold uppercase tracking-wide text-lavender">
-            vs
-          </div>
-
-          <div className="rounded-lg border border-gray-100 p-6 text-left">
-            <p className="text-xs font-semibold uppercase tracking-wide text-accent">
-              Your prospect
-            </p>
-            <ul className="mt-4 space-y-3">
-              {capitalSignals.map((s) => (
-                <li key={s.label} className="flex items-center gap-3">
-                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-tint-accent text-accent">
-                    <Icon name={s.icon} className="" />
-                  </div>
-                  <span className="text-sm text-ink">{s.label}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
+        <div className="animate-fade-up mt-10">
+          <SocialMapGraphic />
         </div>
 
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-purple px-4 py-2 text-sm font-medium text-purple">
-          <CheckIcon className="text-purple" />
+        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-brand px-4 py-2 text-sm font-medium text-brand">
+          <CheckIcon className="text-brand" />
           Strongest connection, ranked automatically
         </div>
       </section>
