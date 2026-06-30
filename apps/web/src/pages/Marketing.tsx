@@ -71,13 +71,18 @@ function TypingDotsRow() {
 const chatExamples = [
   {
     q: "Find a warm path to Jane Doe, VP Sales at Acme",
-    title: "1st-degree LinkedIn match",
+    title: "1st-degree connection",
     detail: "Sam K. is already connected to Jane on LinkedIn",
   },
   {
     q: "Best way into Globex Corp for Marcus Lee, Head of Procurement?",
-    title: "Two ways in",
-    detail: "Priya N. — worked together at Initech · Devon R. — same MBA, Wharton '16",
+    title: "Past company",
+    detail: "Priya N. worked with Marcus at Initech for 3 years",
+  },
+  {
+    q: "Anyone with a connection to Dana Ruiz, CTO at Vantage?",
+    title: "Alma mater",
+    detail: "Devon R. and Dana both went to Wharton — MBA '16",
   },
   {
     q: "Anyone close to our prospect in Portland, ME?",
