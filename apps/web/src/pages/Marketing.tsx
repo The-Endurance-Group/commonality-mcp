@@ -29,11 +29,11 @@ export function Marketing() {
 
       <section className="mx-auto max-w-3xl px-6 py-20 text-center">
         <h1 className="text-4xl font-bold leading-tight text-ink sm:text-5xl">
-          Warm intros to any prospect — right inside Claude.
+          Warm intros to any prospect — right inside Claude or ChatGPT.
         </h1>
         <p className="mx-auto mt-5 max-w-xl text-lg text-gray-600">
           Commonality maps your whole team's network and finds the strongest path to
-          anyone you want to reach. Set up once, then just ask Claude.
+          anyone you want to reach. Set up once, then just ask Claude or ChatGPT.
         </p>
 
         <div className="mt-8 flex items-center justify-center gap-3">
@@ -57,7 +57,7 @@ export function Marketing() {
         </div>
 
         <div className="mx-auto mt-16 aspect-video max-w-2xl rounded-xl border border-dashed border-gray-300 bg-white/60 p-10 text-gray-400">
-          Claude demo video coming soon
+          Claude / ChatGPT demo video coming soon
         </div>
       </section>
 
