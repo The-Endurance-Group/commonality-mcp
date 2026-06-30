@@ -20,11 +20,11 @@ export function Protected({ children, admin = false, onboarding = false }: Props
       </SignedOut>
       <SignedIn>
         {!ready ? (
-          <div className="p-10 text-center text-gray-500">Loading…</div>
+          <div className="p-10 text-center text-lavender">Loading…</div>
         ) : needsOnboarding && !onboarding ? (
           <Navigate to="/onboarding" replace />
         ) : admin && claims?.role !== "admin" ? (
-          <div className="p-10 text-center text-gray-600">
+          <div className="p-10 text-center text-lavender">
             This page is for workspace admins. Ask your admin for access.
           </div>
         ) : (

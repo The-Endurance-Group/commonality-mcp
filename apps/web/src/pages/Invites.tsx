@@ -51,7 +51,7 @@ export function Invites() {
     <div className="space-y-8">
       <section>
         <h2 className="text-lg font-semibold text-ink">Invite teammates</h2>
-        <p className="mt-1 text-sm text-gray-500">
+        <p className="mt-1 text-sm text-lavender">
           Paste up to {MAX_BULK} emails, separated by commas, spaces, or new lines.
         </p>
         <form
@@ -68,7 +68,7 @@ export function Invites() {
             onChange={(e) => setText(e.target.value)}
           />
           <div className="flex items-center justify-between">
-            <span className={`text-sm ${overLimit ? "text-red-600" : "text-gray-500"}`}>
+            <span className={`text-sm ${overLimit ? "text-red-600" : "text-lavender"}`}>
               {parsed.length} email{parsed.length === 1 ? "" : "s"}
               {overLimit ? ` — over the ${MAX_BULK} limit` : ""}
             </span>
@@ -78,7 +78,7 @@ export function Invites() {
           </div>
         </form>
         {summary && (
-          <p className="mt-2 text-sm text-gray-700">
+          <p className="mt-2 text-sm text-lavender">
             Invited {summary.invited} · Skipped {summary.skipped}
             {summary.invalid ? ` · Invalid ${summary.invalid}` : ""}
           </p>
@@ -88,9 +88,9 @@ export function Invites() {
 
       <section>
         <h2 className="mb-3 text-lg font-semibold text-ink">Invites</h2>
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-gray-500">
+            <thead className="bg-gray-50 text-left text-lavender">
               <tr>
                 <th className="px-4 py-2">Email</th>
                 <th className="px-4 py-2">Status</th>
@@ -98,13 +98,13 @@ export function Invites() {
             </thead>
             <tbody>
               {invites.length === 0 ? (
-                <tr><td className="px-4 py-6 text-gray-400" colSpan={2}>No invites yet.</td></tr>
+                <tr><td className="px-4 py-6 text-lavender" colSpan={2}>No invites yet.</td></tr>
               ) : (
                 invites.map((i) => (
-                  <tr key={i.id} className="border-t">
+                  <tr key={i.id} className="border-t border-gray-100">
                     <td className="px-4 py-2">{i.email}</td>
                     <td className="px-4 py-2">
-                      <span className={i.accepted ? "text-green-600" : "text-gray-500"}>
+                      <span className={i.accepted ? "text-accent" : "text-lavender"}>
                         {i.accepted ? "Accepted" : "Pending"}
                       </span>
                     </td>

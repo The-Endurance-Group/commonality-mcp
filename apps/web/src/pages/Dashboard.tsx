@@ -37,9 +37,9 @@ export function Dashboard() {
             </button>
           </div>
         </div>
-        <div className="overflow-hidden rounded-xl border bg-white">
+        <div className="overflow-hidden rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-gray-500">
+            <thead className="bg-gray-50 text-left text-lavender">
               <tr>
                 <th className="px-4 py-2">Name</th>
                 <th className="px-4 py-2">Location</th>
@@ -48,14 +48,14 @@ export function Dashboard() {
             </thead>
             <tbody>
               {employees.length === 0 ? (
-                <tr><td className="px-4 py-6 text-gray-400" colSpan={3}>No team members yet — click “Import team” to add your roster.</td></tr>
+                <tr><td className="px-4 py-6 text-lavender" colSpan={3}>No team members yet — click “Import team” to add your roster.</td></tr>
               ) : (
                 employees.map((e) => (
-                  <tr key={e.id} className="border-t">
+                  <tr key={e.id} className="border-t border-gray-100">
                     <td className="px-4 py-2">{e.name}</td>
-                    <td className="px-4 py-2 text-gray-600">{e.location ?? "—"}</td>
+                    <td className="px-4 py-2 text-lavender">{e.location ?? "—"}</td>
                     <td className="px-4 py-2">
-                      <span className={e.enriched_at ? "text-green-600" : "text-amber-600"}>
+                      <span className={e.enriched_at ? "text-accent" : "text-brand"}>
                         {e.enriched_at ? "Enriched" : "Pending"}
                       </span>
                     </td>
@@ -72,8 +72,8 @@ export function Dashboard() {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div className="rounded-xl border bg-white p-5">
-      <div className="text-sm text-gray-500">{label}</div>
+    <div className="rounded-lg border border-gray-100 bg-white p-5">
+      <div className="text-sm text-lavender">{label}</div>
       <div className="mt-1 text-2xl font-semibold text-ink">{value}</div>
     </div>
   );

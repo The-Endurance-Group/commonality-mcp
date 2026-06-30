@@ -11,8 +11,8 @@ const tabs = [
 export function Layout({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen">
-      <header className="border-b bg-white">
-        <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
+      <header className="border-b border-gray-100 bg-white">
+        <div className="mx-auto flex max-w-content items-center justify-between px-6 py-3">
           <div className="flex items-center gap-6">
             <img src="/logo.png" alt="Commonality" className="h-6 w-auto" />
             <nav className="flex gap-4 text-sm">
@@ -21,7 +21,7 @@ export function Layout({ children }: { children: ReactNode }) {
                   key={t.to}
                   to={t.to}
                   className={({ isActive }) =>
-                    isActive ? "text-brand font-medium" : "text-gray-500 hover:text-ink"
+                    isActive ? "text-brand font-medium" : "text-lavender hover:text-ink"
                   }
                 >
                   {t.label}
@@ -32,7 +32,7 @@ export function Layout({ children }: { children: ReactNode }) {
           <UserButton />
         </div>
       </header>
-      <main className="mx-auto max-w-5xl px-6 py-8">{children}</main>
+      <main className="mx-auto max-w-content px-6 py-8">{children}</main>
     </div>
   );
 }

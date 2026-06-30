@@ -31,14 +31,14 @@ export function Billing() {
       <h2 className="text-lg font-semibold text-ink">Billing</h2>
 
       {status === "success" && (
-        <p className="rounded bg-green-50 p-3 text-sm text-green-700">Thanks! Your subscription is active.</p>
+        <p className="rounded-md bg-tint-accent p-3 text-sm text-accent">Thanks! Your subscription is active.</p>
       )}
       {status === "cancelled" && (
-        <p className="rounded bg-gray-50 p-3 text-sm text-gray-600">Checkout cancelled — no charge made.</p>
+        <p className="rounded-md bg-gray-50 p-3 text-sm text-lavender">Checkout cancelled — no charge made.</p>
       )}
 
-      <div className="rounded-xl border bg-white p-6">
-        <div className="text-sm text-gray-500">Current plan</div>
+      <div className="rounded-lg border border-gray-100 bg-white p-6">
+        <div className="text-sm text-lavender">Current plan</div>
         <div className="mt-1 text-2xl font-semibold text-ink capitalize">{company.data?.plan ?? "…"}</div>
 
         <div className="mt-5">
