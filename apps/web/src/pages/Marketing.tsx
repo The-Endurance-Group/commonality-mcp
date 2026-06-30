@@ -162,12 +162,12 @@ const socialMapPaths = [
 
 function SocialMapGraphic() {
   const rowY = 30;
-  const prospectY = 190;
+  const prospectY = 170;
   const prospectX = 310;
 
   return (
     <div className="mx-auto max-w-3xl overflow-x-auto">
-      <svg viewBox="0 0 620 260" className="mx-auto h-auto w-full min-w-[560px]" aria-hidden="true">
+      <svg viewBox="0 0 620 280" className="mx-auto h-auto w-full min-w-[560px]" aria-hidden="true">
         {socialMapPaths.map((p, i) => (
           <line
             key={`line-${p.name}`}
@@ -177,11 +177,20 @@ function SocialMapGraphic() {
             y2={prospectY - 22}
             stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
             strokeWidth={p.strongest ? 3 : 1.5}
-            pathLength={1}
             className={p.strongest ? "sm-line sm-line-strong" : "sm-line"}
-            style={{ animationDelay: `${i * 0.25}s` }}
+            style={{ animationDelay: `${i * 0.3}s` }}
           />
         ))}
+
+        <g transform={`translate(${prospectX}, ${prospectY})`}>
+          <circle r="22" fill="#65B6AE" />
+          <text x="0" y="40" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
+            Jane Doe
+          </text>
+          <text x="0" y="56" fontSize="11" fill="#645D69" textAnchor="middle">
+            VP Sales, Acme
+          </text>
+        </g>
 
         {socialMapPaths.map((p) => (
           <g key={p.name} transform={`translate(${p.x}, ${rowY})`}>
@@ -206,16 +215,6 @@ function SocialMapGraphic() {
             </text>
           </g>
         ))}
-
-        <g transform={`translate(${prospectX}, ${prospectY})`}>
-          <circle r="22" fill="#65B6AE" />
-          <text x="0" y="-32" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
-            Jane Doe
-          </text>
-          <text x="0" y="-16" fontSize="11" fill="#645D69" textAnchor="middle">
-            VP Sales, Acme
-          </text>
-        </g>
       </svg>
     </div>
   );

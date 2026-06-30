@@ -71,30 +71,37 @@ body {
   animation: fade-in-up 0.7s ease-out both;
 }
 
-@keyframes sm-draw {
-  to {
-    stroke-dashoffset: 0;
+@keyframes sm-line-cycle {
+  0%,
+  100% {
+    opacity: 0;
+  }
+  15%,
+  85% {
+    opacity: 1;
   }
 }
 .sm-line {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: sm-draw 1s ease-out forwards;
+  opacity: 0;
+  animation: sm-line-cycle 5s ease-in-out infinite;
 }
 
-@keyframes sm-pulse-line {
+@keyframes sm-line-cycle-strong {
   0%,
   100% {
+    opacity: 0;
+  }
+  15%,
+  40% {
     opacity: 1;
   }
-  50% {
-    opacity: 0.45;
+  62%,
+  85% {
+    opacity: 0.55;
   }
 }
 .sm-line-strong {
-  animation:
-    sm-draw 1s ease-out forwards,
-    sm-pulse-line 2.4s ease-in-out 1.2s infinite;
+  animation: sm-line-cycle-strong 5s ease-in-out infinite;
 }
 
 @keyframes sm-pulse-node {
@@ -109,7 +116,7 @@ body {
 .sm-node-strong {
   transform-box: fill-box;
   transform-origin: center;
-  animation: sm-pulse-node 2.4s ease-in-out 1.2s infinite;
+  animation: sm-pulse-node 2.4s ease-in-out infinite;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -122,7 +129,6 @@ body {
   .sm-node-strong {
     animation: none !important;
     opacity: 1 !important;
-    stroke-dashoffset: 0 !important;
     transform: none !important;
   }
 }
