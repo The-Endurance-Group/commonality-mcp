@@ -259,9 +259,8 @@ export function Marketing() {
             Your next deal is already in your team's network.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
-            Ask your AI &ldquo;what's the best way into Acme?&rdquo; or &ldquo;how do I meet
-            their VP of Sales?&rdquo; — anytime, for any person or company. Commonality maps
-            your team's social capital to answer.
+            Ask your AI &ldquo;what's the best way into Acme?&rdquo; Get an answer for any
+            person or company, instantly.
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
