@@ -292,6 +292,7 @@ const features = [
 const caseStudies = [
   {
     company: "FenestraPro",
+    logo: "/logos/fenestrapro.webp",
     tags: ["B2B Technology", "Sales Execution"],
     story:
       "FenestraPro had a list of target firms they'd been trying to reach for years with no traction. We mapped the shared history between their team and those target firms, found the warm paths in, and ran an outreach motion built on those real connections.",
@@ -304,6 +305,7 @@ const caseStudies = [
   },
   {
     company: "Huron",
+    logo: "/logos/huron.webp",
     tags: ["Professional Services", "Relationship Expansion"],
     story:
       "Huron's team wanted to grow their network in a way that felt authentic rather than another round of cold outreach. We ran relationship expansion campaigns that connected their people with prospects who shared real, specific backgrounds with them, turning cold contacts into known entities.",
@@ -316,6 +318,7 @@ const caseStudies = [
   },
   {
     company: "Edify Software",
+    logo: "/logos/edify.webp",
     tags: ["Professional Services", "Sales Execution"],
     story:
       "Edify had grown entirely through referrals but had no consistent pipeline. We built the sales infrastructure, generated leads, created content, and executed outreach that resulted in long-term client relationships worth hundreds of thousands of dollars.",
@@ -332,22 +335,26 @@ const shortQuotes = [
     quote: "TEG found and landed the meeting that turned into our largest client. I recommend TEG without reservation.",
     name: "Michael Prevost",
     title: "CEO, VividCloud",
+    logo: "/logos/vividcloud.webp",
   },
   {
     quote:
       "The Endurance Group's efforts to expand our business through networking with like-minded health and safety leaders have helped SaltGrid develop new business relationships across the globe.",
     name: "Chris Aitken",
     title: "CEO, SaltGrid",
+    logo: "/logos/saltgrid.webp",
   },
   {
     quote: "Their lead generation and business development strategies resulted in measurable connections made and new projects for our firm.",
     name: "Jay Connolly",
     title: "President, Connolly Brothers",
+    logo: "/logos/connolly-brothers.webp",
   },
   {
     quote: "The team's expertise and insight into how social capital works were so valuable for our company and had a very high return on investment.",
     name: "Kevin Finn",
     title: "CEO, Mutual Capital Analytics",
+    logo: "/logos/mutual-capital-analytics.webp",
   },
   {
     quote:
@@ -566,7 +573,8 @@ export function Marketing() {
         <div className="mt-10 space-y-6">
           {caseStudies.map((c) => (
             <div key={c.company} className="rounded-lg border border-gray-100 p-6 sm:p-8">
-              <div className="flex flex-wrap items-center gap-2">
+              <div className="flex flex-wrap items-center gap-3">
+                <img src={c.logo} alt={c.company} className="h-7 w-auto object-contain" />
                 <span className="text-lg font-bold text-ink">{c.company}</span>
                 {c.tags.map((tag) => (
                   <span
@@ -592,6 +600,7 @@ export function Marketing() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {shortQuotes.map((t) => (
             <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
+              {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
               <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
               <p className="mt-3 text-xs font-medium text-lavender">
                 {t.name} · {t.title}
