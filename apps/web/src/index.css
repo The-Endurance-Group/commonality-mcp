@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Raleway:wght@400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -7,7 +9,7 @@
     @apply w-full rounded-lg border border-gray-300 px-3 py-2 text-sm outline-none focus:border-brand;
   }
   .btn-primary {
-    @apply rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:opacity-90 disabled:opacity-50;
+    @apply rounded-lg bg-brand px-4 py-2 text-sm font-medium text-white hover:bg-brand-dark disabled:opacity-50;
   }
   .btn-secondary {
     @apply rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-ink hover:bg-gray-50 disabled:opacity-50;
@@ -23,8 +25,7 @@
 
 body {
   margin: 0;
-  font-family: "Gotham", "Raleway", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
-    sans-serif;
-  color: #000000;
+  font-family: "Raleway", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #1a1a1a;
   background: #fafafa;
 }
