@@ -76,6 +76,11 @@ const chatExamples = [
     detail: "Sam K. is already connected to Jane on LinkedIn",
   },
   {
+    q: "What's our best way into Acme Corp as a target account?",
+    title: "Account-based path",
+    detail: "Sam K. has the strongest combined connection across Acme's leadership",
+  },
+  {
     q: "Best way into Globex Corp for Marcus Lee, Head of Procurement?",
     title: "Past company",
     detail: "Priya N. worked with Marcus at Initech for 3 years",
@@ -148,34 +153,37 @@ function ChatMock() {
   );
 }
 
-const pipelineSteps = [
+const setupSteps = [
   { label: "Pick your company", icon: "building" },
   { label: "Find your team on LinkedIn", icon: "users" },
   { label: "Confirm the roster", icon: "check" },
   { label: "Map social capital", icon: "network" },
   { label: "Connect your AI", icon: "link" },
-  { label: "Ask the best way in", icon: "message" },
+];
+
+const askSteps = [
+  { label: "Ask: a person or a company", icon: "message" },
   { label: "Get Path", icon: "mail" },
   { label: "Outreach + Strategy", icon: "pencil" },
 ];
 
-function PipelineGraphic() {
+function PipelineGraphic({ steps, intervalMs = 1700 }: { steps: { label: string; icon: string }[]; intervalMs?: number }) {
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    const id = setInterval(() => setStep((s) => (s + 1) % pipelineSteps.length), 1700);
+    const id = setInterval(() => setStep((s) => (s + 1) % steps.length), intervalMs);
     return () => clearInterval(id);
-  }, []);
+  }, [steps.length, intervalMs]);
 
   return (
     <div className="mx-auto max-w-3xl overflow-x-auto px-1 pb-2">
-      <div className="relative flex min-w-[620px] items-start justify-between">
+      <div className="relative flex min-w-[480px] items-start justify-between">
         <div className="absolute left-0 right-0 top-6 h-0.5 bg-gray-200" />
         <div
           className="absolute left-0 top-6 h-0.5 bg-brand transition-all duration-700 ease-in-out"
-          style={{ width: `${(step / (pipelineSteps.length - 1)) * 100}%` }}
+          style={{ width: `${(step / (steps.length - 1)) * 100}%` }}
         />
-        {pipelineSteps.map((s, i) => {
+        {steps.map((s, i) => {
           const status = i < step ? "done" : i === step ? "active" : "upcoming";
           return (
             <div key={s.label} className="relative z-10 flex flex-1 flex-col items-center px-1 text-center">
@@ -289,8 +297,10 @@ export function Marketing() {
           <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
             Your next deal is already in your team's network.
           </h1>
-          <p className="mx-auto mt-4 max-w-md text-lg text-white/90">
-            Mapped, drafted, and sent — right inside Claude or ChatGPT.
+          <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
+            Ask your AI &ldquo;what's the best way into Acme?&rdquo; or &ldquo;how do I meet
+            their VP of Sales?&rdquo; — anytime, for any person or company. Commonality maps
+            your team's social capital to answer.
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
@@ -318,6 +328,7 @@ export function Marketing() {
 
         <div className="mx-auto mt-12 max-w-md animate-float">
           <ChatMock />
+          <p className="mt-4 text-sm text-white/70">Ask about a person or a whole company — anytime</p>
         </div>
       </section>
 
@@ -342,9 +353,22 @@ export function Marketing() {
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
 
-        <div className="mt-10">
-          <PipelineGraphic />
+        <p className="mt-8 text-sm font-semibold uppercase tracking-wide text-lavender">
+          Set up once
+        </p>
+        <div className="mt-4">
+          <PipelineGraphic steps={setupSteps} />
         </div>
+
+        <p className="mt-10 text-sm font-semibold uppercase tracking-wide text-lavender">
+          Then ask anytime — about a person or a company
+        </p>
+        <div className="mt-4">
+          <PipelineGraphic steps={askSteps} intervalMs={1900} />
+        </div>
+        <p className="mt-4 text-sm text-lavender">
+          New prospect or new target account — just ask.
+        </p>
 
         <div className="mt-10">
           <SignedOut>
