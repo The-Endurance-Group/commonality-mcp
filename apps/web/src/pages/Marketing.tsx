@@ -2,7 +2,7 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-re
 import { Link, Navigate } from "react-router-dom";
 import { useAuthStore } from "../lib/store";
 
-function CheckIcon() {
+function CheckIcon({ className = "text-brand" }: { className?: string }) {
   return (
     <svg
       viewBox="0 0 24 24"
@@ -13,7 +13,7 @@ function CheckIcon() {
       strokeWidth="2"
       strokeLinecap="round"
       strokeLinejoin="round"
-      className="mt-0.5 shrink-0 text-brand"
+      className={`mt-0.5 shrink-0 ${className}`}
     >
       <path d="M20 6 9 17l-5-5" />
     </svg>
@@ -99,55 +99,61 @@ export function Marketing() {
       </header>
 
       {/* Hero */}
-      <section className="mx-auto max-w-3xl px-6 py-20 text-center">
-        <p className="text-sm font-medium uppercase tracking-wide text-accent">
-          Social Selling · Warm Introductions · Relationship-Based Selling
-        </p>
-        <h1 className="mt-4 text-4xl font-bold leading-tight text-ink sm:text-5xl">
-          Your next deal is already in your team's network.
-        </h1>
-        <p className="mx-auto mt-5 max-w-xl text-lg text-lavender">
-          Commonality maps your team's shared schools, employers, and LinkedIn connections to
-          every prospect — right inside Claude or ChatGPT — so every outreach starts with a
-          real reason to connect.
-        </p>
+      <section className="bg-gradient-to-br from-purple via-brand to-accent px-6 py-20 text-center">
+        <div className="mx-auto max-w-3xl">
+          <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
+            Social Selling · Warm Introductions · Relationship-Based Selling
+          </p>
+          <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
+            Your next deal is already in your team's network.
+          </h1>
+          <p className="mx-auto mt-5 max-w-xl text-lg text-white/90">
+            Commonality maps your team's shared schools, employers, and LinkedIn connections to
+            every prospect — right inside Claude or ChatGPT — so every outreach starts with a{" "}
+            <span className="font-semibold">real reason to connect</span>.
+          </p>
 
-        <ul className="mx-auto mt-6 max-w-md space-y-2 text-left text-lavender">
-          <li className="flex gap-2">
-            <CheckIcon />
-            Shared schools, employers & hometowns across your whole team
-          </li>
-          <li className="flex gap-2">
-            <CheckIcon />
-            Outreach drafted by Claude or ChatGPT, grounded in the real connection
-          </li>
-          <li className="flex gap-2">
-            <CheckIcon />
-            Includes 1st-degree LinkedIn connection matching — the strongest warm path of all
-          </li>
-        </ul>
+          <ul className="mx-auto mt-6 max-w-md space-y-2 text-left text-white/90">
+            <li className="flex gap-2">
+              <CheckIcon className="text-white" />
+              Shared schools, employers & hometowns across your whole team
+            </li>
+            <li className="flex gap-2">
+              <CheckIcon className="text-white" />
+              Outreach drafted by Claude or ChatGPT, grounded in the real connection
+            </li>
+            <li className="flex gap-2">
+              <CheckIcon className="text-white" />
+              <span className="font-semibold">
+                Includes 1st-degree LinkedIn connection matching — the strongest warm path of all
+              </span>
+            </li>
+          </ul>
 
-        <div className="mt-8 flex items-center justify-center gap-3">
-          <SignedOut>
-            <SignUpButton mode="modal">
-              <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
-                Start for free — no credit card
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <Link to="/dashboard" className="rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
-              Open your workspace
-            </Link>
-          </SignedIn>
-          <a href="#how-it-works" className="px-6 py-3 font-medium text-brand hover:underline">
-            See how it works →
-          </a>
-        </div>
-        <p className="mt-3 text-sm text-lavender">25 team members & 10 searches free · CRM sync included</p>
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <button className="rounded-lg bg-white px-6 py-3 font-medium text-purple hover:bg-white/90">
+                  Start for free — no credit card
+                </button>
+              </SignUpButton>
+            </SignedOut>
+            <SignedIn>
+              <Link to="/dashboard" className="rounded-lg bg-white px-6 py-3 font-medium text-purple hover:bg-white/90">
+                Open your workspace
+              </Link>
+            </SignedIn>
+            <a href="#how-it-works" className="px-6 py-3 font-medium text-white hover:underline">
+              See how it works →
+            </a>
+          </div>
+          <p className="mt-3 text-sm text-white/70">
+            25 team members & 10 searches free · CRM sync included
+          </p>
 
-        <div className="mx-auto mt-16 aspect-video max-w-2xl rounded-lg border border-dashed border-gray-300 bg-white/60 p-10 text-lavender">
-          Claude / ChatGPT demo video coming soon
+          <div className="mx-auto mt-16 aspect-video max-w-2xl rounded-lg border border-dashed border-white/30 bg-white/10 p-10 text-white/70">
+            Claude / ChatGPT demo video coming soon
+          </div>
         </div>
       </section>
 
