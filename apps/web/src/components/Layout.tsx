@@ -14,7 +14,7 @@ export function Layout({ children }: { children: ReactNode }) {
       <header className="border-b bg-white">
         <div className="mx-auto flex max-w-5xl items-center justify-between px-6 py-3">
           <div className="flex items-center gap-6">
-            <span className="font-semibold text-ink">Commonality</span>
+            <img src="/logo.png" alt="Commonality" className="h-6 w-auto" />
             <nav className="flex gap-4 text-sm">
               {tabs.map((t) => (
                 <NavLink

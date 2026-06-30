@@ -135,7 +135,7 @@ export function Marketing() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <header className="mx-auto flex max-w-content items-center justify-between px-6 py-5">
-        <span className="text-lg font-semibold text-ink">Commonality</span>
+        <img src="/logo.png" alt="Commonality" className="h-7 w-auto" />
         <div className="flex items-center gap-4 text-sm">
           <SignedOut>
             <SignInButton mode="modal">
