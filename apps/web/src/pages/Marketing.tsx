@@ -82,7 +82,7 @@ export function Marketing() {
 
       {/* Hero */}
       <section className="mx-auto max-w-3xl px-6 py-20 text-center">
-        <p className="text-sm font-medium uppercase tracking-wide text-brand">
+        <p className="text-sm font-medium uppercase tracking-wide text-accent">
           Social Selling · Warm Introductions · Relationship-Based Selling
         </p>
         <h1 className="mt-4 text-4xl font-bold leading-tight text-ink sm:text-5xl">
@@ -141,7 +141,7 @@ export function Marketing() {
         <div className="mt-10 grid gap-8 sm:grid-cols-3">
           {stats.map((s) => (
             <div key={s.label} className="text-center">
-              <div className="text-4xl font-bold text-brand">{s.value}</div>
+              <div className="text-4xl font-bold text-accent">{s.value}</div>
               <div className="mt-2 font-medium text-ink">{s.label}</div>
               <div className="mt-1 text-sm text-gray-500">{s.sub}</div>
             </div>
@@ -151,7 +151,7 @@ export function Marketing() {
 
       {/* Workflow */}
       <section id="how-it-works" className="mx-auto max-w-5xl px-6 py-16">
-        <p className="text-center text-sm font-medium uppercase tracking-wide text-brand">
+        <p className="text-center text-sm font-medium uppercase tracking-wide text-accent">
           The workflow
         </p>
         <h2 className="mt-2 text-center text-2xl font-bold text-ink sm:text-3xl">
@@ -191,7 +191,7 @@ export function Marketing() {
 
       {/* Features */}
       <section className="mx-auto max-w-5xl px-6 py-16">
-        <p className="text-center text-sm font-medium uppercase tracking-wide text-brand">
+        <p className="text-center text-sm font-medium uppercase tracking-wide text-accent">
           Built for sales teams
         </p>
         <h2 className="mt-2 text-center text-2xl font-bold text-ink sm:text-3xl">

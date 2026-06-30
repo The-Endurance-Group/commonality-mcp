@@ -4,8 +4,14 @@ export default {
   theme: {
     extend: {
       colors: {
-        ink: "#0f1115",
-        brand: "#5b5bd6",
+        ink: "#000000",
+        brand: "#C45E89",
+        accent: "#65B6AE",
+        purple: "#704282",
+        lavender: "#645D69",
+      },
+      fontFamily: {
+        sans: ["Gotham", "Raleway", "ui-sans-serif", "system-ui", "sans-serif"],
       },
     },
   },
