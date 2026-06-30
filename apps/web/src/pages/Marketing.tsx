@@ -69,9 +69,9 @@ const chatExamples = [
     detail: "Sam K. is already connected to Jane on LinkedIn",
   },
   {
-    q: "Best way into Globex Corp?",
+    q: "Best way into Globex Corp for Marcus Lee, Head of Procurement?",
     title: "Two ways in",
-    detail: "Worked together at Initech · Same MBA — Wharton '16",
+    detail: "Priya N. — worked together at Initech · Devon R. — same MBA, Wharton '16",
   },
   {
     q: "Anyone close to our prospect in Portland, ME?",
