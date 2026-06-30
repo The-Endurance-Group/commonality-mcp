@@ -166,57 +166,25 @@ const askSteps = [
   { label: "Outreach + Strategy", icon: "pencil" },
 ];
 
-function PipelineGraphic({ steps, intervalMs = 1700 }: { steps: { label: string; icon: string }[]; intervalMs?: number }) {
-  const [step, setStep] = useState(0);
-
-  useEffect(() => {
-    const id = setInterval(() => setStep((s) => (s + 1) % steps.length), intervalMs);
-    return () => clearInterval(id);
-  }, [steps.length, intervalMs]);
-
+function PipelineGraphic({ steps }: { steps: { label: string; icon: string }[] }) {
   return (
-    <div className="mx-auto max-w-3xl overflow-x-auto px-1 pb-2">
-      <div className="relative flex min-w-[480px] items-start justify-between">
-        <div className="absolute left-0 right-0 top-6 h-0.5 bg-gray-200" />
+    <div className="mx-auto grid max-w-3xl gap-3 sm:grid-cols-3">
+      {steps.map((s, i) => (
         <div
-          className="absolute left-0 top-6 h-0.5 bg-brand transition-all duration-700 ease-in-out"
-          style={{ width: `${(step / (steps.length - 1)) * 100}%` }}
-        />
-        {steps.map((s, i) => {
-          const status = i < step ? "done" : i === step ? "active" : "upcoming";
-          return (
-            <div key={s.label} className="relative z-10 flex flex-1 flex-col items-center px-1 text-center">
-              <div
-                className={`flex h-12 w-12 items-center justify-center rounded-full border-2 transition-all duration-300 ${
-                  status === "done"
-                    ? "border-brand bg-brand"
-                    : status === "active"
-                      ? "scale-110 border-brand bg-white shadow-lg"
-                      : "border-gray-200 bg-white"
-                }`}
-              >
-                {status === "done" ? (
-                  <CheckIcon className="text-white" />
-                ) : (
-                  <Icon name={s.icon} className={status === "active" ? "text-brand" : "text-gray-300"} />
-                )}
-              </div>
-              <p className={`mt-2 text-xs font-medium ${status === "upcoming" ? "text-gray-300" : "text-ink"}`}>
-                {s.label}
-              </p>
-            </div>
-          );
-        })}
-      </div>
+          key={s.label}
+          className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white p-4 text-left"
+          style={{ animationDelay: `${i * 0.08}s` }}
+        >
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+            <Icon name={s.icon} className="" />
+          </div>
+          <p className="text-sm font-medium text-ink">{s.label}</p>
+        </div>
+      ))}
     </div>
   );
 }
 
-const stats = [
-  { value: "~2%", label: "cold email replies" },
-  { value: "< 30%", label: "cold LinkedIn accepts" },
-  { value: "5–10×", label: "better with a warm intro" },
-];
 
 const features = [
   {
@@ -327,18 +295,39 @@ export function Marketing() {
 
       {/* Why cold outreach is broken */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Why cold outreach is broken</h2>
-        <div className="mt-10 grid gap-8 sm:grid-cols-3">
-          {stats.map((s, i) => (
-            <div
-              key={s.label}
-              className="animate-fade-up"
-              style={{ animationDelay: `${i * 0.12}s` }}
-            >
-              <div className="text-5xl font-bold text-accent">{s.value}</div>
-              <div className="mt-2 text-sm font-medium text-lavender">{s.label}</div>
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+          A warm path gets you in the door. Cold outreach doesn't.
+        </h2>
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
+          <div className="animate-fade-up rounded-lg border border-gray-200 p-6 text-left">
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">
+              Without a warm path
+            </p>
+            <div className="mt-4 space-y-3">
+              <div>
+                <span className="text-2xl font-bold text-ink">~2%</span>
+                <span className="ml-2 text-sm text-lavender">of cold emails get a reply</span>
+              </div>
+              <div>
+                <span className="text-2xl font-bold text-ink">&lt; 30%</span>
+                <span className="ml-2 text-sm text-lavender">of cold LinkedIn requests are accepted</span>
+              </div>
             </div>
-          ))}
+          </div>
+          <div
+            className="animate-fade-up rounded-lg bg-tint-brand p-6 text-left"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
+              With a warm path
+            </p>
+            <div className="mt-4">
+              <span className="text-5xl font-bold text-brand">5–10×</span>
+              <p className="mt-2 text-sm font-medium text-ink">
+                more likely to land a meeting when you go through someone you know
+              </p>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -357,7 +346,7 @@ export function Marketing() {
           Then ask anytime — about a person or a company
         </p>
         <div className="mt-4">
-          <PipelineGraphic steps={askSteps} intervalMs={1900} />
+          <PipelineGraphic steps={askSteps} />
         </div>
         <p className="mt-4 text-sm text-lavender">
           New prospect or new target account — just ask.
