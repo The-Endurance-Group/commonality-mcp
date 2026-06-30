@@ -289,9 +289,78 @@ const features = [
   },
 ];
 
-const testimonials = [
-  { quote: "3 meetings in week one.", initial: "A", name: "Alex R.", role: "VP Sales" },
-  { quote: "Reply rates tripled.", initial: "M", name: "Morgan T.", role: "Head of Growth" },
+const caseStudies = [
+  {
+    company: "FenestraPro",
+    tags: ["B2B Technology", "Sales Execution"],
+    story:
+      "FenestraPro had a list of target firms they'd been trying to reach for years with no traction. We mapped the shared history between their team and those target firms, found the warm paths in, and ran an outreach motion built on those real connections.",
+    result:
+      "Average response rate: 30%. Real conversations opened with firms that had been unreachable through conventional outreach.",
+    quote:
+      "The Endurance Group's strategy of using shared experiences to establish connections and book meetings with prospects has worked incredibly well. Their efforts have resulted in an average 30% response rate and started conversations with key firms that we'd been interested in pursuing for years.",
+    name: "David Palmer",
+    title: "CEO & Founder, FenestraPro",
+  },
+  {
+    company: "Huron",
+    tags: ["Professional Services", "Relationship Expansion"],
+    story:
+      "Huron's team wanted to grow their network in a way that felt authentic rather than another round of cold outreach. We ran relationship expansion campaigns that connected their people with prospects who shared real, specific backgrounds with them, turning cold contacts into known entities.",
+    result:
+      "TEG's relationship expansion campaigns are well-named. By connecting with prospects you share backgrounds with, you develop authentic connections and become a known entity in your space.",
+    quote:
+      "You build your brand and network among individuals who may look to you in the near future for your perspective or when they have business needs aligned to your areas of expertise.",
+    name: "Ben Chrischelles",
+    title: "Senior Director, Huron",
+  },
+  {
+    company: "Edify Software",
+    tags: ["Professional Services", "Sales Execution"],
+    story:
+      "Edify had grown entirely through referrals but had no consistent pipeline. We built the sales infrastructure, generated leads, created content, and executed outreach that resulted in long-term client relationships worth hundreds of thousands of dollars.",
+    result: "Edify has since grown to 60 full-time employees.",
+    quote:
+      "Over the course of several years, our work with The Endurance Group has been instrumental in gaining valuable insights about our market space and establishing connections with the right individuals and organizations, ultimately leading to new long-term client relationships.",
+    name: "Federico Hess",
+    title: "Partner & CEO, Edify Software",
+  },
+];
+
+const shortQuotes = [
+  {
+    quote: "TEG found and landed the meeting that turned into our largest client. I recommend TEG without reservation.",
+    name: "Michael Prevost",
+    title: "CEO, VividCloud",
+  },
+  {
+    quote:
+      "The Endurance Group's efforts to expand our business through networking with like-minded health and safety leaders have helped SaltGrid develop new business relationships across the globe.",
+    name: "Chris Aitken",
+    title: "CEO, SaltGrid",
+  },
+  {
+    quote: "Their lead generation and business development strategies resulted in measurable connections made and new projects for our firm.",
+    name: "Jay Connolly",
+    title: "President, Connolly Brothers",
+  },
+  {
+    quote: "The team's expertise and insight into how social capital works were so valuable for our company and had a very high return on investment.",
+    name: "Kevin Finn",
+    title: "CEO, Mutual Capital Analytics",
+  },
+  {
+    quote:
+      "I highly recommend The Endurance Group for their outstanding social capital campaign services. They are a reliable and trusted partner — responsive and quite proactive.",
+    name: "Nikki Blacksmith",
+    title: "CEO, Symeta Inc.",
+  },
+  {
+    quote:
+      "Their approach to reaching new people is very effective and efficient. If you're looking for a \"way in\" to a large group of targeted people, they'll improve your efficiency.",
+    name: "Jason Benavidez",
+    title: "Director of Strategic Business, The Tyson Group, Inc.",
+  },
 ];
 
 export function Marketing() {
@@ -490,18 +559,43 @@ export function Marketing() {
 
       {/* Testimonials */}
       <section className="mx-auto max-w-content px-6 py-16">
-        <div className="grid gap-6 sm:grid-cols-2">
-          {testimonials.map((t) => (
-            <div key={t.name} className="flex items-center gap-4 rounded-lg bg-tint-brand p-6">
-              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand font-semibold text-white">
-                {t.initial}
+        <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">
+          Trusted by teams who needed a real way in
+        </h2>
+
+        <div className="mt-10 space-y-6">
+          {caseStudies.map((c) => (
+            <div key={c.company} className="rounded-lg border border-gray-100 p-6 sm:p-8">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-lg font-bold text-ink">{c.company}</span>
+                {c.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full bg-tint-accent px-3 py-1 text-xs font-medium text-accent"
+                  >
+                    {tag}
+                  </span>
+                ))}
               </div>
-              <div>
-                <p className="font-medium text-ink">&ldquo;{t.quote}&rdquo;</p>
-                <p className="text-sm text-lavender">
-                  {t.name} · {t.role}
-                </p>
-              </div>
+              <p className="mt-4 text-sm text-lavender">{c.story}</p>
+              <p className="mt-3 text-sm font-medium text-ink">{c.result}</p>
+              <blockquote className="mt-4 border-l-2 border-brand pl-4 text-sm italic text-ink">
+                &ldquo;{c.quote}&rdquo;
+                <footer className="mt-2 text-sm font-medium not-italic text-lavender">
+                  — {c.name}, {c.title}
+                </footer>
+              </blockquote>
+            </div>
+          ))}
+        </div>
+
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {shortQuotes.map((t) => (
+            <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
+              <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
+              <p className="mt-3 text-xs font-medium text-lavender">
+                {t.name} · {t.title}
+              </p>
             </div>
           ))}
         </div>
