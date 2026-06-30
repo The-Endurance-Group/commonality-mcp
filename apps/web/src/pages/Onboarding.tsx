@@ -15,7 +15,7 @@ const STAGE_LABELS: Record<Stage, string> = {
 };
 
 const enrichingNotes = [
-  "Mapping your team's LinkedIn connections — looking for 1st-degree paths to your prospects.",
+  "Pulling each teammate's profile — title, schools, employers, and location.",
   "Cross-referencing alma maters — checking whether any prospects share a degree program with your team.",
   "Reviewing past employers — flagging companies your team and target accounts have in common.",
   "Comparing locations — surfacing teammates based near your prospects.",
@@ -128,7 +128,7 @@ export function Onboarding() {
         {stage === "import" && (
           <Card
             title="Import your team"
-            subtitle="We'll pull every teammate's LinkedIn profile — schools, employers, and connections — to map your team's social capital."
+            subtitle="We'll pull every teammate's LinkedIn profile — schools, employers, and location — to map your team's social capital."
           >
             <p className="text-sm text-lavender">Paste your company's LinkedIn URL to pull the roster automatically…</p>
             <Field label="Company LinkedIn URL">
