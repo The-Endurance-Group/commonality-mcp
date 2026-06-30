@@ -34,6 +34,7 @@ const ICON_PATHS: Record<string, string> = {
   message:
     "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
   mail: "M3 6h18v12H3z M3 6l9 7 9-7",
+  pencil: "M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z",
 };
 
 function Icon({ name, className = "text-brand" }: { name: string; className?: string }) {
@@ -154,7 +155,8 @@ const pipelineSteps = [
   { label: "Map social capital", icon: "network" },
   { label: "Connect your AI", icon: "link" },
   { label: "Ask the best way in", icon: "message" },
-  { label: "Get path + email", icon: "mail" },
+  { label: "Get Path", icon: "mail" },
+  { label: "Outreach + Strategy", icon: "pencil" },
 ];
 
 function PipelineGraphic() {
