@@ -78,7 +78,7 @@ export const TOOL_DEFS: McpToolDef[] = [
   },
   {
     name: "upload_connections",
-    description: "Add a team member's 1st-degree LinkedIn connections for stronger matches.",
+    description: "Add a few 1st-degree LinkedIn connections manually. For a full CSV export, tell the user to upload it in the web app onboarding instead — pasting a whole export here wastes tokens.",
     inputSchema: {
       type: "object",
       properties: {

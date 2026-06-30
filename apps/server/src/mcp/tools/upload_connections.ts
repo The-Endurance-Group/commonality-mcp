@@ -6,12 +6,24 @@ import { text } from "./_result.js";
 interface Conn { name?: string; url?: string; connected_on?: string }
 interface Args { employee_id?: string; employee_url?: string; connections: Conn[] }
 
+// Meant for a handful of manual additions. A full LinkedIn export can run into
+// the thousands — pasting that through chat burns a huge number of tokens, so
+// past this size we redirect to the web app's onboarding upload instead.
+const MAX_MANUAL_CONNECTIONS = 25;
+
 // Store a team member's 1st-degree LinkedIn connections so they count as the
 // strongest warm-path signal in analyze_prospect.
 export const upload_connections: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
     if (!Array.isArray(args.connections) || args.connections.length === 0) {
       return text("Provide a non-empty connections array.", true);
+    }
+    if (args.connections.length > MAX_MANUAL_CONNECTIONS) {
+      return text(
+        `That's ${args.connections.length} connections — too many to paste through chat efficiently. ` +
+          "Please upload the full Connections.csv export in the web app instead (Dashboard → Onboarding → Add LinkedIn connections).",
+        true,
+      );
     }
 
     // Resolve the owning employee within this workspace.
