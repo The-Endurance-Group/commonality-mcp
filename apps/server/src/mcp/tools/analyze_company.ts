@@ -1,6 +1,7 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { checkQuota, incrementUsage, isProspectUnlocked, recordProspectUnlock } from "../../auth/quota.js";
 import { searchCompanies, searchProfiles } from "../../services/apify.js";
+import { appendFreeTrialTip } from "../freeTrialTips.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
@@ -136,6 +137,7 @@ export const analyze_company: ToolHandler<Args> = {
     }
 
     const outcomes: { analysis: ProspectAnalysis; charged: boolean }[] = [];
+    let lastUsedCount: number | null = null;
     for (const url of candidateUrls) {
       const alreadyUnlocked = await isProspectUnlocked(ctx.company_id, url);
       if (!alreadyUnlocked) {
@@ -150,7 +152,7 @@ export const analyze_company: ToolHandler<Args> = {
       }
       if (!alreadyUnlocked) {
         await recordProspectUnlock(ctx.company_id, url);
-        await incrementUsage(ctx.company_id);
+        lastUsedCount = await incrementUsage(ctx.company_id);
       }
       outcomes.push({ analysis, charged: !alreadyUnlocked });
     }
@@ -172,8 +174,9 @@ export const analyze_company: ToolHandler<Args> = {
       : "None of these candidates share a connection with your team yet.";
 
     const charged = outcomes.filter((o) => o.charged).length;
-    return text(
+    const finalResult = text(
       `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
     );
+    return ctx.plan === "free" && lastUsedCount !== null ? appendFreeTrialTip(finalResult, lastUsedCount) : finalResult;
   },
 };

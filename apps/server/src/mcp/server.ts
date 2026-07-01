@@ -9,6 +9,7 @@ import {
   recordProspectUnlock,
 } from "../auth/quota.js";
 import { logger } from "../logger.js";
+import { appendFreeTrialTip } from "./freeTrialTips.js";
 import { HANDLERS, TOOL_DEFS } from "./registry.js";
 
 // MCP JSON-RPC 2.0 endpoint. Auth runs first (middleware) so unauthenticated
@@ -84,7 +85,8 @@ async function handleToolCall(
   if (handler.usesQuota && !result.isError && !alreadyUnlocked) {
     try {
       if (billingKey) await recordProspectUnlock(ctx.company_id, billingKey);
-      await incrementUsage(ctx.company_id);
+      const used = await incrementUsage(ctx.company_id);
+      if (ctx.plan === "free") result = appendFreeTrialTip(result, used);
     } catch (err) {
       logger.error({ err, tool: name }, "billing update failed (result already returned)");
     }
