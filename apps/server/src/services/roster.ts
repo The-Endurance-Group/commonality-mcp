@@ -83,7 +83,7 @@ export async function importRoster(
   companyId: string,
   plan: "free" | "pro",
   input: { companyLinkedinUrl?: string; urls?: string[]; limit?: number },
-): Promise<{ imported: number; remaining: number }> {
+): Promise<{ imported: number; remaining: number; limit: number; trimmedByLimit: boolean }> {
   const status = await checkTeamLimit(companyId, plan);
   if (!status.allowed) {
     throw new TeamLimitError(
@@ -92,19 +92,24 @@ export async function importRoster(
     );
   }
 
-  let people: { name: string; linkedin_url: string }[] = [];
+  let available: { name: string; linkedin_url: string }[] = [];
 
   if (input.companyLinkedinUrl) {
-    const limit = Math.min(input.limit ?? status.remaining, status.remaining);
-    const emps = await apifyCompanyEmployees(input.companyLinkedinUrl, limit);
-    people = emps.map((e) => ({ name: e.name, linkedin_url: e.linkedinUrl }));
+    // Fetch up to the highest tier's cap so we can tell whether the company
+    // actually has more people than this plan's remaining slots allow.
+    const fetchLimit = Math.min(input.limit ?? TEAM_LIMITS.pro, TEAM_LIMITS.pro);
+    const emps = await apifyCompanyEmployees(input.companyLinkedinUrl, fetchLimit);
+    available = emps.map((e) => ({ name: e.name, linkedin_url: e.linkedinUrl }));
   } else if (input.urls?.length) {
-    people = input.urls.slice(0, status.remaining).map((u) => ({ name: u, linkedin_url: u })); // name backfilled on enrichment
+    available = input.urls.map((u) => ({ name: u, linkedin_url: u })); // name backfilled on enrichment
   }
+
+  const trimmedByLimit = available.length > status.remaining;
+  const people = available.slice(0, status.remaining);
 
   const imported = await upsertRoster(companyId, people);
   enrichRosterInBackground(companyId);
-  return { imported, remaining: Math.max(0, status.remaining - imported) };
+  return { imported, remaining: Math.max(0, status.remaining - imported), limit: status.limit, trimmedByLimit };
 }
 
 export async function rosterStatus(companyId: string): Promise<{ total: number; enriched: number }> {

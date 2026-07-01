@@ -31,6 +31,7 @@ export function Onboarding() {
   const [stage, setStage] = useState<Stage>(needsOnboarding ? "workspace" : "import");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [notice, setNotice] = useState<string | null>(null);
 
   // Stage 1 — create workspace
   const [companyName, setCompanyName] = useState("");
@@ -64,14 +65,22 @@ export function Onboarding() {
   async function importTeam() {
     setBusy(true);
     setError(null);
+    setNotice(null);
     try {
       const urls = pastedUrls.split(/\s+/).map((u) => u.trim()).filter(Boolean);
-      await apiFetch("/api/employees/import", {
-        method: "POST",
-        body: JSON.stringify(
-          companyUrl ? { companyLinkedinUrl: companyUrl } : { urls },
-        ),
-      });
+      const result = await apiFetch<{ imported: number; remaining: number; limit: number; trimmedByLimit: boolean }>(
+        "/api/employees/import",
+        {
+          method: "POST",
+          body: JSON.stringify(companyUrl ? { companyLinkedinUrl: companyUrl } : { urls }),
+        },
+      );
+      if (result.trimmedByLimit) {
+        setNotice(
+          `Imported ${result.imported} team members — that's your plan's limit (${result.limit}). ` +
+            "There are more people at this company; upgrade to Pro to add them.",
+        );
+      }
       setStage("enriching");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import failed");
@@ -110,6 +119,9 @@ export function Onboarding() {
       <Steps stage={stage} />
       {error && (
         <p className="animate-fade-up mt-4 rounded-md bg-red-50 p-3 text-sm text-red-600">{error}</p>
+      )}
+      {notice && (
+        <p className="animate-fade-up mt-4 rounded-md bg-tint-brand p-3 text-sm text-brand">{notice}</p>
       )}
 
       <div key={stage} className="animate-fade-up">
