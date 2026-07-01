@@ -2,11 +2,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../lib/api";
+import { useAuthStore } from "../lib/store";
 
 interface Usage { plan: string; used: number; limit: number; remaining: number }
 interface Employee { id: string; name: string; linkedin_url: string | null; location: string | null; enriched_at: string | null }
 
 export function Dashboard() {
+  const isAdmin = useAuthStore((s) => s.claims?.role === "admin");
   const qc = useQueryClient();
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => apiFetch<Usage>("/api/usage") });
   const roster = useQuery({ queryKey: ["employees"], queryFn: () => apiFetch<{ employees: Employee[] }>("/api/employees") });
@@ -33,14 +35,16 @@ export function Dashboard() {
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-ink">Team roster</h2>
-          <div className="flex gap-2">
-            <Link to="/onboarding" className="btn-primary">
-              Import team
-            </Link>
-            <button className="btn-secondary" disabled={reEnrich.isPending || employees.length === 0} onClick={() => reEnrich.mutate()}>
-              {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
-            </button>
-          </div>
+          {isAdmin && (
+            <div className="flex gap-2">
+              <Link to="/onboarding" className="btn-primary">
+                Import team
+              </Link>
+              <button className="btn-secondary" disabled={reEnrich.isPending || employees.length === 0} onClick={() => reEnrich.mutate()}>
+                {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
+              </button>
+            </div>
+          )}
         </div>
         <div className="overflow-hidden rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
