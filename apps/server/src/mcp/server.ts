@@ -75,7 +75,7 @@ async function handleToolCall(
   } catch (err) {
     logger.error({ err, tool: name }, "tool execution failed");
     return {
-      content: [{ type: "text", text: `${name} failed: ${err instanceof Error ? err.message : "unknown error"}. Please try again.` }],
+      content: [{ type: "text", text: `${name} failed. Please try again.` }],
       isError: true,
     };
   }

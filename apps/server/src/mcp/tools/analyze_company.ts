@@ -39,8 +39,8 @@ export const analyze_company: ToolHandler<Args> = {
       let companies;
       try {
         companies = await searchCompanies(args.company_name);
-      } catch (err) {
-        return text(`Couldn't look up that company: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+      } catch {
+        return text("Couldn't look up that company right now. Please try again.", true);
       }
       if (!companies.length) return text(`No company found matching "${args.company_name}".`, true);
 
@@ -74,8 +74,8 @@ export const analyze_company: ToolHandler<Args> = {
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
         candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: [args.role] }, ROLE_SEARCH_LIMIT);
-      } catch (err) {
-        return text(`Couldn't search that company's people: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+      } catch {
+        return text("Couldn't search that company's people right now. Please try again.", true);
       }
 
       if (!candidates.length) {

@@ -23,12 +23,12 @@ export const invite_member: ToolHandler<Args> = {
       invited_by: ctx.user_id,
       accepted: false,
     });
-    if (error) return text(`Couldn't create invite: ${error.message}`, true);
+    if (error) return text("Couldn't create invite. Please try again.", true);
 
     try {
       await sendInviteEmail(email, company.name, ctx.email);
     } catch (err) {
-      return text(`Invite recorded, but the email failed to send: ${err instanceof Error ? err.message : "unknown"}. They can still join with this email.`);
+      return text(`Invite recorded, but the email failed to send. They can still join with this email.`);
     }
     return text(`Invited ${email} to ${company.name}. They'll get setup instructions by email.`);
   },

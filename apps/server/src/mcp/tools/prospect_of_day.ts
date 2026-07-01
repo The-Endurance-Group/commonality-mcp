@@ -24,8 +24,8 @@ export const prospect_of_day: ToolHandler<Record<string, never>> = {
     let candidates;
     try {
       candidates = await searchProfiles(filters, 10);
-    } catch (err) {
-      return text(`Couldn't fetch today's prospect: ${err instanceof Error ? err.message : "search failed"}.`, true);
+    } catch {
+      return text("Couldn't fetch today's prospect right now. Please try again.", true);
     }
     if (!candidates.length) return text("No prospects matched your ICP today. Refine your ICP in the dashboard.");
 

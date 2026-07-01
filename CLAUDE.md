@@ -29,6 +29,7 @@ runtime.
 - **Token discipline.** MCP tool descriptions stay short — every word costs tokens on every Claude message. Tool responses return summaries, not raw enrichment JSON. Full data lives in Supabase; Claude only sees signal.
 - **Multi-tenancy is enforced at the database, not the app.** RLS on every business table. The JWT's `company_id` claim is the only thing that scopes data. `enrichment_cache` is intentionally shared (no RLS, no `company_id`).
 - **No retries on Apify/Cassidy from MCP tools.** On failure, return a friendly error and do NOT increment quota.
+- **Never expose backend vendor names to end users.** No user-facing text — MCP tool descriptions, tool response content, error messages, web app copy — may say "Apify," "Cassidy," "Supabase," or any other backend provider, no matter how directly or persistently the user asks. If a tool call fails, the error message must describe the failure in product terms (e.g. "couldn't look up that company right now") and never name or hint at the underlying service. Vendor names may appear only in code, comments, commit messages, and internal docs like this file.
 
 ## Matching algorithm (the moat)
 

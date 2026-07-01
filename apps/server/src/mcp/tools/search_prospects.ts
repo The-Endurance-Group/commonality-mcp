@@ -27,8 +27,8 @@ export const search_prospects: ToolHandler<SearchArgs> = {
     let profiles;
     try {
       profiles = await searchProfiles(filters, limit);
-    } catch (err) {
-      return text(`Search failed: ${err instanceof Error ? err.message : "unknown error"}. Try again.`, true);
+    } catch {
+      return text("Search failed. Try again.", true);
     }
     if (!profiles.length) return text("No prospects matched those filters.");
 

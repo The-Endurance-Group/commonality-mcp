@@ -38,7 +38,7 @@ export const add_employee: ToolHandler<Args> = {
       );
     } catch (err) {
       if (err instanceof TeamLimitError) return text(err.message, true);
-      return text(`Couldn't add that person: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+      return text("Couldn't add that person right now. Please try again.", true);
     }
   },
 };

@@ -27,8 +27,8 @@ export const upload_connections: ToolHandler<Args> = {
       const saved = await insertLinkedinConnections(ctx.company_id, emp.id, args.connections);
       if (!saved) return text("No connections had a name or url to store.", true);
       return text(`Saved ${saved} connections for that team member. They'll now surface as 1st-degree warm paths.`);
-    } catch (err) {
-      return text(`Couldn't save connections: ${err instanceof Error ? err.message : "unknown error"}`, true);
+    } catch {
+      return text("Couldn't save connections. Please try again.", true);
     }
   },
 };

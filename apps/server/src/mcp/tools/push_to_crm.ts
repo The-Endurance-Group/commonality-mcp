@@ -54,8 +54,8 @@ export const push_to_crm: ToolHandler<Args> = {
         pushOpts,
       );
       return text(`${r.created ? "Created" : "Updated"} ${enriched.name} in Salesforce (lead ${r.leadId}) with Commonality findings.`);
-    } catch (err) {
-      return text(`CRM push failed: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+    } catch {
+      return text("CRM push failed. Please try again.", true);
     }
   },
 };

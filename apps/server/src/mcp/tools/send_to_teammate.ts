@@ -20,8 +20,8 @@ export const send_to_teammate: ToolHandler<Args> = {
 
     try {
       await sendTeammateHandoff(teammate.email, ctx.email, summary, args.note);
-    } catch (err) {
-      return text(`Couldn't email ${teammate.email}: ${err instanceof Error ? err.message : "send failed"}.`, true);
+    } catch {
+      return text(`Couldn't email ${teammate.email}. Please try again.`, true);
     }
     return text(`Sent ${enriched.name} to ${teammate.email}.`);
   },
