@@ -59,7 +59,7 @@ export const TOOL_DEFS: McpToolDef[] = [
   },
   {
     name: "add_employee",
-    description: "Add one person to your team roster by their LinkedIn profile URL, so their connections/background count toward warm paths.",
+    description: "Admin only. Add one person to your team roster by their LinkedIn profile URL, so their connections/background count toward warm paths.",
     inputSchema: {
       type: "object",
       properties: {

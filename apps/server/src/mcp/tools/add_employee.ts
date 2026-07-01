@@ -12,6 +12,7 @@ interface Args {
 // so it respects the same free/pro team-member cap.
 export const add_employee: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
+    if (ctx.role !== "admin") return text("Only workspace admins can add teammates to the roster.", true);
     if (!args.linkedin_url) return text("Provide the person's LinkedIn profile URL.", true);
     if (!/linkedin\.com\/in\//i.test(args.linkedin_url)) {
       return text(

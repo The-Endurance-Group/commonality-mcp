@@ -86,7 +86,7 @@ async function handleToolCall(
     try {
       if (billingKey) await recordProspectUnlock(ctx.company_id, billingKey);
       const used = await incrementUsage(ctx.company_id);
-      if (ctx.plan === "free") result = appendFreeTrialTip(result, used);
+      if (ctx.plan === "free") result = appendFreeTrialTip(result, used, ctx.role);
     } catch (err) {
       logger.error({ err, tool: name }, "billing update failed (result already returned)");
     }

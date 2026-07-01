@@ -11,6 +11,14 @@ companiesRouter.get("/me", async (req, res) => {
     res.status(404).json({ error: "not_found" });
     return;
   }
+  const { data: admin } = await db()
+    .from("users")
+    .select("email")
+    .eq("company_id", req.user!.company_id)
+    .eq("role", "admin")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle<{ email: string }>();
   res.json({
     id: company.id,
     name: company.name,
@@ -18,6 +26,7 @@ companiesRouter.get("/me", async (req, res) => {
     domain: company.domain,
     context: company.context,
     website: company.website,
+    adminEmail: admin?.email ?? null,
   });
 });
 

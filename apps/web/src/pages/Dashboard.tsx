@@ -5,7 +5,16 @@ import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
 interface Usage { plan: string; used: number; limit: number; remaining: number }
-interface Employee { id: string; name: string; linkedin_url: string | null; location: string | null; enriched_at: string | null }
+interface Employee {
+  id: string;
+  name: string;
+  linkedin_url: string | null;
+  location: string | null;
+  schools: string[] | null;
+  past_companies: string[] | null;
+  enriched_at: string | null;
+}
+interface Company { adminEmail: string | null }
 
 // Matches TEAM_LIMITS in apps/server/src/services/roster.ts and the pricing page.
 const TEAM_LIMITS: Record<string, number> = { free: 25, pro: 150 };
@@ -15,6 +24,7 @@ export function Dashboard() {
   const qc = useQueryClient();
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => apiFetch<Usage>("/api/usage") });
   const roster = useQuery({ queryKey: ["employees"], queryFn: () => apiFetch<{ employees: Employee[] }>("/api/employees") });
+  const company = useQuery({ queryKey: ["company"], queryFn: () => apiFetch<Company>("/api/companies/me") });
 
   const reEnrich = useMutation({
     mutationFn: () => apiFetch("/api/employees/re-enrich", { method: "POST" }),
@@ -24,11 +34,12 @@ export function Dashboard() {
   const employees = roster.data?.employees ?? [];
   const appUrl = window.location.origin;
   const mcpUrl = `${appUrl}/mcp`;
+  const adminEmail = company.data?.adminEmail;
 
   return (
     <div className="space-y-8">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Stat label="Plan" value={usage.data?.plan ?? "-"} />
+        <Stat label="Plan" value={usage.data ? usage.data.plan.charAt(0).toUpperCase() + usage.data.plan.slice(1) : "-"} />
         <Stat label="Searches used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "-"} />
         <Stat
           label="Team members"
@@ -39,6 +50,12 @@ export function Dashboard() {
           }
         />
       </section>
+
+      {!isAdmin && adminEmail && (
+        <p className="text-sm text-lavender">
+          Questions? Reach out to your admin, <span className="font-medium text-ink">{adminEmail}</span>.
+        </p>
+      )}
 
       <ConnectorCard mcpUrl={mcpUrl} appUrl={appUrl} />
 
@@ -58,22 +75,39 @@ export function Dashboard() {
             </div>
           )}
         </div>
-        <div className="overflow-hidden rounded-lg border border-gray-100 bg-white">
+        <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-lavender">
               <tr>
                 <th className="px-4 py-2">Name</th>
+                <th className="px-4 py-2">Alma mater</th>
+                <th className="px-4 py-2">Past companies</th>
                 <th className="px-4 py-2">Location</th>
                 <th className="px-4 py-2">Status</th>
               </tr>
             </thead>
             <tbody>
               {employees.length === 0 ? (
-                <tr><td className="px-4 py-6 text-lavender" colSpan={3}>No team members yet - click “Import team” to add your roster.</td></tr>
+                <tr><td className="px-4 py-6 text-lavender" colSpan={5}>No team members yet - click “Import team” to add your roster.</td></tr>
               ) : (
                 employees.map((e) => (
                   <tr key={e.id} className="border-t border-gray-100">
-                    <td className="px-4 py-2">{e.name}</td>
+                    <td className="px-4 py-2">
+                      {e.linkedin_url ? (
+                        <a
+                          href={e.linkedin_url}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-brand hover:underline"
+                        >
+                          {e.name}
+                        </a>
+                      ) : (
+                        e.name
+                      )}
+                    </td>
+                    <td className="px-4 py-2 text-lavender">{e.schools?.length ? e.schools.join(", ") : "-"}</td>
+                    <td className="px-4 py-2 text-lavender">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</td>
                     <td className="px-4 py-2 text-lavender">{e.location ?? "-"}</td>
                     <td className="px-4 py-2">
                       <span className={e.enriched_at ? "text-accent" : "text-brand"}>
@@ -86,6 +120,10 @@ export function Dashboard() {
             </tbody>
           </table>
         </div>
+        <p className="mt-3 text-sm text-lavender">
+          Someone missing? Someone not belong? Reach out to your admin so they can add or remove people
+          {adminEmail && !isAdmin ? ` (${adminEmail})` : ""}.
+        </p>
       </section>
     </div>
   );
@@ -94,17 +132,31 @@ export function Dashboard() {
 type AiClient = "claude" | "chatgpt";
 const AI_CLIENT_LABELS: Record<AiClient, string> = { claude: "Claude", chatgpt: "ChatGPT" };
 
+function defaultInviteMessage(aiClient: AiClient, appUrl: string, mcpUrl: string): string {
+  const clientLabel = AI_CLIENT_LABELS[aiClient];
+  return (
+    `Join us on Commonality:\n` +
+    `1. Sign up at ${appUrl} with your work email.\n` +
+    `2. In ${clientLabel}, go to Settings → Connectors → Add ${aiClient === "claude" ? "custom " : ""}connector, and paste this URL: ${mcpUrl}\n` +
+    `3. Sign in with your email when prompted, then ask ${clientLabel} to find a warm path to a prospect.`
+  );
+}
+
 function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
   const [aiClient, setAiClient] = useState<AiClient>("claude");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState(false);
+  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage("claude", appUrl, mcpUrl));
+  const [inviteEdited, setInviteEdited] = useState(false);
 
   const clientLabel = AI_CLIENT_LABELS[aiClient];
-  const inviteMessage =
-    `Join us on Commonality:\n` +
-    `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. In ${clientLabel}, go to Settings → Connectors → Add ${aiClient === "claude" ? "custom " : ""}connector, and paste this URL: ${mcpUrl}\n` +
-    `3. Sign in with your email when prompted, then ask ${clientLabel} to find a warm path to a prospect.`;
+
+  function selectAiClient(c: AiClient) {
+    setAiClient(c);
+    // Only replace the message with the new client's default if the user
+    // hasn't customized it themselves - don't clobber their edits.
+    if (!inviteEdited) setInviteMessage(defaultInviteMessage(c, appUrl, mcpUrl));
+  }
 
   return (
     <section className="rounded-lg border border-gray-100 bg-white p-6">
@@ -117,7 +169,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
               className={`rounded-md px-2.5 py-1 text-xs font-medium ${
                 aiClient === c ? "bg-tint-brand text-brand" : "text-lavender hover:bg-gray-50"
               }`}
-              onClick={() => setAiClient(c)}
+              onClick={() => selectAiClient(c)}
             >
               {AI_CLIENT_LABELS[c]}
             </button>
@@ -144,8 +196,16 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
       <div className="mt-5 border-t border-gray-100 pt-5">
         <h3 className="text-sm font-semibold text-ink">Invite a teammate</h3>
         <p className="mt-1 text-sm text-lavender">
-          Copy a ready-to-send message with sign-up and connector setup steps for a teammate.
+          Edit the message below if you'd like, then copy it for a teammate.
         </p>
+        <textarea
+          className="input mt-3 h-28 font-mono text-xs"
+          value={inviteMessage}
+          onChange={(e) => {
+            setInviteMessage(e.target.value);
+            setInviteEdited(true);
+          }}
+        />
         <button
           className="btn-secondary mt-3"
           onClick={() => {
@@ -161,48 +221,100 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
   );
 }
 
-const everyonePrompts = [
-  "What's the best way for me to connect with [prospect LinkedIn URL]?",
-  "What's our best way into Acme Corp?",
-  "Add this person to our team: [LinkedIn profile URL].",
-  "Find VPs of Sales at fintech companies in New York.",
-  "Draft a LinkedIn message and email for reaching out to [prospect].",
-  "Help me prep for a call with [prospect].",
-  "Who's my prospect of the day?",
-  "Push [prospect] to HubSpot with our findings.",
-  "Hand this prospect to Sam - they have a stronger connection.",
-  "Add my LinkedIn connections so they count as warm paths.",
-  "Show our team's social capital - top schools, employers, and locations.",
-  "How many searches do I have left this month?",
+const promptCategories: { title: string; prompts: string[] }[] = [
+  {
+    title: "Find warm paths",
+    prompts: [
+      "What's the best way for me to connect with [prospect LinkedIn URL]?",
+      "What's our best way into Acme Corp?",
+      "Find VPs of Sales at fintech companies in New York.",
+      "Who's my prospect of the day?",
+    ],
+  },
+  {
+    title: "Outreach & follow-up",
+    prompts: [
+      "Draft a LinkedIn message and email for reaching out to [prospect].",
+      "Help me prep for a call with [prospect].",
+      "Push [prospect] to HubSpot with our findings.",
+      "Hand this prospect to Sam - they have a stronger connection.",
+    ],
+  },
+  {
+    title: "Team & network",
+    prompts: [
+      "Add my LinkedIn connections so they count as warm paths.",
+      "Show our team's social capital - top schools, employers, and locations.",
+    ],
+  },
+  {
+    title: "Usage",
+    prompts: ["How many searches do I have left this month?"],
+  },
 ];
 
-const adminPrompts = ["Invite jordan@acme.com to our workspace."];
+const adminPromptCategory = {
+  title: "Admin only",
+  prompts: [
+    "Invite jordan@acme.com to our workspace.",
+    "Add this person to our team: [LinkedIn profile URL].",
+  ],
+};
 
 function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
+  const categories = isAdmin ? [...promptCategories, adminPromptCategory] : promptCategories;
+  const [openTitle, setOpenTitle] = useState<string | null>(null);
+
   return (
     <section className="rounded-lg border border-gray-100 bg-white p-6">
-      <h2 className="text-lg font-semibold text-ink">Try asking Claude</h2>
+      <h2 className="text-lg font-semibold text-ink">Try asking your AI</h2>
       <p className="mt-1 text-sm text-lavender">
         Once connected, here's what you can ask - no need to remember exact tool names.
       </p>
 
-      <ul className="mt-4 space-y-2">
-        {everyonePrompts.map((p) => (
-          <PromptItem key={p} prompt={p} />
+      <div className="mt-4 space-y-2">
+        {categories.map((cat) => (
+          <PromptCategory
+            key={cat.title}
+            title={cat.title}
+            prompts={cat.prompts}
+            open={openTitle === cat.title}
+            onToggle={() => setOpenTitle((t) => (t === cat.title ? null : cat.title))}
+          />
         ))}
-      </ul>
-
-      {isAdmin && (
-        <div className="mt-5 border-t border-gray-100 pt-5">
-          <h3 className="text-sm font-semibold text-ink">Admin only</h3>
-          <ul className="mt-3 space-y-2">
-            {adminPrompts.map((p) => (
-              <PromptItem key={p} prompt={p} />
-            ))}
-          </ul>
-        </div>
-      )}
+      </div>
     </section>
+  );
+}
+
+function PromptCategory({
+  title,
+  prompts,
+  open,
+  onToggle,
+}: {
+  title: string;
+  prompts: string[];
+  open: boolean;
+  onToggle: () => void;
+}) {
+  return (
+    <div className="overflow-hidden rounded-md border border-gray-100">
+      <button
+        className="flex w-full items-center justify-between bg-gray-50 px-3 py-2 text-left text-sm font-medium text-ink"
+        onClick={onToggle}
+      >
+        {title}
+        <span className="text-lavender">{open ? "−" : "+"}</span>
+      </button>
+      {open && (
+        <ul className="space-y-2 p-2">
+          {prompts.map((p) => (
+            <PromptItem key={p} prompt={p} />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
 

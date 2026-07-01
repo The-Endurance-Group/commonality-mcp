@@ -10,7 +10,7 @@ export const employeesRouter: RouterType = Router();
 employeesRouter.get("/", async (req, res) => {
   const { data, error } = await db()
     .from("employees")
-    .select("id, name, linkedin_url, location, enriched_at")
+    .select("id, name, linkedin_url, location, schools, past_companies, enriched_at")
     .eq("company_id", req.user!.company_id)
     .order("name");
   if (error) {

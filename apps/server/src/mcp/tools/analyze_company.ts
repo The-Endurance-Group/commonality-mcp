@@ -177,6 +177,8 @@ export const analyze_company: ToolHandler<Args> = {
     const finalResult = text(
       `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
     );
-    return ctx.plan === "free" && lastUsedCount !== null ? appendFreeTrialTip(finalResult, lastUsedCount) : finalResult;
+    return ctx.plan === "free" && lastUsedCount !== null
+      ? appendFreeTrialTip(finalResult, lastUsedCount, ctx.role)
+      : finalResult;
   },
 };
