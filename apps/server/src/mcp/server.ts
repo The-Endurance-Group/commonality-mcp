@@ -63,7 +63,7 @@ async function handleToolCall(
     if (!alreadyUnlocked) {
       const status = await checkQuota(ctx);
       if (!status.allowed) {
-        return { content: [{ type: "text", text: quotaExceededMessage(status, ctx.plan) }], isError: true };
+        return { content: [{ type: "text", text: quotaExceededMessage(status, ctx.plan, ctx.role) }], isError: true };
       }
     }
   }

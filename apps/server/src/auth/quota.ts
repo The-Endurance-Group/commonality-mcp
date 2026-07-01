@@ -83,9 +83,13 @@ export async function recordProspectUnlock(companyId: string, url: string): Prom
 }
 
 /** Friendly upgrade message returned as a tool result when at limit. */
-export function quotaExceededMessage(status: QuotaStatus, plan: "free" | "pro"): string {
+export function quotaExceededMessage(status: QuotaStatus, plan: "free" | "pro", role: "admin" | "member"): string {
   if (plan === "free") {
-    return `You've used all ${status.limit} free searches. Upgrade to Pro for 200 searches/month — visit your Commonality dashboard → Billing to upgrade.`;
+    const upgrade =
+      role === "admin"
+        ? "Upgrade to Pro for 200 searches/month — visit your Commonality dashboard → Billing to upgrade."
+        : "Upgrade to Pro for 200 searches/month — ask your workspace admin to upgrade in Billing.";
+    return `You've used all ${status.limit} free searches. ${upgrade}`;
   }
   return `You've used all ${status.limit} searches this month. Your quota resets at the start of next month.`;
 }
