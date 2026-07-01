@@ -38,37 +38,41 @@ export const analyze_company: ToolHandler<Args> = {
       return text(
         `${roster.length} people at this company:\n${lines.join("\n")}\n\n` +
           "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\", \"Director of Finance\"), " +
-          "pick the matching candidates from this list yourself, then call analyze_company again with " +
-          "company_url + candidate_urls (their LinkedIn URLs) to preview the cost before analyzing.",
+          `pick the matching candidates from this list yourself (up to ${MAX_CANDIDATES} at a time — if more match, ` +
+          "narrow the role/seniority further), then call analyze_company again with company_url + candidate_urls " +
+          "(their LinkedIn URLs) to preview the cost before analyzing.",
       );
     }
 
-    const requested = args.candidate_urls.length;
-    const candidateUrls = args.candidate_urls.slice(0, MAX_CANDIDATES);
-    const truncationNote =
-      requested > MAX_CANDIDATES
-        ? `Note: you selected ${requested} candidates — only analyzing the first ${MAX_CANDIDATES}.\n\n`
-        : "";
+    const candidateUrls = args.candidate_urls;
+    if (candidateUrls.length > MAX_CANDIDATES) {
+      return text(
+        `That's ${candidateUrls.length} candidates — analyze_company only handles ${MAX_CANDIDATES} at a time ` +
+          "(each one takes a real search, one at a time, so a bigger batch could take several minutes). " +
+          "Narrow the role/seniority criteria and pick a smaller set from the roster, then try again.",
+        true,
+      );
+    }
 
     if (!args.confirm) {
       const unlocked = await Promise.all(candidateUrls.map((u) => isProspectUnlocked(ctx.company_id, u)));
       const newCount = unlocked.filter((u) => !u).length;
       if (newCount === 0) {
         return text(
-          `${truncationNote}All ${candidateUrls.length} candidates have already been analyzed for your team — this will be free. ` +
+          `All ${candidateUrls.length} candidates have already been analyzed for your team — this will be free. ` +
             "Call analyze_company again with the same candidate_urls and confirm:true to see the results.",
         );
       }
       const quota = await checkQuota(ctx);
       if (newCount > quota.remaining) {
         return text(
-          `${truncationNote}Analyzing all ${candidateUrls.length} candidates needs ${newCount} new searches, but you only have ${quota.remaining} remaining. ` +
+          `Analyzing all ${candidateUrls.length} candidates needs ${newCount} new searches, but you only have ${quota.remaining} remaining. ` +
             "Pick fewer candidates, or call again with confirm:true to analyze as many as your quota allows.",
         );
       }
       return text(
-        `${truncationNote}This will analyze ${candidateUrls.length} candidates (${newCount} new — the rest were already analyzed and are free), ` +
-          `using ${newCount} of your ${quota.remaining} remaining searches. ` +
+        `This will analyze ${candidateUrls.length} candidates (${newCount} new — the rest were already analyzed and are free), ` +
+          `using ${newCount} of your ${quota.remaining} remaining searches. It analyzes one at a time, so this may take a few minutes. ` +
           "Call analyze_company again with the same candidate_urls and confirm:true to proceed.",
       );
     }
@@ -111,7 +115,7 @@ export const analyze_company: ToolHandler<Args> = {
 
     const charged = outcomes.filter((o) => o.charged).length;
     return text(
-      `${truncationNote}${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
+      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
     );
   },
 };
