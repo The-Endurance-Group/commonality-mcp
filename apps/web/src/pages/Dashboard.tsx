@@ -144,6 +144,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
 const everyonePrompts = [
   "What's the best way for me to connect with [prospect LinkedIn URL]?",
   "What's our best way into Acme Corp?",
+  "Add this person to our team: [LinkedIn profile URL].",
   "Find VPs of Sales at fintech companies in New York.",
   "Draft a LinkedIn message and email for reaching out to [prospect].",
   "Help me prep for a call with [prospect].",
