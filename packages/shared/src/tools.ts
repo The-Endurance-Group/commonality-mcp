@@ -47,9 +47,10 @@ export interface ToolHandler<Args = Record<string, unknown>> {
   run(args: Args, ctx: ToolContext): Promise<McpToolResult>;
 }
 
-/** Names of the 11 MCP tools Commonality exposes. */
+/** Names of the 12 MCP tools Commonality exposes. */
 export const TOOL_NAMES = [
   "analyze_prospect",
+  "analyze_company",
   "search_prospects",
   "generate_outreach",
   "call_prep",

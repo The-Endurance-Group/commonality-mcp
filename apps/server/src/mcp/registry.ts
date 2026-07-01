@@ -1,5 +1,6 @@
 import type { McpToolDef, ToolHandler, ToolName } from "@commonality/shared";
 import { analyze_prospect } from "./tools/analyze_prospect.js";
+import { analyze_company } from "./tools/analyze_company.js";
 import { search_prospects } from "./tools/search_prospects.js";
 import { generate_outreach } from "./tools/generate_outreach.js";
 import { call_prep } from "./tools/call_prep.js";
@@ -14,6 +15,7 @@ import { get_usage } from "./tools/get_usage.js";
 // Tool dispatch table. Handlers run the logic; defs are what tools/list returns.
 export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
   analyze_prospect,
+  analyze_company,
   search_prospects,
   generate_outreach,
   call_prep,
@@ -32,6 +34,22 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "analyze_prospect",
     description: "Find warm paths to a prospect. Returns ranked connections from your team.",
     inputSchema: { type: "object", properties: { url: { type: "string", description: "Prospect LinkedIn URL" } }, required: ["url"] },
+    usesQuota: true,
+  },
+  {
+    name: "analyze_company",
+    description:
+      "Find the best way into a company (account-based, not one person). Call with company_url to get their roster; " +
+      "pick candidates by role yourself, then call again with candidate_urls to preview cost, and again with confirm:true to run it.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        company_url: { type: "string", description: "Target company's LinkedIn URL" },
+        candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected from the roster" },
+        confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },
+      },
+      required: ["company_url"],
+    },
     usesQuota: true,
   },
   {
