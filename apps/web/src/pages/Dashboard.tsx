@@ -42,6 +42,8 @@ export function Dashboard() {
 
       <ConnectorCard mcpUrl={mcpUrl} appUrl={appUrl} />
 
+      <ExamplePromptsCard isAdmin={isAdmin} />
+
       <section>
         <div className="mb-3 flex items-center justify-between">
           <h2 className="text-lg font-semibold text-ink">Team roster</h2>
@@ -136,6 +138,69 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         </button>
       </div>
     </section>
+  );
+}
+
+const everyonePrompts = [
+  "What's the best way for me to connect with [prospect LinkedIn URL]?",
+  "What's our best way into Acme Corp?",
+  "Find VPs of Sales at fintech companies in New York.",
+  "Draft a LinkedIn message and email for reaching out to [prospect].",
+  "Help me prep for a call with [prospect].",
+  "Who's my prospect of the day?",
+  "Push [prospect] to HubSpot with our findings.",
+  "Hand this prospect to Sam — they have a stronger connection.",
+  "Add my LinkedIn connections so they count as warm paths.",
+  "Show our team's social capital — top schools, employers, and locations.",
+  "How many searches do I have left this month?",
+];
+
+const adminPrompts = ["Invite jordan@acme.com to our workspace."];
+
+function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
+  return (
+    <section className="rounded-lg border border-gray-100 bg-white p-6">
+      <h2 className="text-lg font-semibold text-ink">Try asking Claude</h2>
+      <p className="mt-1 text-sm text-lavender">
+        Once connected, here's what you can ask — no need to remember exact tool names.
+      </p>
+
+      <ul className="mt-4 space-y-2">
+        {everyonePrompts.map((p) => (
+          <PromptItem key={p} prompt={p} />
+        ))}
+      </ul>
+
+      {isAdmin && (
+        <div className="mt-5 border-t border-gray-100 pt-5">
+          <h3 className="text-sm font-semibold text-ink">Admin only</h3>
+          <ul className="mt-3 space-y-2">
+            {adminPrompts.map((p) => (
+              <PromptItem key={p} prompt={p} />
+            ))}
+          </ul>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function PromptItem({ prompt }: { prompt: string }) {
+  const [copied, setCopied] = useState(false);
+  return (
+    <li className="flex items-center justify-between gap-3 rounded-md bg-gray-50 px-3 py-2">
+      <span className="text-sm text-ink">&ldquo;{prompt}&rdquo;</span>
+      <button
+        className="shrink-0 text-xs font-medium text-brand hover:underline"
+        onClick={() => {
+          navigator.clipboard.writeText(prompt);
+          setCopied(true);
+          setTimeout(() => setCopied(false), 2000);
+        }}
+      >
+        {copied ? "Copied!" : "Copy"}
+      </button>
+    </li>
   );
 }
 
