@@ -39,16 +39,18 @@ export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_company",
     description:
-      "Find the best way into a company (account-based, not one person). Call with company_url to get their roster; " +
-      "pick candidates by role yourself, then call again with candidate_urls to preview cost, and again with confirm:true to run it.",
+      "Find the best way into a company (account-based, not one person). Call with company_name to resolve a URL, " +
+      "or company_url + role to search their people by title; pick candidates, call again with candidate_urls to " +
+      "preview cost, then confirm:true to run it.",
     inputSchema: {
       type: "object",
       properties: {
+        company_name: { type: "string", description: "Target company's name, if you don't have its LinkedIn URL yet" },
         company_url: { type: "string", description: "Target company's LinkedIn URL" },
-        candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected from the roster" },
+        role: { type: "string", description: "Job title/role to search for at that company, e.g. \"VP of Sales\"" },
+        candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
         confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },
       },
-      required: ["company_url"],
     },
     usesQuota: true,
   },

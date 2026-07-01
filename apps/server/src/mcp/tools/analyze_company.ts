@@ -1,46 +1,93 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { checkQuota, incrementUsage, isProspectUnlocked, recordProspectUnlock } from "../../auth/quota.js";
-import { getCompanyEmployees as scrapeCompanyRoster } from "../../services/apify.js";
+import {
+  getCompanyEmployees as scrapeCompanyRoster,
+  searchCompanies,
+  searchProfiles,
+} from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
 interface Args {
   company_url?: string;
+  company_name?: string;
+  role?: string;
   candidate_urls?: string[];
   confirm?: boolean;
 }
 
 const ROSTER_LIMIT = 40;
+const ROLE_SEARCH_LIMIT = 25;
 const MAX_CANDIDATES = 20;
 
-// Account-based "best way into [Company]" — a 3-call flow built on top of the
-// same per-prospect pipeline analyze_prospect uses (Cassidy enrich + match):
-//   1. company_url only            -> scrape + return the roster for the AI to filter by role.
-//   2. + candidate_urls            -> preview how many NEW searches analyzing them would cost.
-//   3. + candidate_urls + confirm  -> run it, charging quota per new candidate, return a ranking.
+// Account-based "best way into [Company]" — a multi-call flow built on top of
+// the same per-prospect pipeline analyze_prospect uses (Cassidy enrich + match):
+//   0. company_name, no company_url  -> resolve the name to a LinkedIn company URL.
+//   1. company_url (+ optional role) -> role given: LinkedIn people-search scoped to
+//      that company + title (precise). No role: fall back to a general roster
+//      scrape. Either way, return candidates for the AI to pick from.
+//   2. + candidate_urls              -> preview how many NEW searches analyzing them would cost.
+//   3. + candidate_urls + confirm    -> run it, charging quota per new candidate, return a ranking.
 // Billing is handled inside run() (per-candidate, dedup'd by URL) rather than
 // the single usesQuota/billingKey-per-call path other tools use, since one
 // call here can cover anywhere from 0 to MAX_CANDIDATES billable units.
 export const analyze_company: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
-    if (!args.company_url) return text("Provide the target company's LinkedIn URL.", true);
+    if (!args.company_url) {
+      if (!args.company_name) return text("Provide the target company's LinkedIn URL or name.", true);
+
+      let companies;
+      try {
+        companies = await searchCompanies(args.company_name);
+      } catch (err) {
+        return text(`Couldn't look up that company: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+      }
+      if (!companies.length) return text(`No company found matching "${args.company_name}".`, true);
+
+      const lines = companies.map((c, i) => `${i + 1}. ${c.name}${c.location ? ` — ${c.location}` : ""}\n   ${c.linkedinUrl}`);
+      return text(
+        `Found ${companies.length} companies matching "${args.company_name}":\n${lines.join("\n")}\n\n` +
+          "Confirm the right one with the user, then call analyze_company again with company_url set to it.",
+      );
+    }
 
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
-      let roster;
-      try {
-        roster = await scrapeCompanyRoster(args.company_url, ROSTER_LIMIT);
-      } catch (err) {
-        return text(`Couldn't load that company's employees: ${err instanceof Error ? err.message : "unknown error"}.`, true);
-      }
-      if (!roster.length) return text("No employees found for that company URL.", true);
-
-      const lines = roster.map((e, i) => `${i + 1}. ${e.name}${e.title ? ` — ${e.title}` : ""}\n   ${e.linkedinUrl}`);
-      return text(
-        `${roster.length} people at this company:\n${lines.join("\n")}\n\n` +
+      if (!args.role) {
+        return text(
           "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\", \"Director of Finance\"), " +
-          `pick the matching candidates from this list yourself (up to ${MAX_CANDIDATES} at a time — if more match, ` +
-          "narrow the role/seniority further), then call analyze_company again with company_url + candidate_urls " +
-          "(their LinkedIn URLs) to preview the cost before analyzing.",
+            "then call analyze_company again with company_url + role to search for matching people at that company.",
+        );
+      }
+
+      let candidates: { name: string; title: string; linkedinUrl: string }[];
+      try {
+        candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: [args.role] }, ROLE_SEARCH_LIMIT);
+      } catch (err) {
+        return text(`Couldn't search that company's people: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+      }
+
+      if (!candidates.length) {
+        // Fall back to a general roster pull so the AI still has something to work with.
+        let roster;
+        try {
+          roster = await scrapeCompanyRoster(args.company_url, ROSTER_LIMIT);
+        } catch (err) {
+          return text(`Couldn't load that company's employees either: ${err instanceof Error ? err.message : "unknown error"}.`, true);
+        }
+        if (!roster.length) return text("No employees found for that company URL.", true);
+        const lines = roster.map((e, i) => `${i + 1}. ${e.name}${e.title ? ` — ${e.title}` : ""}\n   ${e.linkedinUrl}`);
+        return text(
+          `No exact matches for "${args.role}" — here's the general roster instead (${roster.length} people):\n${lines.join("\n")}\n\n` +
+            `Pick likely matches yourself (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
+            "company_url + candidate_urls to preview the cost before analyzing.",
+        );
+      }
+
+      const lines = candidates.map((c, i) => `${i + 1}. ${c.name} — ${c.title}\n   ${c.linkedinUrl}`);
+      return text(
+        `${candidates.length} people matching "${args.role}" at this company:\n${lines.join("\n")}\n\n` +
+          `Confirm with the user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call ` +
+          "analyze_company again with company_url + candidate_urls to preview the cost before analyzing.",
       );
     }
 
