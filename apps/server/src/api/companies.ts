@@ -18,12 +18,10 @@ companiesRouter.get("/me", async (req, res) => {
     domain: company.domain,
     context: company.context,
     website: company.website,
-    hasHubspot: !!company.hubspot_api_key,
-    hasSalesforce: !!company.salesforce_client_id,
   });
 });
 
-// PATCH /api/companies/me — admins update context/website/domain + CRM creds.
+// PATCH /api/companies/me — admins update context/website/domain.
 companiesRouter.patch("/me", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {
@@ -31,10 +29,7 @@ companiesRouter.patch("/me", async (req, res) => {
     return;
   }
   const b = (req.body ?? {}) as Record<string, unknown>;
-  const allowed = [
-    "name", "domain", "context", "website", "linkedin_company_url",
-    "hubspot_api_key", "salesforce_instance_url", "salesforce_client_id", "salesforce_client_secret",
-  ];
+  const allowed = ["name", "domain", "context", "website", "linkedin_company_url"];
   const update: Record<string, unknown> = {};
   for (const k of allowed) if (k in b) update[k] = b[k];
   if (Object.keys(update).length === 0) {

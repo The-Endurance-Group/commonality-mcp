@@ -103,8 +103,8 @@ export const TOOL_DEFS: McpToolDef[] = [
   },
   {
     name: "push_to_crm",
-    description: "Push a prospect and the warm-path findings to HubSpot or Salesforce.",
-    inputSchema: { type: "object", properties: { url: { type: "string" }, target: { type: "string", enum: ["hubspot", "salesforce"] } }, required: ["url"] },
+    description: "Explains how to log a prospect's findings to HubSpot or Salesforce via Claude's native CRM connectors.",
+    inputSchema: { type: "object", properties: {} },
   },
   {
     name: "send_to_teammate",

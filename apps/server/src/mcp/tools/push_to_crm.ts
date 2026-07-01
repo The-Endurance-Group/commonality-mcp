@@ -1,61 +1,16 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
-import { getCompany } from "../../db/queries.js";
-import { pushToHubspot } from "../../services/hubspot.js";
-import { pushToSalesforce } from "../../services/salesforce.js";
 import { text } from "./_result.js";
-import { analyzeProspectUrl } from "./_prospect.js";
 
-interface Args { url: string; target?: "hubspot" | "salesforce" }
+interface Args { url?: string; target?: "hubspot" | "salesforce" }
 
-// Push a prospect (with the warm-path findings) to the workspace's configured CRM.
+// Commonality doesn't integrate directly with any CRM. Point the user at
+// Claude's native HubSpot/Salesforce connectors so the AI can log findings
+// there itself.
 export const push_to_crm: ToolHandler<Args> = {
-  async run(args: Args, ctx: ToolContext) {
-    if (!args.url) return text("Please provide the prospect's LinkedIn URL.", true);
-    const company = await getCompany(ctx.company_id);
-    if (!company) return text("Workspace not found.", true);
-
-    const hasHubspot = !!company.hubspot_api_key;
-    const hasSalesforce = !!(company.salesforce_instance_url && company.salesforce_client_id && company.salesforce_client_secret);
-    const target = args.target ?? (hasHubspot ? "hubspot" : hasSalesforce ? "salesforce" : undefined);
-    if (!target) {
-      return text(
-        "No CRM is connected to Commonality. Easiest path: connect HubSpot or Salesforce as a native Claude connector, then ask me to analyze the prospect here and log the findings there.",
-        true,
-      );
-    }
-
-    const { enriched, results } = await analyzeProspectUrl(args.url, ctx);
-    const top = results[0];
-    const prospect = {
-      name: enriched.name,
-      email: enriched.email,
-      title: enriched.title || undefined,
-      company: enriched.company || undefined,
-      linkedinUrl: args.url,
-    };
-    const pushOpts = {
-      prospect,
-      employeeName: top?.employee.name ?? "your team",
-      commonalities: top?.commonalities ?? [],
-      strengthScore: top?.strengthScore ?? 0,
-    };
-
-    try {
-      if (target === "hubspot") {
-        if (!hasHubspot) return text("HubSpot isn't connected for this workspace.", true);
-        const r = await pushToHubspot(company.hubspot_api_key!, pushOpts);
-        return text(`${r.created ? "Created" : "Updated"} ${enriched.name} in HubSpot (contact ${r.contactId}) with Commonality findings.`);
-      }
-      if (!hasSalesforce) return text("Salesforce isn't connected for this workspace.", true);
-      const r = await pushToSalesforce(
-        company.salesforce_instance_url!,
-        company.salesforce_client_id!,
-        company.salesforce_client_secret!,
-        pushOpts,
-      );
-      return text(`${r.created ? "Created" : "Updated"} ${enriched.name} in Salesforce (lead ${r.leadId}) with Commonality findings.`);
-    } catch {
-      return text("CRM push failed. Please try again.", true);
-    }
+  async run(_args: Args, _ctx: ToolContext) {
+    return text(
+      "Commonality doesn't push to CRMs directly. Connect HubSpot or Salesforce as a native Claude connector " +
+        "(Settings → Connectors), then ask me to analyze the prospect here and log the findings there.",
+    );
   },
 };

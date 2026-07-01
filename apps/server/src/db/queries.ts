@@ -14,10 +14,6 @@ export interface CompanyRecord {
   context: string | null;
   website: string | null;
   linkedin_company_url: string | null;
-  hubspot_api_key: string | null;
-  salesforce_instance_url: string | null;
-  salesforce_client_id: string | null;
-  salesforce_client_secret: string | null;
   icp_profile: unknown;
 }
 
@@ -56,9 +52,7 @@ export function mapEmployee(row: EmployeeRow, enriched?: EnrichmentData): Employ
 export async function getCompany(companyId: string): Promise<CompanyRecord | null> {
   const { data } = await db()
     .from("companies")
-    .select(
-      "id, name, plan, domain, context, website, linkedin_company_url, hubspot_api_key, salesforce_instance_url, salesforce_client_id, salesforce_client_secret, icp_profile",
-    )
+    .select("id, name, plan, domain, context, website, linkedin_company_url, icp_profile")
     .eq("id", companyId)
     .maybeSingle();
   return (data as CompanyRecord | null) ?? null;
