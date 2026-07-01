@@ -104,8 +104,23 @@ export async function importRoster(
     available = input.urls.map((u) => ({ name: u, linkedin_url: u })); // name backfilled on enrichment
   }
 
-  const trimmedByLimit = available.length > status.remaining;
-  const people = available.slice(0, status.remaining);
+  // Exclude people already on the roster before checking against the plan
+  // limit — otherwise re-importing a company with mostly-existing employees
+  // looks "trimmed by limit" even though every new person fit.
+  const { data: existingRows } = await db()
+    .from("employees")
+    .select("linkedin_url")
+    .eq("company_id", companyId);
+  const existingUrls = new Set(
+    ((existingRows as { linkedin_url: string | null }[] | null) ?? [])
+      .map((r) => r.linkedin_url)
+      .filter((u): u is string => !!u)
+      .map(normUrl),
+  );
+  const newAvailable = available.filter((p) => !existingUrls.has(normUrl(p.linkedin_url)));
+
+  const trimmedByLimit = newAvailable.length > status.remaining;
+  const people = newAvailable.slice(0, status.remaining);
 
   const imported = await upsertRoster(companyId, people);
   enrichRosterInBackground(companyId);
