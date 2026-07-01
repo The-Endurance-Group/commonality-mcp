@@ -26,9 +26,10 @@ export function useSessionBootstrap(): void {
         const data = (await res.json().catch(() => ({}))) as {
           access_token?: string;
           needsOnboarding?: boolean;
+          joined_existing_company?: { companyName: string; adminEmail: string };
         };
         if (cancelled) return;
-        if (data.access_token) setToken(data.access_token);
+        if (data.access_token) setToken(data.access_token, data.joined_existing_company);
         else setNeedsOnboarding();
       } catch {
         if (!cancelled) setNeedsOnboarding();

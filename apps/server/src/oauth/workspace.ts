@@ -17,6 +17,17 @@ interface UserRow {
   role: "admin" | "member";
 }
 
+/** Shown once, right after a user is auto-joined to a workspace they didn't create. */
+export interface JoinedExistingCompany {
+  companyName: string;
+  adminEmail: string;
+}
+
+export interface WorkspaceResolution {
+  claims: SignableClaims;
+  joinedExistingCompany?: JoinedExistingCompany;
+}
+
 function toClaims(user: UserRow, company: CompanyRow, email: string): SignableClaims {
   return {
     sub: user.id,
@@ -28,11 +39,27 @@ function toClaims(user: UserRow, company: CompanyRow, email: string): SignableCl
   };
 }
 
-export async function resolveWorkspaceForEmail(rawEmail: string): Promise<SignableClaims> {
+async function describeJoinedCompany(companyId: string): Promise<JoinedExistingCompany> {
+  const supa = db();
+  const [{ data: company }, { data: admin }] = await Promise.all([
+    supa.from("companies").select("name").eq("id", companyId).maybeSingle<{ name: string }>(),
+    supa
+      .from("users")
+      .select("email")
+      .eq("company_id", companyId)
+      .eq("role", "admin")
+      .order("created_at", { ascending: true })
+      .limit(1)
+      .maybeSingle<{ email: string }>(),
+  ]);
+  return { companyName: company?.name ?? "your company", adminEmail: admin?.email ?? "your admin" };
+}
+
+export async function resolveWorkspaceForEmail(rawEmail: string): Promise<WorkspaceResolution> {
   const supa = db();
   const email = rawEmail.toLowerCase().trim();
 
-  // 1. Already a member of a workspace.
+  // 1. Already a member of a workspace - normal returning login, no notice.
   const { data: existingUser } = await supa
     .from("users")
     .select("id, company_id, role")
@@ -40,7 +67,7 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Signab
     .maybeSingle<UserRow>();
   if (existingUser) {
     const company = await getCompany(existingUser.company_id);
-    return toClaims(existingUser, company, email);
+    return { claims: toClaims(existingUser, company, email) };
   }
 
   // 2. Has a pending, unexpired invite - accept it and join that workspace.
@@ -57,7 +84,10 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Signab
     const user = await createUser(invite.company_id, email, "member");
     await supa.from("invites").update({ accepted: true }).eq("id", invite.id);
     const company = await getCompany(invite.company_id);
-    return toClaims(user, company, email);
+    return {
+      claims: toClaims(user, company, email),
+      joinedExistingCompany: await describeJoinedCompany(company.id),
+    };
   }
 
   // 3. Email domain matches a company that allows domain auto-join.
@@ -70,7 +100,10 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Signab
       .maybeSingle<CompanyRow>();
     if (company) {
       const user = await createUser(company.id, email, "member");
-      return toClaims(user, company, email);
+      return {
+        claims: toClaims(user, company, email),
+        joinedExistingCompany: await describeJoinedCompany(company.id),
+      };
     }
   }
 

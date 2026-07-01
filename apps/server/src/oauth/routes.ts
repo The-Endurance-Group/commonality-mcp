@@ -129,7 +129,7 @@ oauthRouter.get("/callback", async (req, res) => {
   try {
     const { accessToken } = await exchangeClerkCode(code);
     const user = await getClerkUser(accessToken);
-    const claims = await resolveWorkspaceForEmail(user.email);
+    const { claims } = await resolveWorkspaceForEmail(user.email);
 
     const codeToken = signTxn({
       purpose: "oauth_code",

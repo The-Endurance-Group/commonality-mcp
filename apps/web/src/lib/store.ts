@@ -20,13 +20,20 @@ function decode(token: string): Claims | null {
   }
 }
 
+export interface JoinNotice {
+  companyName: string;
+  adminEmail: string;
+}
+
 interface AuthState {
   token: string | null;
   claims: Claims | null;
   needsOnboarding: boolean;
   ready: boolean; // session exchange has completed (success or onboarding)
-  setToken: (token: string) => void;
+  joinNotice: JoinNotice | null; // shown once, right after auto-joining an existing workspace
+  setToken: (token: string, joinNotice?: JoinNotice) => void;
   setNeedsOnboarding: () => void;
+  clearJoinNotice: () => void;
   reset: () => void;
 }
 
@@ -35,7 +42,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   claims: null,
   needsOnboarding: false,
   ready: false,
-  setToken: (token) => set({ token, claims: decode(token), needsOnboarding: false, ready: true }),
+  joinNotice: null,
+  setToken: (token, joinNotice) =>
+    set({ token, claims: decode(token), needsOnboarding: false, ready: true, joinNotice: joinNotice ?? null }),
   setNeedsOnboarding: () => set({ token: null, claims: null, needsOnboarding: true, ready: true }),
-  reset: () => set({ token: null, claims: null, needsOnboarding: false, ready: false }),
+  clearJoinNotice: () => set({ joinNotice: null }),
+  reset: () => set({ token: null, claims: null, needsOnboarding: false, ready: false, joinNotice: null }),
 }));

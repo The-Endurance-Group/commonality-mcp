@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
 function CheckIcon({ className = "text-brand" }: { className?: string }) {
@@ -425,8 +426,9 @@ const shortQuotes = [
 export function Marketing() {
   // Once the session has resolved, send signed-in users straight to their
   // workspace - first-timers to onboarding, returning users to the dashboard.
-  const { ready, token, needsOnboarding } = useAuthStore();
+  const { ready, token, needsOnboarding, joinNotice } = useAuthStore();
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
+  if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
 
   return (

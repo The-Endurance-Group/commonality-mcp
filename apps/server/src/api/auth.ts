@@ -28,9 +28,14 @@ authRouter.post("/token", async (req, res) => {
     return;
   }
   try {
-    const claims = await resolveWorkspaceForEmail(email);
+    const { claims, joinedExistingCompany } = await resolveWorkspaceForEmail(email);
     const { token, expiresIn } = signAccessToken(claims);
-    res.json({ access_token: token, expires_in: expiresIn, token_type: "Bearer" });
+    res.json({
+      access_token: token,
+      expires_in: expiresIn,
+      token_type: "Bearer",
+      ...(joinedExistingCompany ? { joined_existing_company: joinedExistingCompany } : {}),
+    });
   } catch (err) {
     if (err instanceof WorkspaceResolutionError) {
       res.json({ needsOnboarding: true, email });
