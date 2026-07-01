@@ -1,6 +1,7 @@
+import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
@@ -177,6 +178,8 @@ export function Dashboard() {
           </table>
         </div>
       </CollapsibleCard>
+
+      <AccountCard />
     </div>
   );
 }
@@ -325,6 +328,8 @@ function ConnectionsCard() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [added, setAdded] = useState<{ name: string; saved: number }[]>([]);
+  const [deleting, setDeleting] = useState(false);
+  const [deleteNotice, setDeleteNotice] = useState<string | null>(null);
 
   async function upload() {
     if (!employeeId || !file) return;
@@ -347,10 +352,28 @@ function ConnectionsCard() {
     }
   }
 
+  async function deleteConnections() {
+    if (!employeeId) return;
+    setDeleting(true);
+    setError(null);
+    setDeleteNotice(null);
+    try {
+      const empName = employees.find((e) => e.id === employeeId)?.name ?? "That teammate";
+      const { removed } = await apiFetch<{ removed: number }>(`/api/employees/${employeeId}/connections`, {
+        method: "DELETE",
+      });
+      setDeleteNotice(`Removed ${removed} connection${removed === 1 ? "" : "s"} for ${empName}.`);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't delete connections");
+    } finally {
+      setDeleting(false);
+    }
+  }
+
   return (
     <CollapsibleCard
       title="Add your LinkedIn connections"
-      subtitle="1st-degree LinkedIn connections are the strongest warm-path signal Commonality has - add yours or a teammate's here anytime."
+      subtitle="1st-degree LinkedIn connections are the strongest warm-path signal Commonality has - add or delete yours or a teammate's here at any time."
     >
       <div>
         <p className="text-sm font-medium text-ink">How to export them from LinkedIn:</p>
@@ -397,15 +420,22 @@ function ConnectionsCard() {
       </div>
 
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+      {deleteNotice && <p className="mt-3 text-sm text-brand">{deleteNotice}</p>}
 
       <div className="mt-4 rounded-lg bg-tint-accent p-4 text-sm text-ink">
         Some people aren't comfortable sharing this, and that's completely okay - it's optional and
-        not required to use Commonality.
+        not required to use Commonality. You can delete a teammate's uploaded connections at any
+        time using the picker above.
       </div>
 
-      <button className="btn-primary mt-4" disabled={busy || !employeeId || !file} onClick={upload}>
-        {busy ? "Saving…" : "Upload"}
-      </button>
+      <div className="mt-4 flex flex-wrap gap-3">
+        <button className="btn-primary" disabled={busy || !employeeId || !file} onClick={upload}>
+          {busy ? "Saving…" : "Upload"}
+        </button>
+        <button className="btn-secondary" disabled={deleting || !employeeId} onClick={deleteConnections}>
+          {deleting ? "Deleting…" : "Delete their connections"}
+        </button>
+      </div>
     </CollapsibleCard>
   );
 }
@@ -511,6 +541,94 @@ function PromptItem({ prompt }: { prompt: string }) {
         {copied ? "Copied!" : "Copy"}
       </button>
     </li>
+  );
+}
+
+function AccountCard() {
+  const { signOut } = useClerk();
+  const navigate = useNavigate();
+  const qc = useQueryClient();
+  const roster = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => apiFetch<{ employees: RosterEmployee[] }>("/api/employees"),
+  });
+  const employees = roster.data?.employees ?? [];
+
+  const [employeeId, setEmployeeId] = useState("");
+  const [leaveNotice, setLeaveNotice] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const leaveTeam = useMutation({
+    mutationFn: (id: string) => apiFetch("/api/employees/leave", { method: "POST", body: JSON.stringify({ employeeId: id }) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["employees"] });
+      setLeaveNotice("You've been removed from the team roster.");
+      setEmployeeId("");
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : "Couldn't remove you from the roster"),
+  });
+
+  const deleteAccount = useMutation({
+    mutationFn: () => apiFetch("/api/users/me", { method: "DELETE" }),
+    onSuccess: async () => {
+      await signOut();
+      navigate("/");
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : "Couldn't delete your account"),
+  });
+
+  function confirmLeaveTeam() {
+    if (!employeeId) return;
+    const name = employees.find((e) => e.id === employeeId)?.name ?? "you";
+    if (!window.confirm(`Remove ${name} from the team roster? This can't be undone.`)) return;
+    setError(null);
+    leaveTeam.mutate(employeeId);
+  }
+
+  function confirmDeleteAccount() {
+    if (!window.confirm("Delete your Commonality account? This can't be undone and you'll be signed out.")) return;
+    setError(null);
+    deleteAccount.mutate();
+  }
+
+  return (
+    <CollapsibleCard title="Your account" subtitle="Manage your own membership - these actions only affect you.">
+      <div>
+        <h3 className="text-sm font-semibold text-ink">Leave the team roster</h3>
+        <p className="mt-1 text-sm text-lavender">
+          Remove yourself from your company's roster at any time. Pick your name below.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <select className="input flex-1" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+            <option value="">Select your name…</option>
+            {employees.map((e) => (
+              <option key={e.id} value={e.id}>{e.name}</option>
+            ))}
+          </select>
+          <button className="btn-secondary" disabled={leaveTeam.isPending || !employeeId} onClick={confirmLeaveTeam}>
+            {leaveTeam.isPending ? "Removing…" : "Remove me"}
+          </button>
+        </div>
+        {leaveNotice && <p className="mt-2 text-sm text-brand">{leaveNotice}</p>}
+      </div>
+
+      <div className="mt-5 border-t border-gray-100 pt-5">
+        <h3 className="text-sm font-semibold text-ink">Delete your account</h3>
+        <p className="mt-1 text-sm text-lavender">
+          Permanently deletes your Commonality login. This doesn't remove you from the team
+          roster - do that above first if you'd like.
+        </p>
+        <button
+          className="btn-secondary mt-3 text-red-600"
+          disabled={deleteAccount.isPending}
+          onClick={confirmDeleteAccount}
+        >
+          {deleteAccount.isPending ? "Deleting…" : "Delete my account"}
+        </button>
+      </div>
+
+      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+    </CollapsibleCard>
   );
 }
 

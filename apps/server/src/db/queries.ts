@@ -132,6 +132,17 @@ export async function insertLinkedinConnections(
   return rows.length;
 }
 
+/** Delete every uploaded LinkedIn connection for one employee. Returns the count removed. */
+export async function deleteLinkedinConnections(companyId: string, employeeId: string): Promise<number> {
+  const { error, count } = await db()
+    .from("linkedin_connections")
+    .delete({ count: "exact" })
+    .eq("company_id", companyId)
+    .eq("employee_id", employeeId);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}
+
 /** Find a teammate in the same workspace by email. */
 export async function getTeammateByEmail(
   companyId: string,

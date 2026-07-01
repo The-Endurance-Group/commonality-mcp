@@ -1,6 +1,6 @@
 import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
-import { insertLinkedinConnections } from "../db/queries.js";
+import { deleteLinkedinConnections, insertLinkedinConnections } from "../db/queries.js";
 import {
   enrichRosterInBackground,
   importRoster,
@@ -84,6 +84,26 @@ employeesRouter.delete("/:id", async (req, res) => {
   res.json({ ok: true });
 });
 
+// POST /api/employees/leave - self-service: any signed-in member removes
+// themselves from the roster. There's no stored link between a login and a
+// roster row, so the caller identifies which roster entry is theirs (the web
+// app has them pick their own name) - this intentionally mirrors the same
+// trust model as the connections upload/delete routes below.
+employeesRouter.post("/leave", async (req, res) => {
+  const user = req.user!;
+  const { employeeId } = (req.body ?? {}) as { employeeId?: string };
+  if (!employeeId) {
+    res.status(400).json({ error: "provide employeeId" });
+    return;
+  }
+  const removed = await removeFromRoster(user.company_id, employeeId);
+  if (!removed) {
+    res.status(404).json({ error: "team member not found in your workspace" });
+    return;
+  }
+  res.json({ ok: true });
+});
+
 // POST /api/employees/re-enrich - admins re-run enrichment for the roster.
 employeesRouter.post("/re-enrich", async (req, res) => {
   const user = req.user!;
@@ -130,5 +150,27 @@ employeesRouter.post("/:id/connections", async (req, res) => {
     res.json({ saved });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "failed to save connections" });
+  }
+});
+
+// DELETE /api/employees/:id/connections - remove a teammate's uploaded
+// connections at any time. Same open trust model as the upload route above.
+employeesRouter.delete("/:id/connections", async (req, res) => {
+  const user = req.user!;
+  const { data: employee } = await db()
+    .from("employees")
+    .select("id")
+    .eq("company_id", user.company_id)
+    .eq("id", req.params.id)
+    .maybeSingle<{ id: string }>();
+  if (!employee) {
+    res.status(404).json({ error: "team member not found in your workspace" });
+    return;
+  }
+  try {
+    const removed = await deleteLinkedinConnections(user.company_id, employee.id);
+    res.json({ removed });
+  } catch (err) {
+    res.status(500).json({ error: err instanceof Error ? err.message : "failed to delete connections" });
   }
 });

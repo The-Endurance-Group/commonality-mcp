@@ -5,6 +5,7 @@ import { companiesRouter } from "./companies.js";
 import { employeesRouter } from "./employees.js";
 import { invitesRouter } from "./invites.js";
 import { usageRouter } from "./usage.js";
+import { usersRouter } from "./users.js";
 
 // REST API consumed by the React web app. All routes require a valid
 // Commonality JWT. (The Stripe webhook is mounted separately in index.ts with a
@@ -18,6 +19,7 @@ apiRouter.use("/companies", companiesRouter);
 apiRouter.use("/employees", employeesRouter);
 apiRouter.use("/invites", invitesRouter);
 apiRouter.use("/billing", billingRouter);
+apiRouter.use("/users", usersRouter);
 
 apiRouter.all("*", (_req, res) => {
   res.status(404).json({ error: "not_found" });
