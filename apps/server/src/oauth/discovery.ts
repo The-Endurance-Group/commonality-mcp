@@ -2,7 +2,7 @@ import { Router, type Router as RouterType } from "express";
 import { config } from "../config.js";
 
 // OAuth 2.1 discovery. Commonality is the authorization server the MCP client
-// (Claude) talks to — it issues the access token the /mcp endpoint accepts.
+// (Claude) talks to - it issues the access token the /mcp endpoint accepts.
 // User authentication is delegated to Clerk behind /oauth/authorize.
 export const discoveryRouter: RouterType = Router();
 

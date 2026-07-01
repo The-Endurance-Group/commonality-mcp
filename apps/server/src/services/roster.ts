@@ -8,7 +8,7 @@ import { getEnrichedProfile } from "./enrichmentCache.js";
 // denormalized columns and stamping enriched_at. The web onboarding polls
 // rosterStatus() for progress.
 
-// Team member cap by plan — matches the numbers advertised on the pricing page.
+// Team member cap by plan - matches the numbers advertised on the pricing page.
 export const TEAM_LIMITS = { free: 25, pro: 150 } as const;
 
 export class TeamLimitError extends Error {}
@@ -105,7 +105,7 @@ export async function importRoster(
   }
 
   // Exclude people already on the roster before checking against the plan
-  // limit — otherwise re-importing a company with mostly-existing employees
+  // limit - otherwise re-importing a company with mostly-existing employees
   // looks "trimmed by limit" even though every new person fit.
   const { data: existingRows } = await db()
     .from("employees")

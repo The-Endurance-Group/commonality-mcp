@@ -1,5 +1,5 @@
 // MCP tool type definitions shared between server and web.
-// Keep descriptions short — every word costs tokens on every Claude message.
+// Keep descriptions short - every word costs tokens on every Claude message.
 
 export interface JsonSchema {
   type: string;
@@ -16,7 +16,7 @@ export interface McpToolDef {
   usesQuota?: boolean;
 }
 
-/** Authenticated context passed to every tool's run() — derived from the JWT. */
+/** Authenticated context passed to every tool's run() - derived from the JWT. */
 export interface ToolContext {
   company_id: string;
   user_id: string;

@@ -10,7 +10,7 @@ const COMPANY_EMPLOYEES_ACTOR = "harvestapi/linkedin-company-employees";
 const PROFILE_SEARCH_ACTOR = "harvestapi/linkedin-profile-search";
 
 // waitSecs is passed to the Apify SDK and controls how long to wait for a run to FINISH after it starts.
-// It does NOT bound how long the SDK spends trying to submit/start the run — that can hang indefinitely.
+// It does NOT bound how long the SDK spends trying to submit/start the run - that can hang indefinitely.
 // withTimeout() wraps the entire call with a hard wall-clock limit.
 const SEARCH_WAIT_SECS = 8;
 const EMPLOYEES_WAIT_SECS = 55;
@@ -30,7 +30,7 @@ export function apifyEnabled(): boolean {
 function getClient(): ApifyClient {
   const token = apifyToken();
   if (!token) throw new Error("APIFY_API_KEY is not configured");
-  // Create a fresh client per call — reusing a singleton risks stale HTTP keep-alive
+  // Create a fresh client per call - reusing a singleton risks stale HTTP keep-alive
   // connections that hang silently until OS TCP timeout (~75s), far exceeding our 9s limit.
   return new ApifyClient({ token });
 }
@@ -154,7 +154,7 @@ export interface ProfileSearchFilters {
   pastCompanies?: string[];
   pastJobTitles?: string[];
   schools?: string[];
-  companyHeadcount?: string[]; // human-readable LinkedIn buckets, e.g. "51-200", "10001+" — mapped to the actor's letter codes in runProfileSearch()
+  companyHeadcount?: string[]; // human-readable LinkedIn buckets, e.g. "51-200", "10001+" - mapped to the actor's letter codes in runProfileSearch()
   companyHeadquarterLocations?: string[];
   seniorityLevelIds?: string[]; // LinkedIn seniority level IDs, e.g. "120" for "Senior"
   functionIds?: string[]; // LinkedIn job function IDs, e.g. "8" for "Engineering"
@@ -172,7 +172,7 @@ const ADVANCED_FILTER_KEYS: (keyof ProfileSearchFilters)[] = [
 // The actor's input schema rejects human-readable headcount ranges and instead expects
 // LinkedIn's standard company-size bucket letter codes. Confirmed from a live Apify
 // validation error: "Field input.companyHeadcount.0 must be equal to one of the allowed
-// values: A".."I" — these map 1:1 to LinkedIn's own 9 standard headcount facets.
+// values: A".."I" - these map 1:1 to LinkedIn's own 9 standard headcount facets.
 const COMPANY_HEADCOUNT_CODES: Record<string, string> = {
   "self-employed": "A",
   "1-10": "B",
@@ -202,7 +202,7 @@ function isLikelyInputValidationError(err: unknown): boolean {
   return /input schema|is not allowed|should (be|match)|invalid input|not a valid/i.test(e?.message || "");
 }
 
-// Stashed for admin debugging — the raw shape of the most recent profile-search
+// Stashed for admin debugging - the raw shape of the most recent profile-search
 // result, so field-mapping issues (e.g. title/company not populating) can be
 // diagnosed without direct Apify dataset access.
 let lastProfileSearchRawSample: unknown;
@@ -214,7 +214,7 @@ export function getLastProfileSearchRawSample(): unknown {
 // Direct LinkedIn people-search: returns real, currently-employed profiles matching
 // LinkedIn's own job-title/location/company filters (no AI guessing involved).
 // profileScraperMode "Short" returns basic profile fields incl. linkedinUrl with no
-// per-profile scraping cost ($0.10/search page of up to 25 results) — the actor
+// per-profile scraping cost ($0.10/search page of up to 25 results) - the actor
 // defaults to "Full" (which scrapes each profile, $0.004/profile extra).
 export async function searchProfiles(filters: ProfileSearchFilters, limit = 25): Promise<ApifyProfile[]> {
   try {
@@ -239,7 +239,7 @@ async function runProfileSearch(filters: ProfileSearchFilters, limit: number): P
   if (actorInput.companyHeadcount?.length) {
     const mapped = mapCompanyHeadcount(actorInput.companyHeadcount);
     if (mapped.length) actorInput.companyHeadcount = mapped;
-    else delete actorInput.companyHeadcount; // none of the values matched a known bucket — omit rather than send invalid codes
+    else delete actorInput.companyHeadcount; // none of the values matched a known bucket - omit rather than send invalid codes
   }
   const items = await runActor(
     PROFILE_SEARCH_ACTOR,

@@ -55,7 +55,7 @@ async function handleToolCall(
   }
 
   // Billing: a quota tool may expose a per-call key (e.g. a prospect URL). If
-  // this company already unlocked that key, the call is free — no quota check,
+  // this company already unlocked that key, the call is free - no quota check,
   // no charge. Otherwise gate on quota; at limit returns a friendly message.
   const billingKey = handler.usesQuota ? handler.billingKey?.(args) ?? null : null;
   let alreadyUnlocked = false;
@@ -108,7 +108,7 @@ mcpRouter.post("/", requireAuth, async (req, res) => {
       res.json(rpcResult(id, { protocolVersion: PROTOCOL_VERSION, capabilities: { tools: {} }, serverInfo: SERVER_INFO }));
       return;
     case "notifications/initialized":
-      res.status(204).end(); // notification — no response body
+      res.status(204).end(); // notification - no response body
       return;
     case "ping":
       res.json(rpcResult(id, {}));

@@ -6,7 +6,7 @@ import { parseConnectionsCsv } from "../services/linkedinCsv.js";
 
 export const employeesRouter: RouterType = Router();
 
-// GET /api/employees — the workspace roster.
+// GET /api/employees - the workspace roster.
 employeesRouter.get("/", async (req, res) => {
   const { data, error } = await db()
     .from("employees")
@@ -20,7 +20,7 @@ employeesRouter.get("/", async (req, res) => {
   res.json({ employees: data ?? [] });
 });
 
-// POST /api/employees/import — admins import via company URL or profile URLs.
+// POST /api/employees/import - admins import via company URL or profile URLs.
 employeesRouter.post("/import", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {
@@ -46,12 +46,12 @@ employeesRouter.post("/import", async (req, res) => {
   }
 });
 
-// GET /api/employees/enrichment-status — onboarding progress poll.
+// GET /api/employees/enrichment-status - onboarding progress poll.
 employeesRouter.get("/enrichment-status", async (req, res) => {
   res.json(await rosterStatus(req.user!.company_id));
 });
 
-// POST /api/employees/re-enrich — admins re-run enrichment for the roster.
+// POST /api/employees/re-enrich - admins re-run enrichment for the roster.
 employeesRouter.post("/re-enrich", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {
@@ -63,7 +63,7 @@ employeesRouter.post("/re-enrich", async (req, res) => {
   res.json({ ok: true });
 });
 
-// POST /api/employees/:id/connections — upload a teammate's exported
+// POST /api/employees/:id/connections - upload a teammate's exported
 // Connections.csv. Any signed-in workspace member can do this for
 // themselves or a teammate; it's optional and only strengthens 1st-degree
 // warm-path matching.
@@ -88,7 +88,7 @@ employeesRouter.post("/:id/connections", async (req, res) => {
 
   const connections = parseConnectionsCsv(csv);
   if (!connections.length) {
-    res.status(400).json({ error: "couldn't find any connections in that file — is it LinkedIn's Connections.csv?" });
+    res.status(400).json({ error: "couldn't find any connections in that file - is it LinkedIn's Connections.csv?" });
     return;
   }
 

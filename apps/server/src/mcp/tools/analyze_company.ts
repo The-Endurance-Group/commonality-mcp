@@ -17,14 +17,14 @@ interface Args {
 const ROLE_SEARCH_LIMIT = 25;
 const MAX_CANDIDATES = 20;
 
-// Account-based "best way into [Company]" — a multi-call flow built on top of
+// Account-based "best way into [Company]" - a multi-call flow built on top of
 // the same per-prospect pipeline analyze_prospect uses (Cassidy enrich + match):
 //   0. company_name, no company_url  -> resolve the name to a LinkedIn company URL
 //      (or the user can paste one directly if none of the matches are right).
 //   1. company_url, no role          -> ask the user for a role, then search.
 //      company_url + role            -> LinkedIn people-search scoped to that
 //      company + title. Zero results: try one reworded/broader variation
-//      (role_retry:true) before asking the user to revise their filters —
+//      (role_retry:true) before asking the user to revise their filters -
 //      never silently falls back to an unfiltered roster.
 //   2. + candidate_urls              -> preview how many NEW searches analyzing them would cost.
 //   3. + candidate_urls + confirm    -> run it, charging quota per new candidate, return a ranking.
@@ -44,7 +44,7 @@ export const analyze_company: ToolHandler<Args> = {
       }
       if (!companies.length) return text(`No company found matching "${args.company_name}".`, true);
 
-      const lines = companies.map((c, i) => `${i + 1}. ${c.name}${c.location ? ` — ${c.location}` : ""}\n   ${c.linkedinUrl}`);
+      const lines = companies.map((c, i) => `${i + 1}. ${c.name}${c.location ? ` - ${c.location}` : ""}\n   ${c.linkedinUrl}`);
       return text(
         `Found ${companies.length} companies matching "${args.company_name}":\n${lines.join("\n")}\n\n` +
           "Confirm the right one with the user, then call analyze_company again with company_url set to it. " +
@@ -56,7 +56,7 @@ export const analyze_company: ToolHandler<Args> = {
     if (!/linkedin\.com\/company\//i.test(args.company_url)) {
       return text(
         `"${args.company_url}" doesn't look like a LinkedIn company page URL (should contain linkedin.com/company/...). ` +
-          "Don't guess one — call analyze_company with company_name instead to resolve the real URL first.",
+          "Don't guess one - call analyze_company with company_name instead to resolve the real URL first.",
         true,
       );
     }
@@ -65,7 +65,7 @@ export const analyze_company: ToolHandler<Args> = {
       if (!args.role) {
         return text(
           "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\", \"Director of Finance\"). " +
-            "Turn their answer into a specific job-title filter value — this gets passed directly to a LinkedIn " +
+            "Turn their answer into a specific job-title filter value - this gets passed directly to a LinkedIn " +
             "title search, so it needs to look like a real title, not a vague description. Then call analyze_company " +
             "again with company_url + role to search for matching people at that company.",
         );
@@ -82,19 +82,19 @@ export const analyze_company: ToolHandler<Args> = {
         if (!args.role_retry) {
           return text(
             `No matches for "${args.role}" at this company. Try a different phrasing or a related title ` +
-              "(e.g. a synonym, broader seniority, or alternate wording — don't ask the user yet), then call " +
+              "(e.g. a synonym, broader seniority, or alternate wording - don't ask the user yet), then call " +
               "analyze_company again with company_url + the new role + role_retry:true.",
           );
         }
         return text(
-          `Still no matches after trying a different phrasing. Ask the user to revise their filters — a different ` +
-            "role, broader seniority, or a different title entirely — then call analyze_company again with the " +
+          `Still no matches after trying a different phrasing. Ask the user to revise their filters - a different ` +
+            "role, broader seniority, or a different title entirely - then call analyze_company again with the " +
             "new role (and role_retry unset, to get a fresh two-try budget).",
           true,
         );
       }
 
-      const lines = candidates.map((c, i) => `${i + 1}. ${c.name} — ${c.title}\n   ${c.linkedinUrl}`);
+      const lines = candidates.map((c, i) => `${i + 1}. ${c.name} - ${c.title}\n   ${c.linkedinUrl}`);
       return text(
         `${candidates.length} people matching "${args.role}" at this company:\n${lines.join("\n")}\n\n` +
           `Confirm with the user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call ` +
@@ -118,7 +118,7 @@ export const analyze_company: ToolHandler<Args> = {
       const newCount = unlocked.filter((u) => !u).length;
       if (newCount === 0) {
         return text(
-          `All ${candidateUrls.length} candidates have already been analyzed for your team — this will be free. ` +
+          `All ${candidateUrls.length} candidates have already been analyzed for your team - this will be free. ` +
             "Call analyze_company again with the same candidate_urls and confirm:true to see the results.",
         );
       }
@@ -130,7 +130,7 @@ export const analyze_company: ToolHandler<Args> = {
         );
       }
       return text(
-        `This will analyze ${candidateUrls.length} candidates (${newCount} new — the rest were already analyzed and are free), ` +
+        `This will analyze ${candidateUrls.length} candidates (${newCount} new - the rest were already analyzed and are free), ` +
           `using ${newCount} of your ${quota.remaining} remaining searches. It analyzes one at a time, so this may take a few minutes. ` +
           "Call analyze_company again with the same candidate_urls and confirm:true to proceed.",
       );
@@ -142,7 +142,7 @@ export const analyze_company: ToolHandler<Args> = {
       const alreadyUnlocked = await isProspectUnlocked(ctx.company_id, url);
       if (!alreadyUnlocked) {
         const status = await checkQuota(ctx);
-        if (!status.allowed) break; // out of quota — stop gracefully, return what we have
+        if (!status.allowed) break; // out of quota - stop gracefully, return what we have
       }
       let analysis: ProspectAnalysis;
       try {
@@ -165,12 +165,12 @@ export const analyze_company: ToolHandler<Args> = {
 
     const lines = ranked.map((o, i) => {
       const name = `${o.analysis.enriched.name}${o.analysis.enriched.title ? `, ${o.analysis.enriched.title}` : ""}`;
-      return o.best ? `${i + 1}. ${name} — ${summarizePath(o.best)}` : `${i + 1}. ${name} — no shared connections found.`;
+      return o.best ? `${i + 1}. ${name} - ${summarizePath(o.best)}` : `${i + 1}. ${name} - no shared connections found.`;
     });
 
     const top = ranked[0];
     const headline = top?.best
-      ? `Your best way into this company is through ${top.analysis.enriched.name} — ${summarizePath(top.best)}.`
+      ? `Your best way into this company is through ${top.analysis.enriched.name} - ${summarizePath(top.best)}.`
       : "None of these candidates share a connection with your team yet.";
 
     const charged = outcomes.filter((o) => o.charged).length;

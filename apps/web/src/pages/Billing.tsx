@@ -34,7 +34,7 @@ export function Billing() {
         <p className="rounded-md bg-tint-accent p-3 text-sm text-accent">Thanks! Your subscription is active.</p>
       )}
       {status === "cancelled" && (
-        <p className="rounded-md bg-gray-50 p-3 text-sm text-lavender">Checkout cancelled — no charge made.</p>
+        <p className="rounded-md bg-gray-50 p-3 text-sm text-lavender">Checkout cancelled - no charge made.</p>
       )}
 
       <div className="rounded-lg border border-gray-100 bg-white p-6">
@@ -48,7 +48,7 @@ export function Billing() {
             </button>
           ) : (
             <button className="btn-primary" disabled={busy} onClick={() => go("/api/billing/checkout")}>
-              {busy ? "Redirecting…" : "Upgrade to Pro — 200 searches/mo"}
+              {busy ? "Redirecting…" : "Upgrade to Pro - 200 searches/mo"}
             </button>
           )}
         </div>

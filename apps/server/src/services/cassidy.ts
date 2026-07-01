@@ -20,7 +20,7 @@ export async function getRawProfile(linkedinUrl: string, timeoutMs = 30_000): Pr
       signal: controller.signal,
     });
   } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") throw new Error("AI enrichment timed out — will retry");
+    if (err instanceof Error && err.name === "AbortError") throw new Error("AI enrichment timed out - will retry");
     throw err;
   } finally {
     clearTimeout(timeout);
@@ -53,7 +53,7 @@ export async function analyzeLinkedInProfile(linkedinUrl: string, timeoutMs = 30
     });
   } catch (err) {
     clearTimeout(timeout);
-    if (err instanceof Error && err.name === "AbortError") throw new Error("AI enrichment timed out — will retry");
+    if (err instanceof Error && err.name === "AbortError") throw new Error("AI enrichment timed out - will retry");
     throw err;
   }
   clearTimeout(timeout);
@@ -66,7 +66,7 @@ export async function analyzeLinkedInProfile(linkedinUrl: string, timeoutMs = 30
   const data = await response.json() as any;
 
   if (!data.workflowRun?.actionResults?.[0]?.output?.value) {
-    throw new Error("Invalid Cassidy response structure — no profile data found");
+    throw new Error("Invalid Cassidy response structure - no profile data found");
   }
 
   const profileData = JSON.parse(data.workflowRun.actionResults[0].output.value) as any;

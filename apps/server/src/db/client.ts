@@ -4,7 +4,7 @@ import { config } from "../config.js";
 let cached: SupabaseClient | null = null;
 
 /**
- * Supabase client using the service role key. This BYPASSES RLS — tenancy must
+ * Supabase client using the service role key. This BYPASSES RLS - tenancy must
  * be enforced in application code by always filtering on the caller's
  * company_id (from the JWT). RLS policies remain as defense-in-depth.
  *

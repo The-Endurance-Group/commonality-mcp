@@ -4,7 +4,7 @@ import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath } from "./_prospect.js";
 
 // Find warm paths from the team to a prospect. Returns a ranked, token-lean
-// summary — full enrichment stays in Supabase. Billed once per (company, URL):
+// summary - full enrichment stays in Supabase. Billed once per (company, URL):
 // re-analysing the same prospect is free.
 export const analyze_prospect: ToolHandler<{ url: string }> = {
   usesQuota: true,
@@ -17,7 +17,7 @@ export const analyze_prospect: ToolHandler<{ url: string }> = {
     const { enriched, results } = await analyzeProspectUrl(args.url, ctx);
     const quota = await checkQuota(ctx);
     const billing = unlocked
-      ? "Already analyzed for your team — no credit used."
+      ? "Already analyzed for your team - no credit used."
       : `Uses 1 of your ${quota.remaining} remaining searches.`;
 
     const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}.`;

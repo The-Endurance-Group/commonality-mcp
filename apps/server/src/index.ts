@@ -28,7 +28,7 @@ app.use(
 );
 app.use(pinoHttp({ logger }));
 
-// Stripe webhook — MUST be mounted with the raw body BEFORE express.json() so
+// Stripe webhook - MUST be mounted with the raw body BEFORE express.json() so
 // the signature can be verified against the exact bytes Stripe sent.
 app.post("/api/billing/webhook", express.raw({ type: "application/json" }), async (req, res) => {
   const signature = req.header("stripe-signature");
@@ -47,7 +47,7 @@ app.post("/api/billing/webhook", express.raw({ type: "application/json" }), asyn
 
 app.use(express.json({ limit: "5mb" }));
 // OAuth token/registration requests arrive as application/x-www-form-urlencoded
-// per the OAuth 2.0 spec — parse those too so /oauth/token reads grant_type etc.
+// per the OAuth 2.0 spec - parse those too so /oauth/token reads grant_type etc.
 app.use(express.urlencoded({ extended: true }));
 
 // Mount order per the build brief:
@@ -58,7 +58,7 @@ app.use("/oauth", oauthRouter);
 // 3. MCP JSON-RPC (requires Bearer JWT)
 app.use("/mcp", mcpRouter);
 // 4. REST API for the React app
-//    4a. Session exchange (Clerk -> Commonality JWT) — must precede the gated router.
+//    4a. Session exchange (Clerk -> Commonality JWT) - must precede the gated router.
 app.use("/api/auth", authRouter);
 //    4b. Everything else (requires Bearer Commonality JWT)
 app.use("/api", apiRouter);
@@ -66,7 +66,7 @@ app.use("/api", apiRouter);
 app.get("/healthz", (_req, res) => {
   res.json({ ok: true });
 });
-// 6. Static SPA (catch-all) — must be last
+// 6. Static SPA (catch-all) - must be last
 mountStatic(app);
 
 app.listen(config.port, () => {

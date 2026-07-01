@@ -19,7 +19,7 @@ export function mountStatic(app: Express): void {
   const webDist = candidates.find((p) => existsSync(p));
 
   if (!webDist) {
-    // No build present (e.g. server-only dev). Skip — API/MCP still work.
+    // No build present (e.g. server-only dev). Skip - API/MCP still work.
     return;
   }
 

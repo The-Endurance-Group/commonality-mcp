@@ -7,7 +7,7 @@ interface Args {
   name?: string;
 }
 
-// Add one teammate to the roster by LinkedIn URL — the single-person
+// Add one teammate to the roster by LinkedIn URL - the single-person
 // equivalent of the web app's bulk "Import team" flow. Reuses importRoster()
 // so it respects the same free/pro team-member cap.
 export const add_employee: ToolHandler<Args> = {

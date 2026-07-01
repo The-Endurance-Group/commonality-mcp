@@ -51,5 +51,5 @@ export function summarizePath(r: ConnectionResult): string {
       return `both in ${c.value}`;
     })
     .join("; ");
-  return `${r.employee.name} — ${sig} (score ${r.strengthScore})`;
+  return `${r.employee.name} - ${sig} (score ${r.strengthScore})`;
 }

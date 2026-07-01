@@ -17,10 +17,10 @@ const STAGE_LABELS: Record<Stage, string> = {
 };
 
 const enrichingNotes = [
-  "Pulling each teammate's profile — title, schools, employers, and location.",
-  "Cross-referencing alma maters — checking whether any prospects share a degree program with your team.",
-  "Reviewing past employers — flagging companies your team and target accounts have in common.",
-  "Comparing locations — surfacing teammates based near your prospects.",
+  "Pulling each teammate's profile - title, schools, employers, and location.",
+  "Cross-referencing alma maters - checking whether any prospects share a degree program with your team.",
+  "Reviewing past employers - flagging companies your team and target accounts have in common.",
+  "Comparing locations - surfacing teammates based near your prospects.",
   "Scoring every path by strength, so the best connection always surfaces first.",
 ];
 
@@ -33,7 +33,7 @@ export function Onboarding() {
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
-  // Stage 1 — create workspace
+  // Stage 1 - create workspace
   const [companyName, setCompanyName] = useState("");
   const [domain, setDomain] = useState("");
 
@@ -58,7 +58,7 @@ export function Onboarding() {
     }
   }
 
-  // Stage 2 — import team
+  // Stage 2 - import team
   const [companyUrl, setCompanyUrl] = useState("");
   const [pastedUrls, setPastedUrls] = useState("");
 
@@ -77,7 +77,7 @@ export function Onboarding() {
       );
       if (result.trimmedByLimit) {
         setNotice(
-          `Imported ${result.imported} team members — that's your plan's limit (${result.limit}). ` +
+          `Imported ${result.imported} team members - that's your plan's limit (${result.limit}). ` +
             "There are more people at this company; upgrade to Pro to add them.",
         );
       }
@@ -89,7 +89,7 @@ export function Onboarding() {
     }
   }
 
-  // Stage 3 — enrichment progress
+  // Stage 3 - enrichment progress
   const [progress, setProgress] = useState<{ total: number; enriched: number }>({ total: 0, enriched: 0 });
   useEffect(() => {
     if (stage !== "enriching") return;
@@ -140,11 +140,11 @@ export function Onboarding() {
 
       <div key={displayStage} className={leaving ? "animate-fade-out" : "animate-fade-up"}>
         {displayStage === "workspace" && (
-          <Card title="Create your workspace" subtitle="Just your company name — we'll use it to start building your team's social map.">
+          <Card title="Create your workspace" subtitle="Just your company name - we'll use it to start building your team's social map.">
             <Field label="Company name">
               <input className="input" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Acme Inc." />
             </Field>
-            <Field label="Email domain (optional — lets teammates auto-join)">
+            <Field label="Email domain (optional - lets teammates auto-join)">
               <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="acme.com" />
             </Field>
             <button className="btn-primary" disabled={busy || !companyName.trim()} onClick={createWorkspace}>
@@ -156,7 +156,7 @@ export function Onboarding() {
         {displayStage === "import" && (
           <Card
             title="Import your team"
-            subtitle="We'll pull every teammate's LinkedIn profile — schools, employers, and location — to map your team's social capital."
+            subtitle="We'll pull every teammate's LinkedIn profile - schools, employers, and location - to map your team's social capital."
           >
             <p className="text-sm text-lavender">Paste your company's LinkedIn URL to pull the roster automatically…</p>
             <Field label="Company LinkedIn URL">
@@ -267,7 +267,7 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
   return (
     <Card
       title="Add LinkedIn connections (optional)"
-      subtitle="This is the single strongest signal Commonality can use — a 1st-degree LinkedIn connection beats any other path in. Totally optional."
+      subtitle="This is the single strongest signal Commonality can use - a 1st-degree LinkedIn connection beats any other path in. Totally optional."
     >
       <div>
         <p className="text-sm font-medium text-ink">How to export them from LinkedIn:</p>
@@ -275,7 +275,7 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
           <li>On LinkedIn, click your profile photo → <span className="font-medium text-ink">Settings &amp; Privacy</span>.</li>
           <li>Go to the <span className="font-medium text-ink">Data privacy</span> tab → <span className="font-medium text-ink">Get a copy of your data</span>.</li>
           <li>Select <span className="font-medium text-ink">Connections</span>, then click <span className="font-medium text-ink">Request archive</span>.</li>
-          <li>LinkedIn emails you a download link (usually within a few minutes) — download it and unzip it.</li>
+          <li>LinkedIn emails you a download link (usually within a few minutes) - download it and unzip it.</li>
           <li>Upload the <span className="font-medium text-ink">Connections.csv</span> file here, for yourself or any teammate.</li>
         </ol>
       </div>
@@ -286,7 +286,7 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
             <div key={i} className="flex items-center gap-2 rounded-md bg-tint-brand px-3 py-2 text-sm text-brand">
               <span>✓</span>
               <span className="font-medium">{a.name}</span>
-              <span className="text-lavender">— {a.saved} connections added</span>
+              <span className="text-lavender">- {a.saved} connections added</span>
             </div>
           ))}
         </div>
@@ -314,7 +314,7 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <div className="rounded-lg bg-tint-accent p-4 text-sm text-ink">
-        Some people aren't comfortable sharing this, and that's completely okay — it's optional
+        Some people aren't comfortable sharing this, and that's completely okay - it's optional
         and not required to use Commonality. You can always add it later if you or a teammate
         changes your mind.
       </div>

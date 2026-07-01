@@ -43,7 +43,7 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Signab
     return toClaims(existingUser, company, email);
   }
 
-  // 2. Has a pending, unexpired invite — accept it and join that workspace.
+  // 2. Has a pending, unexpired invite - accept it and join that workspace.
   const nowIso = new Date().toISOString();
   const { data: invite } = await supa
     .from("invites")

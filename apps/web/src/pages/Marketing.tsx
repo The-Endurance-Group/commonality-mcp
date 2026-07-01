@@ -88,7 +88,7 @@ const chatExamples = [
   {
     q: "Anyone with a connection to Dana Ruiz, CTO at Vantage?",
     title: "Alma mater",
-    detail: "Devon R. and Dana both went to Wharton — MBA '16",
+    detail: "Devon R. and Dana both went to Wharton - MBA '16",
   },
   {
     q: "Anyone close to our prospect in Portland, ME?",
@@ -298,7 +298,7 @@ function SocialMapGraphic() {
 
 const setupSteps = [
   { label: "Tell us your company", icon: "building" },
-  { label: "We find your team — you confirm", icon: "users" },
+  { label: "We find your team - you confirm", icon: "users" },
   { label: "Connect to your AI", icon: "link" },
 ];
 
@@ -434,7 +434,7 @@ const shortQuotes = [
   },
   {
     quote:
-      "I highly recommend The Endurance Group for their outstanding social capital campaign services. They are a reliable and trusted partner — responsive and quite proactive.",
+      "I highly recommend The Endurance Group for their outstanding social capital campaign services. They are a reliable and trusted partner - responsive and quite proactive.",
     name: "Nikki Blacksmith",
     title: "CEO, Symeta Inc.",
   },
@@ -448,7 +448,7 @@ const shortQuotes = [
 
 export function Marketing() {
   // Once the session has resolved, send signed-in users straight to their
-  // workspace — first-timers to onboarding, returning users to the dashboard.
+  // workspace - first-timers to onboarding, returning users to the dashboard.
   const { ready, token, needsOnboarding } = useAuthStore();
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
@@ -510,7 +510,7 @@ export function Marketing() {
 
         <div className="mx-auto mt-12 max-w-md animate-float">
           <ChatMock />
-          <p className="mt-4 text-sm text-white/70">Ask about a person or a whole company — anytime</p>
+          <p className="mt-4 text-sm text-white/70">Ask about a person or a whole company - anytime</p>
         </div>
       </section>
 
@@ -558,8 +558,8 @@ export function Marketing() {
           How we find the strongest connection
         </h2>
         <p className="mx-auto mt-2 max-w-xl text-lavender">
-          We analyze social capital on both sides — every person on your team, and your
-          prospect — then rank every possible path.
+          We analyze social capital on both sides - every person on your team, and your
+          prospect - then rank every possible path.
         </p>
 
         <div className="animate-fade-up mt-10">
@@ -575,7 +575,7 @@ export function Marketing() {
           <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
             <p className="text-xs font-semibold uppercase tracking-wide text-lavender">LinkedIn tells you</p>
             <p className="mt-3 text-sm text-ink">
-              Your top prospect is a 2nd-degree connection — and that's about it.
+              Your top prospect is a 2nd-degree connection - and that's about it.
             </p>
           </div>
           <div
@@ -584,7 +584,7 @@ export function Marketing() {
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-brand">Commonality tells you</p>
             <p className="mt-3 text-sm font-medium text-ink">
-              A coworker went to the same school, another worked at the same past company — and
+              A coworker went to the same school, another worked at the same past company - and
               which of those shared bonds actually gets you the meeting.
             </p>
           </div>
@@ -603,13 +603,13 @@ export function Marketing() {
         </div>
 
         <p className="mt-10 text-sm font-semibold uppercase tracking-wide text-lavender">
-          Then ask anytime — about a person or a company
+          Then ask anytime - about a person or a company
         </p>
         <div className="mt-4">
           <PipelineGraphic steps={askSteps} startAt={4} />
         </div>
         <p className="mt-4 text-sm text-lavender">
-          New prospect or new target account — just ask.
+          New prospect or new target account - just ask.
         </p>
 
         <div className="mt-10">
@@ -685,7 +685,7 @@ export function Marketing() {
               <blockquote className="mt-4 border-l-2 border-brand pl-4 text-sm italic text-ink">
                 &ldquo;{c.quote}&rdquo;
                 <footer className="mt-2 text-sm font-medium not-italic text-lavender">
-                  — {c.name}, {c.title}
+                  - {c.name}, {c.title}
                 </footer>
               </blockquote>
             </div>
@@ -793,7 +793,7 @@ export function Marketing() {
       </section>
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
-        <div className="mx-auto max-w-content px-6">© Commonality — The Endurance Group</div>
+        <div className="mx-auto max-w-content px-6">© Commonality - The Endurance Group</div>
       </footer>
     </div>
   );

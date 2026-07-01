@@ -12,7 +12,7 @@ function ensureEnabled(res: Parameters<Parameters<typeof billingRouter.post>[1]>
   return true;
 }
 
-// POST /api/billing/checkout — admin starts a Pro subscription. Returns a URL.
+// POST /api/billing/checkout - admin starts a Pro subscription. Returns a URL.
 billingRouter.post("/checkout", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {
@@ -28,7 +28,7 @@ billingRouter.post("/checkout", async (req, res) => {
   }
 });
 
-// POST /api/billing/portal — admin opens the Stripe customer portal. Returns a URL.
+// POST /api/billing/portal - admin opens the Stripe customer portal. Returns a URL.
 billingRouter.post("/portal", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {

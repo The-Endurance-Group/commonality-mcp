@@ -1,6 +1,6 @@
 // Domain schemas + types. Ported/distilled from the reference repo's
 // shared/schema.ts. UI-specific form schemas and Drizzle table defs are
-// intentionally dropped — only domain types the analysis algorithm and MCP
+// intentionally dropped - only domain types the analysis algorithm and MCP
 // tools need live here.
 
 import { z } from "zod";
@@ -15,7 +15,7 @@ export type Commonality = z.infer<typeof commonalitySchema>;
 
 /**
  * A team member whose network we mine for warm paths. This is the rich domain
- * shape the matching algorithm consumes — the persisted `employees` row is
+ * shape the matching algorithm consumes - the persisted `employees` row is
  * leaner (schools/past_companies jsonb); the DB layer maps rows into this type.
  */
 export const employeeSchema = z.object({

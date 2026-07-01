@@ -10,7 +10,7 @@ const FREE_TRIAL_TIPS: string[] = [
   "Did you know I can prep you for a call? Ask for a call script that opens with what you have in common with the prospect.",
   "Did you know I can push a prospect straight to HubSpot or Salesforce once you've found a warm path?",
   "Did you know you can hand a prospect to a teammate with a stronger connection? Just tell me who and why.",
-  "Did you know I can show your team's collective network — top schools, employers, and locations?",
+  "Did you know I can show your team's collective network - top schools, employers, and locations?",
   "Did you know uploading your LinkedIn connections gives you more warm paths to work with? Ask me how.",
   "Did you know I can surface a fresh on-ICP prospect your team has a warm path to? Just ask for your prospect of the day.",
 ];

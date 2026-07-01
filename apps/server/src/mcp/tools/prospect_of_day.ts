@@ -40,7 +40,7 @@ export const prospect_of_day: ToolHandler<Record<string, never>> = {
 
     const top = candidates[0];
     return text(
-      `Prospect of the day: ${top.name}${top.title ? `, ${top.title}` : ""}${top.company ? ` at ${top.company}` : ""}\n${top.linkedinUrl}\n\nNo warm path on your team yet — a cold but on-ICP option.`,
+      `Prospect of the day: ${top.name}${top.title ? `, ${top.title}` : ""}${top.company ? ` at ${top.company}` : ""}\n${top.linkedinUrl}\n\nNo warm path on your team yet - a cold but on-ICP option.`,
     );
   },
 };

@@ -17,7 +17,7 @@ async function clerkEmailFromRequest(req: Request): Promise<string> {
   return getClerkUserEmail(sub);
 }
 
-// POST /api/auth/token — exchange a Clerk session for a Commonality JWT.
+// POST /api/auth/token - exchange a Clerk session for a Commonality JWT.
 // Returns { needsOnboarding: true } when the user has no workspace yet.
 authRouter.post("/token", async (req, res) => {
   let email: string;
@@ -40,7 +40,7 @@ authRouter.post("/token", async (req, res) => {
   }
 });
 
-// POST /api/auth/onboarding — first-time admin creates their workspace.
+// POST /api/auth/onboarding - first-time admin creates their workspace.
 authRouter.post("/onboarding", async (req, res) => {
   let email: string;
   try {

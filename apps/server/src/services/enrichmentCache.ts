@@ -5,7 +5,7 @@ import { analyzeLinkedInProfile } from "./cassidy.js";
 
 // NEW (not in the reference repo). The shared, cross-tenant enrichment cache.
 // We hit Cassidy at most once per LinkedIn URL within the freshness window.
-// The enrichment_cache table is intentionally NOT scoped by company_id — a
+// The enrichment_cache table is intentionally NOT scoped by company_id - a
 // profile enriched for one workspace is reusable by all.
 
 const FRESHNESS_MS = 90 * 24 * 60 * 60 * 1000; // 90 days
@@ -43,7 +43,7 @@ export async function getEnrichedProfile(
   if (cached && !opts.forceRefresh) {
     const age = Date.now() - new Date(cached.last_refreshed).getTime();
     if (age < FRESHNESS_MS) {
-      // Fresh hit — bump the request counter, return cached data.
+      // Fresh hit - bump the request counter, return cached data.
       await supa
         .from("enrichment_cache")
         .update({ request_count: cached.request_count + 1 })
@@ -52,7 +52,7 @@ export async function getEnrichedProfile(
     }
   }
 
-  // Miss or stale — enrich via Cassidy and upsert.
+  // Miss or stale - enrich via Cassidy and upsert.
   const fresh = await analyzeLinkedInProfile(linkedinUrl);
   const { error: upsertError } = await supa.from("enrichment_cache").upsert({
     linkedin_url: linkedinUrl,

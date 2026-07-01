@@ -3,7 +3,7 @@ import { z } from "zod";
 import { config } from "../config.js";
 
 // Claims signed into every Commonality access token. The MCP endpoint and REST
-// API trust only these — Clerk authenticates the human, Commonality issues the
+// API trust only these - Clerk authenticates the human, Commonality issues the
 // token that scopes them to a workspace.
 export const jwtClaimsSchema = z.object({
   sub: z.string(),

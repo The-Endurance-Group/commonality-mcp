@@ -74,7 +74,7 @@ export function Invites() {
           <div className="flex items-center justify-between">
             <span className={`text-sm ${overLimit ? "text-red-600" : "text-lavender"}`}>
               {parsed.length} email{parsed.length === 1 ? "" : "s"}
-              {overLimit ? ` — over the ${MAX_BULK} limit` : ""}
+              {overLimit ? ` - over the ${MAX_BULK} limit` : ""}
             </span>
             <button className="btn-primary whitespace-nowrap" disabled={invite.isPending || parsed.length === 0 || overLimit}>
               {invite.isPending ? "Sending…" : `Send ${parsed.length || ""} invite${parsed.length === 1 ? "" : "s"}`}
@@ -155,7 +155,7 @@ function DomainSection({ domain }: { domain: string | null }) {
     <section className="rounded-lg border border-gray-100 bg-white p-6">
       <h2 className="text-lg font-semibold text-ink">Company email domain</h2>
       <p className="mt-1 text-sm text-lavender">
-        Anyone who signs up with this email domain automatically joins your workspace — no invite
+        Anyone who signs up with this email domain automatically joins your workspace - no invite
         needed. Didn't set this during onboarding? Add or change it here.
       </p>
       <form

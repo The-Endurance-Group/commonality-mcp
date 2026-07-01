@@ -5,7 +5,7 @@ import { sendInviteEmail } from "../services/resend.js";
 
 export const invitesRouter: RouterType = Router();
 
-// GET /api/invites — pending + accepted invites for the workspace.
+// GET /api/invites - pending + accepted invites for the workspace.
 invitesRouter.get("/", async (req, res) => {
   const { data, error } = await db()
     .from("invites")
@@ -19,7 +19,7 @@ invitesRouter.get("/", async (req, res) => {
   res.json({ invites: data ?? [] });
 });
 
-// POST /api/invites — admins invite a teammate (creates row + emails them).
+// POST /api/invites - admins invite a teammate (creates row + emails them).
 invitesRouter.post("/", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {
@@ -64,7 +64,7 @@ interface BulkResult {
   emailSent?: boolean;
 }
 
-// POST /api/invites/bulk — admins invite up to 50 teammates at once.
+// POST /api/invites/bulk - admins invite up to 50 teammates at once.
 // Skips emails that are already members or already have a pending invite.
 invitesRouter.post("/bulk", async (req, res) => {
   const user = req.user!;
@@ -126,7 +126,7 @@ invitesRouter.post("/bulk", async (req, res) => {
       res.status(500).json({ error: error.message });
       return;
     }
-    // Best-effort emails — the invite row stands even if delivery fails.
+    // Best-effort emails - the invite row stands even if delivery fails.
     await Promise.all(
       toInvite.map(async (email) => {
         let emailSent = true;

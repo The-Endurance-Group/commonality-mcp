@@ -33,7 +33,7 @@ export const search_prospects: ToolHandler<SearchArgs> = {
     if (!profiles.length) return text("No prospects matched those filters.");
 
     const lines = profiles.map(
-      (p, i) => `${i + 1}. ${p.name}${p.title ? ` — ${p.title}` : ""}${p.company ? ` @ ${p.company}` : ""}\n   ${p.linkedinUrl}`,
+      (p, i) => `${i + 1}. ${p.name}${p.title ? ` - ${p.title}` : ""}${p.company ? ` @ ${p.company}` : ""}\n   ${p.linkedinUrl}`,
     );
     return text(`Found ${profiles.length} prospects:\n${lines.join("\n")}\n\nAnalyze any of them with analyze_prospect.`);
   },

@@ -5,7 +5,7 @@ import dotenv from "dotenv";
 // Load the nearest .env by walking up from cwd. In this monorepo the server is
 // launched from apps/server but .env lives at the repo root, so cwd-only loading
 // (dotenv's default) would miss it. In production (Railway) there's no .env and
-// real env vars are already present — this is a harmless no-op there.
+// real env vars are already present - this is a harmless no-op there.
 function loadEnv(): void {
   let dir = process.cwd();
   for (let i = 0; i < 6; i++) {
@@ -57,7 +57,7 @@ export const config = {
   // Where Stripe redirects back to after checkout/portal (the web app origin).
   webAppUrl: optional("WEB_APP_URL", optional("PUBLIC_BASE_URL", "http://localhost:8080")),
 
-  // Lazily required — only the subsystems that use them call required().
+  // Lazily required - only the subsystems that use them call required().
   // Kept as getters so the server can boot for healthz without every secret set.
   get jwtSecret() {
     return required("JWT_SECRET");

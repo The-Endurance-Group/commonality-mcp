@@ -15,10 +15,10 @@ export const social_capital_dashboard: ToolHandler<Record<string, never>> = {
 
     const sc = computeSocialCapital(employees, company?.name);
     const top = (items: CountItem[]) =>
-      items.slice(0, 5).map((i) => `${i.label} (${i.count})`).join(", ") || "—";
+      items.slice(0, 5).map((i) => `${i.label} (${i.count})`).join(", ") || "-";
 
     return text(
-      `Social capital — ${sc.totalEmployees} team members\n\n` +
+      `Social capital - ${sc.totalEmployees} team members\n\n` +
         `Top schools: ${top(sc.schools)}\n` +
         `Top past employers: ${top(sc.pastCompanies)}\n` +
         `Top locations: ${top(sc.locations)}\n` +

@@ -9,7 +9,7 @@ const RESEND_API = "https://api.resend.com/emails";
 async function sendEmail(to: string, subject: string, text: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    logger.warn({ to, subject }, "RESEND_API_KEY not set — email not sent");
+    logger.warn({ to, subject }, "RESEND_API_KEY not set - email not sent");
     return;
   }
   const from = process.env.RESEND_FROM_EMAIL ?? "invites@commonality.co";
@@ -41,7 +41,7 @@ To get started:
 2. Paste this URL: ${mcpUrl}
 3. Sign in with this email (${email}) when prompted
 
-The full team roster is already set up — you'll have access immediately.`;
+The full team roster is already set up - you'll have access immediately.`;
   await sendEmail(email, subject, text);
 }
 

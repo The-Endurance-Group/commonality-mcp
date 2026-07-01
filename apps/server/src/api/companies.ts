@@ -4,7 +4,7 @@ import { getCompany } from "../db/queries.js";
 
 export const companiesRouter: RouterType = Router();
 
-// GET /api/companies/me — the caller's workspace (non-secret fields only).
+// GET /api/companies/me - the caller's workspace (non-secret fields only).
 companiesRouter.get("/me", async (req, res) => {
   const company = await getCompany(req.user!.company_id);
   if (!company) {
@@ -21,7 +21,7 @@ companiesRouter.get("/me", async (req, res) => {
   });
 });
 
-// PATCH /api/companies/me — admins update context/website/domain.
+// PATCH /api/companies/me - admins update context/website/domain.
 companiesRouter.patch("/me", async (req, res) => {
   const user = req.user!;
   if (user.role !== "admin") {

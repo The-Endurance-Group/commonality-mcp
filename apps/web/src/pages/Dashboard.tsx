@@ -28,8 +28,8 @@ export function Dashboard() {
   return (
     <div className="space-y-8">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Stat label="Plan" value={usage.data?.plan ?? "—"} />
-        <Stat label="Searches used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "—"} />
+        <Stat label="Plan" value={usage.data?.plan ?? "-"} />
+        <Stat label="Searches used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "-"} />
         <Stat
           label="Team members"
           value={
@@ -69,12 +69,12 @@ export function Dashboard() {
             </thead>
             <tbody>
               {employees.length === 0 ? (
-                <tr><td className="px-4 py-6 text-lavender" colSpan={3}>No team members yet — click “Import team” to add your roster.</td></tr>
+                <tr><td className="px-4 py-6 text-lavender" colSpan={3}>No team members yet - click “Import team” to add your roster.</td></tr>
               ) : (
                 employees.map((e) => (
                   <tr key={e.id} className="border-t border-gray-100">
                     <td className="px-4 py-2">{e.name}</td>
-                    <td className="px-4 py-2 text-lavender">{e.location ?? "—"}</td>
+                    <td className="px-4 py-2 text-lavender">{e.location ?? "-"}</td>
                     <td className="px-4 py-2">
                       <span className={e.enriched_at ? "text-accent" : "text-brand"}>
                         {e.enriched_at ? "Enriched" : "Pending"}
@@ -150,9 +150,9 @@ const everyonePrompts = [
   "Help me prep for a call with [prospect].",
   "Who's my prospect of the day?",
   "Push [prospect] to HubSpot with our findings.",
-  "Hand this prospect to Sam — they have a stronger connection.",
+  "Hand this prospect to Sam - they have a stronger connection.",
   "Add my LinkedIn connections so they count as warm paths.",
-  "Show our team's social capital — top schools, employers, and locations.",
+  "Show our team's social capital - top schools, employers, and locations.",
   "How many searches do I have left this month?",
 ];
 
@@ -163,7 +163,7 @@ function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
     <section className="rounded-lg border border-gray-100 bg-white p-6">
       <h2 className="text-lg font-semibold text-ink">Try asking Claude</h2>
       <p className="mt-1 text-sm text-lavender">
-        Once connected, here's what you can ask — no need to remember exact tool names.
+        Once connected, here's what you can ask - no need to remember exact tool names.
       </p>
 
       <ul className="mt-4 space-y-2">

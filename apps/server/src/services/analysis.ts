@@ -2,7 +2,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import type { Employee, Company } from "@commonality/shared";
 
 // Ported verbatim from the reference repo (server/services/analysis.ts).
-// This is the moat — DO NOT change the scoring order or the alias/normalization
+// This is the moat - DO NOT change the scoring order or the alias/normalization
 // tables. Only the type import path differs from the original.
 
 export interface Commonality {
@@ -35,7 +35,7 @@ const GENERIC_COMPANIES = ["inc", "inc.", "llc", "corp", "corp.", "ltd", "ltd.",
 const GENERIC_LOCATIONS = ["united states", "usa", "us", "america", "california", "new york", "texas", "florida", "area", "region", "metropolitan", "metro", "greater"];
 
 // Strip common legal-entity suffixes so "Acme Inc." matches "Acme". The suffix must be preceded
-// by a separator (or start of string) — without this, short suffixes like "co"/"ag"/"sa" would
+// by a separator (or start of string) - without this, short suffixes like "co"/"ag"/"sa" would
 // match the tail of unrelated names (e.g. "Geico" -> "Gei", "Ecco" -> "Ec").
 const COMPANY_SUFFIX_RE = /(?:^|[\s,.])[\s,.]*(inc\.?|llc\.?|ltd\.?|corp\.?|co\.?|plc\.?|lp\.?|llp\.?|pllc\.?|gmbh|ag|sa|nv|bv|& co\.?|and company|and co\.?|international|worldwide|global|holdings?|group|ventures?|partners?)$/i;
 
@@ -331,13 +331,13 @@ export function findConnections(
     const commonalities: Commonality[] = [];
     let strengthScore = 0;
 
-    // 1st-degree LinkedIn connection — highest possible signal (strength 5).
+    // 1st-degree LinkedIn connection - highest possible signal (strength 5).
     if (linkedInConnectors?.has(employee.id)) {
       commonalities.push({ type: "linkedin_connection", value: "1st-degree LinkedIn connection", strength: 5 });
       strengthScore += 5;
     }
 
-    // Education — collect ALL matching schools (not just the first).
+    // Education - collect ALL matching schools (not just the first).
     const splitSchools = (s: string) =>
       (s.includes(";") ? s.split(";") : s.split(/, /)).map(p => p.trim()).filter(Boolean);
     const prospectSchools = prospect.almaMater ? splitSchools(prospect.almaMater) : [];
@@ -367,7 +367,7 @@ export function findConnections(
       }
     }
 
-    // Past companies — deduplicate matches within the same employee pairing.
+    // Past companies - deduplicate matches within the same employee pairing.
     const seenCompanies = new Set<string>();
     const employeePastCompanies = Array.isArray(employee.pastCompanies) ? employee.pastCompanies as string[] : [];
     const allProspectCompanies = [
@@ -421,7 +421,7 @@ export function findConnections(
 
   results.sort((a, b) => b.strengthScore - a.strengthScore);
 
-  // Deduplicate by employee name — keep the highest-scoring record when the same
+  // Deduplicate by employee name - keep the highest-scoring record when the same
   // person exists twice in the DB (e.g. two LinkedIn URL formats for the same employee).
   const seen = new Map<string, ConnectionResult>();
   for (const r of results) {
@@ -475,7 +475,7 @@ export function computeSocialCapital(employees: Employee[], companyName?: string
 
   const ownCompanyNormalized = companyName ? normalizeCompany(companyName) : null;
 
-  // Track a person in a detail map — deduplicates by name so count == names.length
+  // Track a person in a detail map - deduplicates by name so count == names.length
   const track = (detail: Map<string, DetailPerson[]>, key: string | null | undefined, person: DetailPerson) => {
     if (!key) return;
     const k = key.trim();
@@ -519,7 +519,7 @@ export function computeSocialCapital(employees: Employee[], companyName?: string
   }
 
   // \S+ (not \w) so accented/non-ASCII leading letters (ü, ö, İ, ç, ...) get capitalized
-  // correctly too — \w is ASCII-only and would skip them, capitalizing the next letter instead.
+  // correctly too - \w is ASCII-only and would skip them, capitalizing the next letter instead.
   const toTitleCase = (s: string) =>
     s.replace(/\S+/g, w => w.charAt(0).toLocaleUpperCase() + w.slice(1));
   const formatLocation = (loc: string) =>
@@ -643,7 +643,7 @@ async function generateSingleOutreach(company: Company, opts: OutreachOptions, t
 About ${company.name} (use this for context on what we do):
 ${companyContext}
 
-Shared connection(s) to open with naturally: ${commonalityText || "none specific — keep it warm and genuine"}.
+Shared connection(s) to open with naturally: ${commonalityText || "none specific - keep it warm and genuine"}.
 
 Requirements:
 - Around 100 words (90-120).
@@ -657,7 +657,7 @@ Requirements:
 
 About ${company.name} (context on what we do): ${companyContext}
 
-Shared connection(s) to reference: ${commonalityText || "none specific — keep it warm and genuine"}.
+Shared connection(s) to reference: ${commonalityText || "none specific - keep it warm and genuine"}.
 
 Requirements:
 - STRICTLY under 300 characters (this is a hard LinkedIn limit).
@@ -717,13 +717,13 @@ export interface CallPrep {
 }
 
 function callPrepFallback(company: Company, opts: CallPrepOptions): CallPrep {
-  const what = company.context || "[describe what your company does — add this in Settings → Company context]";
+  const what = company.context || "[describe what your company does - add this in Settings → Company context]";
   return {
     opening: `Thank you so much for taking the time to speak with me today. It is so nice to meet someone where ${opts.commonality}. At ${company.name}, we really value relationships, so everyone here actually does networking calls like this regularly.`,
-    discovery: `So tell me about your work — what types of companies and people do you typically work with? Who is your ideal prospect? What industries? What titles?`,
+    discovery: `So tell me about your work - what types of companies and people do you typically work with? Who is your ideal prospect? What industries? What titles?`,
     transition: `Thank you for sharing. Well, here's what we do: ${what}. Based on what you just told me about who you work with, I think there could be a real fit worth exploring.`,
-    objections: `If they ask detailed questions you can't answer on the spot: "That's a great question — rather than give you a half answer, let me set up a quick follow-up call with the right person on our team." Always offer a concrete next step before hanging up.`,
-    followUp: `Right after the call, log your notes in your CRM while they're fresh. Then send a short thank-you note:\n\nHi ${opts.prospect.name.split(" ")[0]}, it was great speaking with you today — always good to meet someone where ${opts.commonality}. I'll follow up with the next steps we discussed. Thanks again!`,
+    objections: `If they ask detailed questions you can't answer on the spot: "That's a great question - rather than give you a half answer, let me set up a quick follow-up call with the right person on our team." Always offer a concrete next step before hanging up.`,
+    followUp: `Right after the call, log your notes in your CRM while they're fresh. Then send a short thank-you note:\n\nHi ${opts.prospect.name.split(" ")[0]}, it was great speaking with you today - always good to meet someone where ${opts.commonality}. I'll follow up with the next steps we discussed. Thanks again!`,
   };
 }
 
@@ -736,7 +736,7 @@ export async function generateCallPrep(company: Company, opts: CallPrepOptions):
   if (company.website) contextParts.push(`Website: ${company.website}`);
   const companyContext = contextParts.length
     ? contextParts.join("\n")
-    : "(no context provided — keep the pitch generic and remind the user to fill in their value proposition in Settings)";
+    : "(no context provided - keep the pitch generic and remind the user to fill in their value proposition in Settings)";
 
   const p = opts.prospect;
   const profileLines = [
@@ -758,13 +758,13 @@ export async function generateCallPrep(company: Company, opts: CallPrepOptions):
 Prospect profile (already researched for them):
 ${profileLines}${extraCommon}
 
-About ${company.name} (use this — and ONLY this — for the discovery questions and the transition pitch):
+About ${company.name} (use this - and ONLY this - for the discovery questions and the transition pitch):
 ${companyContext}
 
 Methodology:
-1. OPENING: a verbatim opening in the style of "Thank you so much for taking the time to speak with me today. It is so nice to meet another [COMMONALITY]..." — adapted naturally to their specific shared commonality. Warm, genuine, brief.
-2. DISCOVERY: ask about THEM first. Questions in the style of "What types of companies and people do you typically work with? Who is your ideal prospect? What industries? Titles?" — but tailor the questions to what ${company.name} offers, so the prospect's answers naturally set up the transition pitch.
-3. TRANSITION: "Thank you for sharing. Well, we are..." — built strictly from the company context above, explicitly connecting what the prospect just said about who they work with to how ${company.name} helps.
+1. OPENING: a verbatim opening in the style of "Thank you so much for taking the time to speak with me today. It is so nice to meet another [COMMONALITY]..." - adapted naturally to their specific shared commonality. Warm, genuine, brief.
+2. DISCOVERY: ask about THEM first. Questions in the style of "What types of companies and people do you typically work with? Who is your ideal prospect? What industries? Titles?" - but tailor the questions to what ${company.name} offers, so the prospect's answers naturally set up the transition pitch.
+3. TRANSITION: "Thank you for sharing. Well, we are..." - built strictly from the company context above, explicitly connecting what the prospect just said about who they work with to how ${company.name} helps.
 4. OBJECTIONS: how to gracefully defer questions they can't answer on the spot, and a clear call-to-action offering a follow-up call.
 5. FOLLOW-UP: remind them to log notes in their CRM immediately after, plus a short ready-to-send thank-you note that references the shared commonality.
 

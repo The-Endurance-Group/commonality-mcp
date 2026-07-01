@@ -30,7 +30,7 @@ export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
   get_usage,
 };
 
-// Descriptions stay SHORT — every word costs tokens on every Claude message.
+// Descriptions stay SHORT - every word costs tokens on every Claude message.
 export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_prospect",
@@ -47,9 +47,9 @@ export const TOOL_DEFS: McpToolDef[] = [
     inputSchema: {
       type: "object",
       properties: {
-        company_name: { type: "string", description: "Target company's name — use this to resolve the real LinkedIn URL. Prefer this over guessing company_url yourself." },
-        company_url: { type: "string", description: "Target company's LinkedIn URL, from a prior company_name lookup — never guess this" },
-        role: { type: "string", description: "Job title/role to search for at that company, e.g. \"VP of Sales\" — must be a real title, not a vague description" },
+        company_name: { type: "string", description: "Target company's name - use this to resolve the real LinkedIn URL. Prefer this over guessing company_url yourself." },
+        company_url: { type: "string", description: "Target company's LinkedIn URL, from a prior company_name lookup - never guess this" },
+        role: { type: "string", description: "Job title/role to search for at that company, e.g. \"VP of Sales\" - must be a real title, not a vague description" },
         role_retry: { type: "boolean", description: "Set true when retrying role with a reworded/broader title after zero results" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
         confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },
@@ -113,7 +113,7 @@ export const TOOL_DEFS: McpToolDef[] = [
   },
   {
     name: "upload_connections",
-    description: "Add a few 1st-degree LinkedIn connections manually. For a full CSV export, tell the user to upload it in the web app onboarding instead — pasting a whole export here wastes tokens.",
+    description: "Add a few 1st-degree LinkedIn connections manually. For a full CSV export, tell the user to upload it in the web app onboarding instead - pasting a whole export here wastes tokens.",
     inputSchema: {
       type: "object",
       properties: {
