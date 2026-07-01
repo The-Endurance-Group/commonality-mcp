@@ -165,7 +165,7 @@ const mobileFanX = [-50, -17, 17, 50];
 function SocialMapMobile() {
   const colX = 170;
   const rowGap = 78;
-  const rowStart = 36;
+  const rowStart = 56;
   const prospectY = rowStart + rowGap * socialMapPaths.length + 40;
   const rows = socialMapPaths.map((p, i) => ({
     ...p,
