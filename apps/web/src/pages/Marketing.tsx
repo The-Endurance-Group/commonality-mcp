@@ -481,8 +481,8 @@ export function Marketing() {
             Your next deal is already in your team's network.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
-            Ask your AI &ldquo;what's the best way into Acme?&rdquo; Get an answer for any
-            person or company, instantly.
+            Ask your AI &ldquo;what's the best way into Acme?&rdquo; or &ldquo;find me a warm
+            intro to John Smith, VP of Finance at Global Inc.&rdquo;
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
