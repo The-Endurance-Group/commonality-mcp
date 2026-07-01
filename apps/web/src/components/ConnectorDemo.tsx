@@ -263,8 +263,15 @@ export function ConnectorDemo() {
         target.style.transform = "scale(1)";
       }, 140);
     }
+    // Rejects instead of resolving once stopped, so the calling async
+    // function unwinds immediately at the next await instead of continuing
+    // to mutate the DOM after unmount (matters under StrictMode's dev-only
+    // double effect invocation, where an old instance's pending timers can
+    // otherwise race a freshly-mounted one).
     function wait(ms: number) {
-      return new Promise<void>((resolve) => setTimeout(resolve, ms));
+      return new Promise<void>((resolve, reject) =>
+        setTimeout(() => (stopped ? reject(new Error("stopped")) : resolve()), ms),
+      );
     }
     function typeInto(target: HTMLElement, text: string, speed: number) {
       target.textContent = "";
@@ -313,7 +320,8 @@ export function ConnectorDemo() {
     }
 
     async function playLoop() {
-      while (!stopped) {
+      try {
+        while (!stopped) {
         caption.textContent = "";
         chatsIcon.style.background = "transparent";
         briefcase.style.background = "transparent";
@@ -375,6 +383,8 @@ export function ConnectorDemo() {
         click(addCustomItem);
         addCustomItem.style.background = "var(--bg-accent)";
         await wait(600);
+        popover.style.opacity = "0";
+        popover.style.pointerEvents = "none";
 
         cursor.style.opacity = "0";
         modalOverlay.style.opacity = "1";
@@ -522,6 +532,9 @@ export function ConnectorDemo() {
 
         caption.textContent = "Commonality found a warm intro path";
         await wait(2200);
+        }
+      } catch {
+        // stopped mid-flight (unmount, or a StrictMode dev double-invoke) - nothing to clean up.
       }
     }
 
