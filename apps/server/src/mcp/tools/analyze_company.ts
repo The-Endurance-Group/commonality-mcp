@@ -1,10 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { checkQuota, incrementUsage, isProspectUnlocked, recordProspectUnlock } from "../../auth/quota.js";
-import {
-  getCompanyEmployees as scrapeCompanyRoster,
-  searchCompanies,
-  searchProfiles,
-} from "../../services/apify.js";
+import { searchCompanies, searchProfiles } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
@@ -12,20 +8,23 @@ interface Args {
   company_url?: string;
   company_name?: string;
   role?: string;
+  role_retry?: boolean;
   candidate_urls?: string[];
   confirm?: boolean;
 }
 
-const ROSTER_LIMIT = 40;
 const ROLE_SEARCH_LIMIT = 25;
 const MAX_CANDIDATES = 20;
 
 // Account-based "best way into [Company]" — a multi-call flow built on top of
 // the same per-prospect pipeline analyze_prospect uses (Cassidy enrich + match):
-//   0. company_name, no company_url  -> resolve the name to a LinkedIn company URL.
-//   1. company_url (+ optional role) -> role given: LinkedIn people-search scoped to
-//      that company + title (precise). No role: fall back to a general roster
-//      scrape. Either way, return candidates for the AI to pick from.
+//   0. company_name, no company_url  -> resolve the name to a LinkedIn company URL
+//      (or the user can paste one directly if none of the matches are right).
+//   1. company_url, no role          -> ask the user for a role, then search.
+//      company_url + role            -> LinkedIn people-search scoped to that
+//      company + title. Zero results: try one reworded/broader variation
+//      (role_retry:true) before asking the user to revise their filters —
+//      never silently falls back to an unfiltered roster.
 //   2. + candidate_urls              -> preview how many NEW searches analyzing them would cost.
 //   3. + candidate_urls + confirm    -> run it, charging quota per new candidate, return a ranking.
 // Billing is handled inside run() (per-candidate, dedup'd by URL) rather than
@@ -47,7 +46,9 @@ export const analyze_company: ToolHandler<Args> = {
       const lines = companies.map((c, i) => `${i + 1}. ${c.name}${c.location ? ` — ${c.location}` : ""}\n   ${c.linkedinUrl}`);
       return text(
         `Found ${companies.length} companies matching "${args.company_name}":\n${lines.join("\n")}\n\n` +
-          "Confirm the right one with the user, then call analyze_company again with company_url set to it.",
+          "Confirm the right one with the user, then call analyze_company again with company_url set to it. " +
+          "If none of these are the right company, ask the user to paste the correct LinkedIn company URL " +
+          "themselves and call analyze_company again with that company_url instead.",
       );
     }
 
@@ -62,8 +63,10 @@ export const analyze_company: ToolHandler<Args> = {
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
       if (!args.role) {
         return text(
-          "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\", \"Director of Finance\"), " +
-            "then call analyze_company again with company_url + role to search for matching people at that company.",
+          "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\", \"Director of Finance\"). " +
+            "Turn their answer into a specific job-title filter value — this gets passed directly to a LinkedIn " +
+            "title search, so it needs to look like a real title, not a vague description. Then call analyze_company " +
+            "again with company_url + role to search for matching people at that company.",
         );
       }
 
@@ -75,26 +78,18 @@ export const analyze_company: ToolHandler<Args> = {
       }
 
       if (!candidates.length) {
-        // Fall back to a general roster pull so the AI still has something to work with.
-        let roster;
-        try {
-          roster = await scrapeCompanyRoster(args.company_url, ROSTER_LIMIT);
-        } catch (err) {
-          return text(`Couldn't load that company's employees either: ${err instanceof Error ? err.message : "unknown error"}.`, true);
-        }
-        if (!roster.length) {
+        if (!args.role_retry) {
           return text(
-            "No matches for that role, and no employees at all came back for that company URL — it's likely wrong " +
-              "or outdated rather than the company having no people on LinkedIn. Re-resolve it with company_name " +
-              "and try again with the fresh URL, rather than assuming there are no results.",
-            true,
+            `No matches for "${args.role}" at this company. Try a different phrasing or a related title ` +
+              "(e.g. a synonym, broader seniority, or alternate wording — don't ask the user yet), then call " +
+              "analyze_company again with company_url + the new role + role_retry:true.",
           );
         }
-        const lines = roster.map((e, i) => `${i + 1}. ${e.name}${e.title ? ` — ${e.title}` : ""}\n   ${e.linkedinUrl}`);
         return text(
-          `No exact matches for "${args.role}" — here's the general roster instead (${roster.length} people):\n${lines.join("\n")}\n\n` +
-            `Pick likely matches yourself (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
-            "company_url + candidate_urls to preview the cost before analyzing.",
+          `Still no matches after trying a different phrasing. Ask the user to revise their filters — a different ` +
+            "role, broader seniority, or a different title entirely — then call analyze_company again with the " +
+            "new role (and role_retry unset, to get a fresh two-try budget).",
+          true,
         );
       }
 
