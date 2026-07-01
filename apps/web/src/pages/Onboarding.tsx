@@ -114,6 +114,20 @@ export function Onboarding() {
 
   const mcpUrl = `${window.location.origin}/mcp`;
 
+  // Cross-fade between stages: briefly play a fade-out on the outgoing stage
+  // before swapping to the incoming one, instead of an instant unmount.
+  const [displayStage, setDisplayStage] = useState(stage);
+  const [leaving, setLeaving] = useState(false);
+  useEffect(() => {
+    if (stage === displayStage) return;
+    setLeaving(true);
+    const t = setTimeout(() => {
+      setDisplayStage(stage);
+      setLeaving(false);
+    }, 180);
+    return () => clearTimeout(t);
+  }, [stage, displayStage]);
+
   return (
     <div className="mx-auto max-w-xl px-6 py-16">
       <Steps stage={stage} />
@@ -124,8 +138,8 @@ export function Onboarding() {
         <p className="animate-fade-up mt-4 rounded-md bg-tint-brand p-3 text-sm text-brand">{notice}</p>
       )}
 
-      <div key={stage} className="animate-fade-up">
-        {stage === "workspace" && (
+      <div key={displayStage} className={leaving ? "animate-fade-out" : "animate-fade-up"}>
+        {displayStage === "workspace" && (
           <Card title="Create your workspace" subtitle="Just your company name — we'll use it to start building your team's social map.">
             <Field label="Company name">
               <input className="input" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Acme Inc." />
@@ -139,7 +153,7 @@ export function Onboarding() {
           </Card>
         )}
 
-        {stage === "import" && (
+        {displayStage === "import" && (
           <Card
             title="Import your team"
             subtitle="We'll pull every teammate's LinkedIn profile — schools, employers, and location — to map your team's social capital."
@@ -158,7 +172,7 @@ export function Onboarding() {
           </Card>
         )}
 
-        {stage === "enriching" && (
+        {displayStage === "enriching" && (
           <Card title="Mapping your team's social capital…">
             <EnrichingNotes />
             <div className="mt-5 h-3 w-full overflow-hidden rounded-full bg-gray-200">
@@ -176,9 +190,9 @@ export function Onboarding() {
           </Card>
         )}
 
-        {stage === "connections" && <ConnectionsStep onContinue={() => setStage("connector")} />}
+        {displayStage === "connections" && <ConnectionsStep onContinue={() => setStage("connector")} />}
 
-        {stage === "connector" && (
+        {displayStage === "connector" && (
           <Card
             title="Add the Commonality connector in Claude"
             subtitle="One link to your AI, and you can start asking for warm paths immediately."
