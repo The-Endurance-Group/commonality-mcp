@@ -51,6 +51,14 @@ export const analyze_company: ToolHandler<Args> = {
       );
     }
 
+    if (!/linkedin\.com\/company\//i.test(args.company_url)) {
+      return text(
+        `"${args.company_url}" doesn't look like a LinkedIn company page URL (should contain linkedin.com/company/...). ` +
+          "Don't guess one — call analyze_company with company_name instead to resolve the real URL first.",
+        true,
+      );
+    }
+
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
       if (!args.role) {
         return text(
@@ -74,7 +82,14 @@ export const analyze_company: ToolHandler<Args> = {
         } catch (err) {
           return text(`Couldn't load that company's employees either: ${err instanceof Error ? err.message : "unknown error"}.`, true);
         }
-        if (!roster.length) return text("No employees found for that company URL.", true);
+        if (!roster.length) {
+          return text(
+            "No matches for that role, and no employees at all came back for that company URL — it's likely wrong " +
+              "or outdated rather than the company having no people on LinkedIn. Re-resolve it with company_name " +
+              "and try again with the fresh URL, rather than assuming there are no results.",
+            true,
+          );
+        }
         const lines = roster.map((e, i) => `${i + 1}. ${e.name}${e.title ? ` — ${e.title}` : ""}\n   ${e.linkedinUrl}`);
         return text(
           `No exact matches for "${args.role}" — here's the general roster instead (${roster.length} people):\n${lines.join("\n")}\n\n` +

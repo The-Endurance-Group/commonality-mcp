@@ -45,8 +45,8 @@ export const TOOL_DEFS: McpToolDef[] = [
     inputSchema: {
       type: "object",
       properties: {
-        company_name: { type: "string", description: "Target company's name, if you don't have its LinkedIn URL yet" },
-        company_url: { type: "string", description: "Target company's LinkedIn URL" },
+        company_name: { type: "string", description: "Target company's name — use this to resolve the real LinkedIn URL. Prefer this over guessing company_url yourself." },
+        company_url: { type: "string", description: "Target company's LinkedIn URL, from a prior company_name lookup — never guess this" },
         role: { type: "string", description: "Job title/role to search for at that company, e.g. \"VP of Sales\"" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
         confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },
