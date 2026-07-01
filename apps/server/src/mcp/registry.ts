@@ -1,6 +1,7 @@
 import type { McpToolDef, ToolHandler, ToolName } from "@commonality/shared";
 import { analyze_prospect } from "./tools/analyze_prospect.js";
 import { analyze_company } from "./tools/analyze_company.js";
+import { add_employee } from "./tools/add_employee.js";
 import { search_prospects } from "./tools/search_prospects.js";
 import { generate_outreach } from "./tools/generate_outreach.js";
 import { call_prep } from "./tools/call_prep.js";
@@ -16,6 +17,7 @@ import { get_usage } from "./tools/get_usage.js";
 export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
   analyze_prospect,
   analyze_company,
+  add_employee,
   search_prospects,
   generate_outreach,
   call_prep,
@@ -54,6 +56,18 @@ export const TOOL_DEFS: McpToolDef[] = [
       },
     },
     usesQuota: true,
+  },
+  {
+    name: "add_employee",
+    description: "Add one person to your team roster by their LinkedIn profile URL, so their connections/background count toward warm paths.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        linkedin_url: { type: "string", description: "The person's LinkedIn profile URL" },
+        name: { type: "string", description: "Their name, if known" },
+      },
+      required: ["linkedin_url"],
+    },
   },
   {
     name: "search_prospects",
