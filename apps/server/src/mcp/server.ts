@@ -104,9 +104,15 @@ mcpRouter.post("/", requireAuth, async (req, res) => {
   const { id, method, params } = body;
 
   switch (method) {
-    case "initialize":
-      res.json(rpcResult(id, { protocolVersion: PROTOCOL_VERSION, capabilities: { tools: {} }, serverInfo: SERVER_INFO }));
+    case "initialize": {
+      // Echo the client's requested protocol version if it sent one, rather
+      // than always asserting ours - keeps us honest with the MCP spec's
+      // negotiation model for clients other than Claude (e.g. ChatGPT).
+      const requestedVersion = params?.protocolVersion;
+      const protocolVersion = typeof requestedVersion === "string" ? requestedVersion : PROTOCOL_VERSION;
+      res.json(rpcResult(id, { protocolVersion, capabilities: { tools: {} }, serverInfo: SERVER_INFO }));
       return;
+    }
     case "notifications/initialized":
       res.status(204).end(); // notification - no response body
       return;

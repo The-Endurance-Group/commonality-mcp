@@ -91,21 +91,41 @@ export function Dashboard() {
   );
 }
 
+type AiClient = "claude" | "chatgpt";
+const AI_CLIENT_LABELS: Record<AiClient, string> = { claude: "Claude", chatgpt: "ChatGPT" };
+
 function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
+  const [aiClient, setAiClient] = useState<AiClient>("claude");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState(false);
 
+  const clientLabel = AI_CLIENT_LABELS[aiClient];
   const inviteMessage =
     `Join us on Commonality:\n` +
     `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. In Claude, go to Settings → Connectors → Add custom connector, and paste this URL: ${mcpUrl}\n` +
-    `3. Sign in with your email when prompted, then ask Claude to find a warm path to a prospect.`;
+    `2. In ${clientLabel}, go to Settings → Connectors → Add ${aiClient === "claude" ? "custom " : ""}connector, and paste this URL: ${mcpUrl}\n` +
+    `3. Sign in with your email when prompted, then ask ${clientLabel} to find a warm path to a prospect.`;
 
   return (
     <section className="rounded-lg border border-gray-100 bg-white p-6">
-      <h2 className="text-lg font-semibold text-ink">Connect to Claude</h2>
+      <div className="flex items-center justify-between">
+        <h2 className="text-lg font-semibold text-ink">Connect to {clientLabel}</h2>
+        <div className="flex gap-1.5">
+          {(Object.keys(AI_CLIENT_LABELS) as AiClient[]).map((c) => (
+            <button
+              key={c}
+              className={`rounded-md px-2.5 py-1 text-xs font-medium ${
+                aiClient === c ? "bg-tint-brand text-brand" : "text-lavender hover:bg-gray-50"
+              }`}
+              onClick={() => setAiClient(c)}
+            >
+              {AI_CLIENT_LABELS[c]}
+            </button>
+          ))}
+        </div>
+      </div>
       <p className="mt-1 text-sm text-lavender">
-        Add this URL as a custom connector in Claude → Settings → Connectors, then ask Claude to find a warm path.
+        Add this URL as a custom connector in {clientLabel} → Settings → Connectors, then ask {clientLabel} to find a warm path.
       </p>
       <div className="mt-3 flex items-center gap-2">
         <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
