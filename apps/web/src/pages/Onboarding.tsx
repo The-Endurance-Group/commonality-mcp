@@ -502,49 +502,15 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
   );
 }
 
-type AiClient = "claude" | "chatgpt";
-
-const AI_CLIENT_STEPS: Record<AiClient, { label: string; steps: string[]; askNote: string }> = {
-  claude: {
-    label: "Claude",
-    steps: ["Open Claude → Settings → Connectors → Add custom connector.", "Paste this URL:"],
-    askNote: "Sign in with your email when prompted, then ask Claude to find a warm path.",
-  },
-  chatgpt: {
-    label: "ChatGPT",
-    steps: ["Open ChatGPT → Settings → Connectors → Add connector.", "Paste this URL:"],
-    askNote: "Sign in with your email when prompted, then ask ChatGPT to find a warm path.",
-  },
-};
-
 function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void }) {
-  const [aiClient, setAiClient] = useState<AiClient | null>(null);
-
-  if (!aiClient) {
-    return (
-      <Card title="Which AI do you use?" subtitle="We'll show you the exact steps to connect Commonality.">
-        <div className="flex gap-3">
-          <button className="btn-secondary flex-1" onClick={() => setAiClient("claude")}>
-            Claude
-          </button>
-          <button className="btn-secondary flex-1" onClick={() => setAiClient("chatgpt")}>
-            ChatGPT
-          </button>
-        </div>
-      </Card>
-    );
-  }
-
-  const client = AI_CLIENT_STEPS[aiClient];
   return (
     <Card
-      title={`Add the Commonality connector in ${client.label}`}
+      title="Add the Commonality connector in Claude"
       subtitle="One link to your AI, and you can start asking for warm paths immediately."
     >
       <ol className="list-decimal space-y-2 pl-5 text-sm text-lavender">
-        {client.steps.map((s) => (
-          <li key={s}>{s}</li>
-        ))}
+        <li>Open Claude → Settings → Connectors → Add custom connector.</li>
+        <li>Paste this URL:</li>
       </ol>
       <div className="mt-2 flex items-center gap-2">
         <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
@@ -552,20 +518,17 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
           Copy
         </button>
       </div>
-      <p className="mt-3 text-sm text-lavender">{client.askNote}</p>
-      <button className="btn-link mt-2" onClick={() => setAiClient(null)}>
-        ← Use a different AI
-      </button>
+      <p className="mt-3 text-sm text-lavender">
+        Sign in with your email when prompted, then ask Claude to find a warm path.
+      </p>
       <button className="btn-primary mt-4" onClick={onDone}>
         Go to dashboard
       </button>
 
-      {aiClient === "claude" && (
-        <div className="mt-6 border-t border-gray-100 pt-6">
-          <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-          <ConnectorDemo />
-        </div>
-      )}
+      <div className="mt-6 border-t border-gray-100 pt-6">
+        <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
+        <ConnectorDemo />
+      </div>
     </Card>
   );
 }

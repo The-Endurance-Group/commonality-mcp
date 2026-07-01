@@ -223,55 +223,25 @@ function CollapsibleCard({
   );
 }
 
-type AiClient = "claude" | "chatgpt";
-const AI_CLIENT_LABELS: Record<AiClient, string> = { claude: "Claude", chatgpt: "ChatGPT" };
-
-function defaultInviteMessage(aiClient: AiClient, appUrl: string, mcpUrl: string): string {
-  const clientLabel = AI_CLIENT_LABELS[aiClient];
+function defaultInviteMessage(appUrl: string, mcpUrl: string): string {
   return (
     `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
     `our team's shared schools, past employers, and connections:\n` +
     `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. In ${clientLabel}, go to Settings → Connectors → Add ${aiClient === "claude" ? "custom " : ""}connector, and paste this URL: ${mcpUrl}\n` +
-    `3. Sign in with your email when prompted, then ask ${clientLabel} to find a warm path to a prospect.`
+    `2. In Claude, go to Settings → Connectors → Add custom connector, and paste this URL: ${mcpUrl}\n` +
+    `3. Sign in with your email when prompted, then ask Claude to find a warm path to a prospect.`
   );
 }
 
 function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
-  const [aiClient, setAiClient] = useState<AiClient>("claude");
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState(false);
-  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage("claude", appUrl, mcpUrl));
-  const [inviteEdited, setInviteEdited] = useState(false);
-
-  const clientLabel = AI_CLIENT_LABELS[aiClient];
-
-  function selectAiClient(c: AiClient) {
-    setAiClient(c);
-    // Only replace the message with the new client's default if the user
-    // hasn't customized it themselves - don't clobber their edits.
-    if (!inviteEdited) setInviteMessage(defaultInviteMessage(c, appUrl, mcpUrl));
-  }
+  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage(appUrl, mcpUrl));
 
   return (
     <CollapsibleCard
-      title={`Connect to ${clientLabel}`}
-      subtitle={`Add this URL as a custom connector in ${clientLabel} → Settings → Connectors, then ask ${clientLabel} to find a warm path.`}
-      actions={
-        <div className="flex gap-1.5">
-          {(Object.keys(AI_CLIENT_LABELS) as AiClient[]).map((c) => (
-            <button
-              key={c}
-              className={`rounded-md px-2.5 py-1 text-xs font-medium ${
-                aiClient === c ? "bg-tint-brand text-brand" : "text-lavender hover:bg-gray-50"
-              }`}
-              onClick={() => selectAiClient(c)}
-            >
-              {AI_CLIENT_LABELS[c]}
-            </button>
-          ))}
-        </div>
-      }
+      title="Connect to Claude"
+      subtitle="Add this URL as a custom connector in Claude → Settings → Connectors, then ask Claude to find a warm path."
     >
       <div className="flex items-center gap-2">
         <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
@@ -287,12 +257,10 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         </button>
       </div>
 
-      {aiClient === "claude" && (
-        <div className="mt-5">
-          <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-          <ConnectorDemo />
-        </div>
-      )}
+      <div className="mt-5">
+        <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
+        <ConnectorDemo />
+      </div>
 
       <div className="mt-5 border-t border-gray-100 pt-5">
         <h3 className="text-sm font-semibold text-ink">Invite a teammate</h3>
@@ -302,10 +270,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         <textarea
           className="input mt-3 h-28 font-mono text-xs"
           value={inviteMessage}
-          onChange={(e) => {
-            setInviteMessage(e.target.value);
-            setInviteEdited(true);
-          }}
+          onChange={(e) => setInviteMessage(e.target.value)}
         />
         <button
           className="btn-secondary mt-3"
