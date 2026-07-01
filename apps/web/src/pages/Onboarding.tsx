@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/clerk-react";
+import { useAuth, useUser } from "@clerk/clerk-react";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
@@ -6,6 +6,29 @@ import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
 type Stage = "workspace" | "import" | "enriching" | "connections" | "connector";
+
+// Free/generic email providers - never autofill a company domain from these,
+// since the domain wouldn't actually belong to the user's company.
+const GENERIC_EMAIL_DOMAINS = new Set([
+  "gmail.com",
+  "yahoo.com",
+  "outlook.com",
+  "hotmail.com",
+  "icloud.com",
+  "aol.com",
+  "live.com",
+  "msn.com",
+  "protonmail.com",
+  "proton.me",
+  "mail.com",
+  "gmx.com",
+]);
+
+function suggestedDomain(email: string | null | undefined): string {
+  const domain = email?.split("@")[1]?.toLowerCase().trim();
+  if (!domain || GENERIC_EMAIL_DOMAINS.has(domain)) return "";
+  return domain;
+}
 
 const STAGE_ORDER: Stage[] = ["workspace", "import", "enriching", "connections", "connector"];
 const STAGE_LABELS: Record<Stage, string> = {
@@ -26,6 +49,7 @@ const enrichingNotes = [
 
 export function Onboarding() {
   const { getToken } = useAuth();
+  const { user } = useUser();
   const navigate = useNavigate();
   const { needsOnboarding, setToken } = useAuthStore();
   const [stage, setStage] = useState<Stage>(needsOnboarding ? "workspace" : "import");
@@ -35,7 +59,16 @@ export function Onboarding() {
 
   // Stage 1 - create workspace
   const [companyName, setCompanyName] = useState("");
-  const [domain, setDomain] = useState("");
+  const [domain, setDomain] = useState(() => suggestedDomain(user?.primaryEmailAddress?.emailAddress));
+
+  // Clerk's user loads asynchronously - fill in the suggestion once it's
+  // available if the field is still empty and the user hasn't typed yet.
+  useEffect(() => {
+    if (domain) return;
+    const suggestion = suggestedDomain(user?.primaryEmailAddress?.emailAddress);
+    if (suggestion) setDomain(suggestion);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.primaryEmailAddress?.emailAddress]);
 
   async function createWorkspace() {
     setBusy(true);
@@ -45,7 +78,7 @@ export function Onboarding() {
       const res = await fetch("/api/auth/onboarding", {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${clerkToken}` },
-        body: JSON.stringify({ companyName, domain: domain || undefined }),
+        body: JSON.stringify({ companyName, domain }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "Failed to create workspace");
@@ -144,10 +177,10 @@ export function Onboarding() {
             <Field label="Company name">
               <input className="input" value={companyName} onChange={(e) => setCompanyName(e.target.value)} placeholder="Acme Inc." />
             </Field>
-            <Field label="Email domain (optional - lets teammates auto-join)">
+            <Field label="Email domain (required - lets teammates on this domain auto-join)">
               <input className="input" value={domain} onChange={(e) => setDomain(e.target.value)} placeholder="acme.com" />
             </Field>
-            <button className="btn-primary" disabled={busy || !companyName.trim()} onClick={createWorkspace}>
+            <button className="btn-primary" disabled={busy || !companyName.trim() || !domain.trim()} onClick={createWorkspace}>
               {busy ? "Creating…" : "Create workspace"}
             </button>
           </Card>

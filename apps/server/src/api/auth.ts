@@ -59,6 +59,10 @@ authRouter.post("/onboarding", async (req, res) => {
     res.status(400).json({ error: "companyName required" });
     return;
   }
+  if (!domain || !domain.trim()) {
+    res.status(400).json({ error: "domain required" });
+    return;
+  }
   try {
     const claims = await createWorkspace(email, companyName.trim(), domain);
     const { token, expiresIn } = signAccessToken(claims);
