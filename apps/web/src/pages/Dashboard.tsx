@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 
@@ -16,6 +17,8 @@ export function Dashboard() {
   });
 
   const employees = roster.data?.employees ?? [];
+  const appUrl = window.location.origin;
+  const mcpUrl = `${appUrl}/mcp`;
 
   return (
     <div className="space-y-8">
@@ -24,6 +27,8 @@ export function Dashboard() {
         <Stat label="Searches used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "—"} />
         <Stat label="Team members" value={String(employees.length)} />
       </section>
+
+      <ConnectorCard mcpUrl={mcpUrl} appUrl={appUrl} />
 
       <section>
         <div className="mb-3 flex items-center justify-between">
@@ -67,6 +72,56 @@ export function Dashboard() {
         </div>
       </section>
     </div>
+  );
+}
+
+function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
+  const [copiedUrl, setCopiedUrl] = useState(false);
+  const [copiedInvite, setCopiedInvite] = useState(false);
+
+  const inviteMessage =
+    `Join us on Commonality:\n` +
+    `1. Sign up at ${appUrl} with your work email.\n` +
+    `2. In Claude, go to Settings → Connectors → Add custom connector, and paste this URL: ${mcpUrl}\n` +
+    `3. Sign in with your email when prompted, then ask Claude to find a warm path to a prospect.`;
+
+  return (
+    <section className="rounded-lg border border-gray-100 bg-white p-6">
+      <h2 className="text-lg font-semibold text-ink">Connect to Claude</h2>
+      <p className="mt-1 text-sm text-lavender">
+        Add this URL as a custom connector in Claude → Settings → Connectors, then ask Claude to find a warm path.
+      </p>
+      <div className="mt-3 flex items-center gap-2">
+        <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
+        <button
+          className="btn-secondary"
+          onClick={() => {
+            navigator.clipboard.writeText(mcpUrl);
+            setCopiedUrl(true);
+            setTimeout(() => setCopiedUrl(false), 2000);
+          }}
+        >
+          {copiedUrl ? "Copied!" : "Copy"}
+        </button>
+      </div>
+
+      <div className="mt-5 border-t border-gray-100 pt-5">
+        <h3 className="text-sm font-semibold text-ink">Invite a teammate</h3>
+        <p className="mt-1 text-sm text-lavender">
+          Copy a ready-to-send message with sign-up and connector setup steps for a teammate.
+        </p>
+        <button
+          className="btn-secondary mt-3"
+          onClick={() => {
+            navigator.clipboard.writeText(inviteMessage);
+            setCopiedInvite(true);
+            setTimeout(() => setCopiedInvite(false), 2000);
+          }}
+        >
+          {copiedInvite ? "Copied!" : "Copy invite message"}
+        </button>
+      </div>
+    </section>
   );
 }
 
