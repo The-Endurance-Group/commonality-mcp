@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { type ReactNode, useState } from "react";
 import { Link } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
@@ -61,10 +61,12 @@ export function Dashboard() {
 
       <ExamplePromptsCard isAdmin={isAdmin} />
 
-      <section>
-        <div className="mb-3 flex items-center justify-between">
-          <h2 className="text-lg font-semibold text-ink">Team roster</h2>
-          {isAdmin && (
+      <ConnectionsCard />
+
+      <CollapsibleCard
+        title="Team roster"
+        actions={
+          isAdmin ? (
             <div className="flex gap-2">
               <Link to="/onboarding" className="btn-primary">
                 Import team
@@ -73,8 +75,9 @@ export function Dashboard() {
                 {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
               </button>
             </div>
-          )}
-        </div>
+          ) : undefined
+        }
+      >
         <p className="mb-3 text-sm text-lavender">
           Someone missing? Someone not belong? Reach out to your admin so they can add or remove people
           {adminEmail && !isAdmin ? ` (${adminEmail})` : ""}.
@@ -124,8 +127,46 @@ export function Dashboard() {
             </tbody>
           </table>
         </div>
-      </section>
+      </CollapsibleCard>
     </div>
+  );
+}
+
+// Shared shell for every major dashboard section - a bordered white card
+// with a title/actions header that can collapse, so users can hide
+// sections they don't care about instead of scrolling past them.
+function CollapsibleCard({
+  title,
+  subtitle,
+  actions,
+  children,
+}: {
+  title: ReactNode;
+  subtitle?: ReactNode;
+  actions?: ReactNode;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(true);
+  return (
+    <section className="rounded-lg border border-gray-100 bg-white p-6">
+      <div className="flex items-center justify-between gap-3">
+        <button
+          className="flex min-w-0 items-center gap-2 text-left"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+        >
+          <span className={`shrink-0 text-lavender transition-transform ${open ? "rotate-90" : ""}`}>›</span>
+          <h2 className="truncate text-lg font-semibold text-ink">{title}</h2>
+        </button>
+        {actions}
+      </div>
+      {open && (
+        <>
+          {subtitle && <p className="mt-1 text-sm text-lavender">{subtitle}</p>}
+          <div className="mt-4">{children}</div>
+        </>
+      )}
+    </section>
   );
 }
 
@@ -160,9 +201,10 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
   }
 
   return (
-    <section className="rounded-lg border border-gray-100 bg-white p-6">
-      <div className="flex items-center justify-between">
-        <h2 className="text-lg font-semibold text-ink">Connect to {clientLabel}</h2>
+    <CollapsibleCard
+      title={`Connect to ${clientLabel}`}
+      subtitle={`Add this URL as a custom connector in ${clientLabel} → Settings → Connectors, then ask ${clientLabel} to find a warm path.`}
+      actions={
         <div className="flex gap-1.5">
           {(Object.keys(AI_CLIENT_LABELS) as AiClient[]).map((c) => (
             <button
@@ -176,11 +218,9 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
             </button>
           ))}
         </div>
-      </div>
-      <p className="mt-1 text-sm text-lavender">
-        Add this URL as a custom connector in {clientLabel} → Settings → Connectors, then ask {clientLabel} to find a warm path.
-      </p>
-      <div className="mt-3 flex items-center gap-2">
+      }
+    >
+      <div className="flex items-center gap-2">
         <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
         <button
           className="btn-secondary"
@@ -218,7 +258,106 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
           {copiedInvite ? "Copied!" : "Copy invite message"}
         </button>
       </div>
-    </section>
+    </CollapsibleCard>
+  );
+}
+
+interface RosterEmployee { id: string; name: string }
+
+function ConnectionsCard() {
+  const roster = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => apiFetch<{ employees: RosterEmployee[] }>("/api/employees"),
+  });
+  const employees = roster.data?.employees ?? [];
+
+  const [employeeId, setEmployeeId] = useState("");
+  const [file, setFile] = useState<File | null>(null);
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [added, setAdded] = useState<{ name: string; saved: number }[]>([]);
+
+  async function upload() {
+    if (!employeeId || !file) return;
+    setBusy(true);
+    setError(null);
+    try {
+      const csv = await file.text();
+      const { saved } = await apiFetch<{ saved: number }>(`/api/employees/${employeeId}/connections`, {
+        method: "POST",
+        body: JSON.stringify({ csv }),
+      });
+      const empName = employees.find((e) => e.id === employeeId)?.name ?? "Teammate";
+      setAdded((a) => [...a, { name: empName, saved }]);
+      setEmployeeId("");
+      setFile(null);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't save that file");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <CollapsibleCard
+      title="Add your LinkedIn connections"
+      subtitle="1st-degree LinkedIn connections are the strongest warm-path signal Commonality has - add yours or a teammate's here anytime."
+    >
+      <div>
+        <p className="text-sm font-medium text-ink">How to export them from LinkedIn:</p>
+        <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-lavender">
+          <li>On LinkedIn, click your profile photo → <span className="font-medium text-ink">Settings &amp; Privacy</span>.</li>
+          <li>Go to the <span className="font-medium text-ink">Data privacy</span> tab → <span className="font-medium text-ink">Get a copy of your data</span>.</li>
+          <li>Select <span className="font-medium text-ink">Connections</span>, then click <span className="font-medium text-ink">Request archive</span>.</li>
+          <li>LinkedIn emails you a download link (usually within a few minutes) - download it and unzip it.</li>
+          <li>Upload the <span className="font-medium text-ink">Connections.csv</span> file below.</li>
+        </ol>
+      </div>
+
+      {added.length > 0 && (
+        <div className="mt-4 space-y-1.5">
+          {added.map((a, i) => (
+            <div key={i} className="flex items-center gap-2 rounded-md bg-tint-brand px-3 py-2 text-sm text-brand">
+              <span>✓</span>
+              <span className="font-medium">{a.name}</span>
+              <span className="text-lavender">- {a.saved} connections added</span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div className="mt-4 grid gap-4 sm:grid-cols-2">
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-lavender">Whose connections is this?</span>
+          <select className="input" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
+            <option value="">Select a teammate…</option>
+            {employees.map((e) => (
+              <option key={e.id} value={e.id}>{e.name}</option>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="mb-1 block text-sm font-medium text-lavender">Connections.csv</span>
+          <input
+            type="file"
+            accept=".csv"
+            className="input"
+            onChange={(e) => setFile(e.target.files?.[0] ?? null)}
+          />
+        </label>
+      </div>
+
+      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+      <div className="mt-4 rounded-lg bg-tint-accent p-4 text-sm text-ink">
+        Some people aren't comfortable sharing this, and that's completely okay - it's optional and
+        not required to use Commonality.
+      </div>
+
+      <button className="btn-primary mt-4" disabled={busy || !employeeId || !file} onClick={upload}>
+        {busy ? "Saving…" : "Upload"}
+      </button>
+    </CollapsibleCard>
   );
 }
 
@@ -257,13 +396,11 @@ function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
   const [openTitle, setOpenTitle] = useState<string | null>(null);
 
   return (
-    <section className="rounded-lg border border-gray-100 bg-white p-6">
-      <h2 className="text-lg font-semibold text-ink">Try asking your AI</h2>
-      <p className="mt-1 text-sm text-lavender">
-        Once connected, here's what you can ask - no need to remember exact tool names.
-      </p>
-
-      <div className="mt-4 space-y-2">
+    <CollapsibleCard
+      title="Try asking your AI"
+      subtitle="Once connected, here's what you can ask - no need to remember exact tool names."
+    >
+      <div className="space-y-2">
         {categories.map((cat) => (
           <PromptCategory
             key={cat.title}
@@ -274,7 +411,7 @@ function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
           />
         ))}
       </div>
-    </section>
+    </CollapsibleCard>
   );
 }
 
