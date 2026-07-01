@@ -1,9 +1,10 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { apiFetch } from "../lib/api";
 
 interface Invite { id: string; email: string; accepted: boolean; expires_at: string; created_at: string }
 interface BulkSummary { invited: number; skipped: number; invalid: number }
+interface Company { domain: string | null }
 
 const MAX_BULK = 50;
 
@@ -26,6 +27,7 @@ export function Invites() {
   const [summary, setSummary] = useState<BulkSummary | null>(null);
 
   const list = useQuery({ queryKey: ["invites"], queryFn: () => apiFetch<{ invites: Invite[] }>("/api/invites") });
+  const company = useQuery({ queryKey: ["company"], queryFn: () => apiFetch<Company>("/api/companies/me") });
 
   const parsed = parseEmails(text);
   const overLimit = parsed.length > MAX_BULK;
@@ -49,6 +51,8 @@ export function Invites() {
 
   return (
     <div className="space-y-8">
+      <DomainSection domain={company.data?.domain ?? null} />
+
       <section>
         <h2 className="text-lg font-semibold text-ink">Invite teammates</h2>
         <p className="mt-1 text-sm text-lavender">
@@ -116,5 +120,65 @@ export function Invites() {
         </div>
       </section>
     </div>
+  );
+}
+
+function DomainSection({ domain }: { domain: string | null }) {
+  const qc = useQueryClient();
+  const [value, setValue] = useState(domain ?? "");
+  const [dirty, setDirty] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [saved, setSaved] = useState(false);
+
+  // Sync in the fetched value once it arrives, without clobbering an in-progress edit.
+  useEffect(() => {
+    if (!dirty && domain !== null) setValue(domain);
+  }, [domain, dirty]);
+
+  const save = useMutation({
+    mutationFn: () =>
+      apiFetch("/api/companies/me", {
+        method: "PATCH",
+        body: JSON.stringify({ domain: value.trim().toLowerCase() || null }),
+      }),
+    onSuccess: () => {
+      setError(null);
+      setDirty(false);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+      qc.invalidateQueries({ queryKey: ["company"] });
+    },
+    onError: (e) => setError(e instanceof Error ? e.message : "Failed to save"),
+  });
+
+  return (
+    <section className="rounded-lg border border-gray-100 bg-white p-6">
+      <h2 className="text-lg font-semibold text-ink">Company email domain</h2>
+      <p className="mt-1 text-sm text-lavender">
+        Anyone who signs up with this email domain automatically joins your workspace — no invite
+        needed. Didn't set this during onboarding? Add or change it here.
+      </p>
+      <form
+        className="mt-3 flex items-center gap-2"
+        onSubmit={(ev) => {
+          ev.preventDefault();
+          save.mutate();
+        }}
+      >
+        <input
+          className="input"
+          placeholder="acme.com"
+          value={value}
+          onChange={(e) => {
+            setValue(e.target.value);
+            setDirty(true);
+          }}
+        />
+        <button className="btn-primary whitespace-nowrap" disabled={save.isPending}>
+          {save.isPending ? "Saving…" : saved ? "Saved!" : "Save"}
+        </button>
+      </form>
+      {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+    </section>
   );
 }
