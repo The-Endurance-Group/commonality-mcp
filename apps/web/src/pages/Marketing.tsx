@@ -160,7 +160,10 @@ const socialMapPaths = [
   { name: "Alex P.", signal: "Both live in Portland, ME", x: 550, strongest: false },
 ];
 
-const mobileFanX = [-50, -17, 17, 50];
+// Wide enough that the line from the topmost (strongest) node to the
+// prospect clears every other node's circle on the way down, instead of
+// grazing through them.
+const mobileFanX = [-70, -25, 25, 70];
 
 function SocialMapMobile() {
   const colX = 170;
@@ -214,12 +217,12 @@ function SocialMapMobile() {
               strokeWidth="1.5"
               className={p.strongest ? "sm-node-strong" : ""}
             />
-            <text x="0" y="-30" fontSize="14" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
+            <text x="0" y="-42" fontSize="14" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
               {p.name}
             </text>
             <text
               x="0"
-              y="-14"
+              y="-26"
               fontSize="12"
               fill={p.strongest ? "#C45E89" : "#645D69"}
               textAnchor="middle"
@@ -337,33 +340,6 @@ function PipelineGraphic({
   );
 }
 
-
-const features = [
-  {
-    title: "Team network map",
-    desc: "Every shared connection across your team, incl. 1st-degree LinkedIn",
-    icon: "network",
-    tint: "bg-tint-brand text-brand",
-  },
-  {
-    title: "AI-drafted outreach",
-    desc: "Claude or ChatGPT writes the intro, grounded in the connection",
-    icon: "link",
-    tint: "bg-tint-accent text-accent",
-  },
-  {
-    title: "Pipeline tracking",
-    desc: "Never lose track of a warm intro or follow-up",
-    icon: "history",
-    tint: "bg-tint-purple text-purple",
-  },
-  {
-    title: "Lead routing",
-    desc: "Auto-route prospects to the rep with the best connection",
-    icon: "route",
-    tint: "bg-tint-brand text-brand",
-  },
-];
 
 const caseStudies = [
   {
@@ -628,34 +604,6 @@ export function Marketing() {
               Open your workspace
             </Link>
           </SignedIn>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section className="mx-auto max-w-content px-6 py-16">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Everything you need to work warm</h2>
-          <p className="mt-2 text-lavender">
-            Built for sales teams selling through the AI platform they already use.
-          </p>
-        </div>
-
-        <div className="mt-10 grid gap-4 sm:grid-cols-2">
-          {features.map((f, i) => (
-            <div
-              key={f.title}
-              className="animate-fade-up flex items-start gap-4 rounded-lg border border-gray-100 p-5 text-left transition hover:scale-105 hover:shadow-md"
-              style={{ animationDelay: `${i * 0.08}s` }}
-            >
-              <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${f.tint}`}>
-                <Icon name={f.icon} className="" />
-              </div>
-              <div>
-                <div className="text-sm font-semibold text-ink">{f.title}</div>
-                <div className="mt-1 text-sm text-lavender">{f.desc}</div>
-              </div>
-            </div>
-          ))}
         </div>
       </section>
 
