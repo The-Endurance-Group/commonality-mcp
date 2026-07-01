@@ -229,16 +229,6 @@ const promptCategories: { title: string; prompts: string[] }[] = [
       "What's the best way for me to connect with [prospect LinkedIn URL]?",
       "What's our best way into Acme Corp?",
       "Find VPs of Sales at fintech companies in New York.",
-      "Who's my prospect of the day?",
-    ],
-  },
-  {
-    title: "Outreach & follow-up",
-    prompts: [
-      "Draft a LinkedIn message and email for reaching out to [prospect].",
-      "Help me prep for a call with [prospect].",
-      "Push [prospect] to HubSpot with our findings.",
-      "Hand this prospect to Sam - they have a stronger connection.",
     ],
   },
   {
