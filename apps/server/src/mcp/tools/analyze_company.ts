@@ -47,9 +47,10 @@ export const analyze_company: ToolHandler<Args> = {
     const candidateUrls = args.candidate_urls;
     if (candidateUrls.length > MAX_CANDIDATES) {
       return text(
-        `That's ${candidateUrls.length} candidates — analyze_company only handles ${MAX_CANDIDATES} at a time ` +
+        `That's ${candidateUrls.length} candidates, but analyze_company only handles ${MAX_CANDIDATES} at a time ` +
           "(each one takes a real search, one at a time, so a bigger batch could take several minutes). " +
-          "Narrow the role/seniority criteria and pick a smaller set from the roster, then try again.",
+          "Tell the user this and ask them to narrow the role/seniority (e.g. a more specific title) or pick " +
+          `which ${MAX_CANDIDATES} or fewer to analyze first, then call analyze_company again with that smaller list.`,
         true,
       );
     }
