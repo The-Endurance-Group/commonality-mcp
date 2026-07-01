@@ -75,6 +75,10 @@ export function Dashboard() {
             </div>
           )}
         </div>
+        <p className="mb-3 text-sm text-lavender">
+          Someone missing? Someone not belong? Reach out to your admin so they can add or remove people
+          {adminEmail && !isAdmin ? ` (${adminEmail})` : ""}.
+        </p>
         <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-lavender">
@@ -120,10 +124,6 @@ export function Dashboard() {
             </tbody>
           </table>
         </div>
-        <p className="mt-3 text-sm text-lavender">
-          Someone missing? Someone not belong? Reach out to your admin so they can add or remove people
-          {adminEmail && !isAdmin ? ` (${adminEmail})` : ""}.
-        </p>
       </section>
     </div>
   );
