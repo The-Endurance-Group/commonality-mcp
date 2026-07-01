@@ -94,11 +94,19 @@ export function Onboarding() {
   // Stage 2 - import team
   const [companyUrl, setCompanyUrl] = useState("");
   const [pastedUrls, setPastedUrls] = useState("");
+  const [importProgress, setImportProgress] = useState(0);
 
   async function importTeam() {
     setBusy(true);
     setError(null);
     setNotice(null);
+    setImportProgress(4);
+    // No real progress signal for this single request (it's one blocking
+    // LinkedIn scrape), so ease toward ~92% over time and snap to 100% on
+    // completion - keeps the bar visibly moving instead of looking stuck.
+    const tick = setInterval(() => {
+      setImportProgress((p) => (p >= 92 ? p : p + (92 - p) * 0.06));
+    }, 300);
     try {
       const urls = pastedUrls.split(/\s+/).map((u) => u.trim()).filter(Boolean);
       const result = await apiFetch<{ imported: number; remaining: number; limit: number; trimmedByLimit: boolean }>(
@@ -108,6 +116,7 @@ export function Onboarding() {
           body: JSON.stringify(companyUrl ? { companyLinkedinUrl: companyUrl } : { urls }),
         },
       );
+      setImportProgress(100);
       if (result.trimmedByLimit) {
         setNotice(
           `Imported ${result.imported} team members - that's your plan's limit (${result.limit}). ` +
@@ -118,7 +127,9 @@ export function Onboarding() {
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import failed");
     } finally {
+      clearInterval(tick);
       setBusy(false);
+      setImportProgress(0);
     }
   }
 
@@ -202,6 +213,19 @@ export function Onboarding() {
             <button className="btn-primary" disabled={busy || (!companyUrl && !pastedUrls.trim())} onClick={importTeam}>
               {busy ? "Importing…" : "Import team"}
             </button>
+            {busy && (
+              <div>
+                <div className="h-2 w-full overflow-hidden rounded-full bg-gray-200">
+                  <div
+                    className="h-full bg-brand transition-all duration-300 ease-out"
+                    style={{ width: `${importProgress}%` }}
+                  />
+                </div>
+                <p className="mt-2 text-sm text-lavender">
+                  Pulling your team's LinkedIn profiles - this can take up to a minute for larger teams.
+                </p>
+              </div>
+            )}
           </Card>
         )}
 
