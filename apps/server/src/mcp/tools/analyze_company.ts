@@ -43,26 +43,31 @@ export const analyze_company: ToolHandler<Args> = {
       );
     }
 
+    const requested = args.candidate_urls.length;
     const candidateUrls = args.candidate_urls.slice(0, MAX_CANDIDATES);
+    const truncationNote =
+      requested > MAX_CANDIDATES
+        ? `Note: you selected ${requested} candidates — only analyzing the first ${MAX_CANDIDATES}.\n\n`
+        : "";
 
     if (!args.confirm) {
       const unlocked = await Promise.all(candidateUrls.map((u) => isProspectUnlocked(ctx.company_id, u)));
       const newCount = unlocked.filter((u) => !u).length;
       if (newCount === 0) {
         return text(
-          `All ${candidateUrls.length} candidates have already been analyzed for your team — this will be free. ` +
+          `${truncationNote}All ${candidateUrls.length} candidates have already been analyzed for your team — this will be free. ` +
             "Call analyze_company again with the same candidate_urls and confirm:true to see the results.",
         );
       }
       const quota = await checkQuota(ctx);
       if (newCount > quota.remaining) {
         return text(
-          `Analyzing all ${candidateUrls.length} candidates needs ${newCount} new searches, but you only have ${quota.remaining} remaining. ` +
+          `${truncationNote}Analyzing all ${candidateUrls.length} candidates needs ${newCount} new searches, but you only have ${quota.remaining} remaining. ` +
             "Pick fewer candidates, or call again with confirm:true to analyze as many as your quota allows.",
         );
       }
       return text(
-        `This will analyze ${candidateUrls.length} candidates (${newCount} new — the rest were already analyzed and are free), ` +
+        `${truncationNote}This will analyze ${candidateUrls.length} candidates (${newCount} new — the rest were already analyzed and are free), ` +
           `using ${newCount} of your ${quota.remaining} remaining searches. ` +
           "Call analyze_company again with the same candidate_urls and confirm:true to proceed.",
       );
@@ -106,7 +111,7 @@ export const analyze_company: ToolHandler<Args> = {
 
     const charged = outcomes.filter((o) => o.charged).length;
     return text(
-      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
+      `${truncationNote}${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
     );
   },
 };
