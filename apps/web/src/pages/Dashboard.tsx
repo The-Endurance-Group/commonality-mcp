@@ -135,7 +135,8 @@ const AI_CLIENT_LABELS: Record<AiClient, string> = { claude: "Claude", chatgpt: 
 function defaultInviteMessage(aiClient: AiClient, appUrl: string, mcpUrl: string): string {
   const clientLabel = AI_CLIENT_LABELS[aiClient];
   return (
-    `Join us on Commonality:\n` +
+    `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
+    `our team's shared schools, past employers, and connections:\n` +
     `1. Sign up at ${appUrl} with your work email.\n` +
     `2. In ${clientLabel}, go to Settings → Connectors → Add ${aiClient === "claude" ? "custom " : ""}connector, and paste this URL: ${mcpUrl}\n` +
     `3. Sign in with your email when prompted, then ask ${clientLabel} to find a warm path to a prospect.`
