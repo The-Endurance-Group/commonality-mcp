@@ -1,5 +1,5 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
-import { importRoster, TeamLimitError } from "../../services/roster.js";
+import { enrichRosterInBackground, importRoster, TeamLimitError } from "../../services/roster.js";
 import { text } from "./_result.js";
 
 interface Args {
@@ -33,6 +33,7 @@ export const add_employee: ToolHandler<Args> = {
         }
         return text("That person is already on your team roster.");
       }
+      enrichRosterInBackground(ctx.company_id);
       return text(
         `Added ${args.name ?? "that person"} to your team roster. Enrichment (schools, employers, location) ` +
           "runs in the background and usually finishes within a minute or two.",

@@ -1,7 +1,13 @@
 import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
 import { insertLinkedinConnections } from "../db/queries.js";
-import { enrichRosterInBackground, importRoster, rosterStatus, TeamLimitError } from "../services/roster.js";
+import {
+  enrichRosterInBackground,
+  importRoster,
+  removeFromRoster,
+  rosterStatus,
+  TeamLimitError,
+} from "../services/roster.js";
 import { parseConnectionsCsv } from "../services/linkedinCsv.js";
 
 export const employeesRouter: RouterType = Router();
@@ -49,6 +55,33 @@ employeesRouter.post("/import", async (req, res) => {
 // GET /api/employees/enrichment-status - onboarding progress poll.
 employeesRouter.get("/enrichment-status", async (req, res) => {
   res.json(await rosterStatus(req.user!.company_id));
+});
+
+// POST /api/employees/start-enrichment - admins kick off enrichment once
+// they're done reviewing/editing the freshly-imported roster.
+employeesRouter.post("/start-enrichment", async (req, res) => {
+  const user = req.user!;
+  if (user.role !== "admin") {
+    res.status(403).json({ error: "forbidden" });
+    return;
+  }
+  enrichRosterInBackground(user.company_id);
+  res.json({ ok: true });
+});
+
+// DELETE /api/employees/:id - admins remove one person from the roster.
+employeesRouter.delete("/:id", async (req, res) => {
+  const user = req.user!;
+  if (user.role !== "admin") {
+    res.status(403).json({ error: "forbidden" });
+    return;
+  }
+  const removed = await removeFromRoster(user.company_id, req.params.id);
+  if (!removed) {
+    res.status(404).json({ error: "team member not found in your workspace" });
+    return;
+  }
+  res.json({ ok: true });
 });
 
 // POST /api/employees/re-enrich - admins re-run enrichment for the roster.

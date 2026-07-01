@@ -1,11 +1,11 @@
 import { useAuth, useUser } from "@clerk/clerk-react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
-type Stage = "workspace" | "import" | "enriching" | "connections" | "connector";
+type Stage = "workspace" | "import" | "review" | "enriching" | "connections" | "connector";
 
 // Free/generic email providers - never autofill a company domain from these,
 // since the domain wouldn't actually belong to the user's company.
@@ -30,14 +30,18 @@ function suggestedDomain(email: string | null | undefined): string {
   return domain;
 }
 
-const STAGE_ORDER: Stage[] = ["workspace", "import", "enriching", "connections", "connector"];
+const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching", "connections", "connector"];
 const STAGE_LABELS: Record<Stage, string> = {
   workspace: "Workspace",
   import: "Import",
+  review: "Review",
   enriching: "Enrich",
   connections: "Connections",
   connector: "Connect",
 };
+
+// Matches TEAM_LIMITS in apps/server/src/services/roster.ts and the pricing page.
+const TEAM_LIMITS: Record<"free" | "pro", number> = { free: 25, pro: 150 };
 
 const enrichingNotes = [
   "Pulling each teammate's profile - title, schools, employers, and location.",
@@ -51,7 +55,8 @@ export function Onboarding() {
   const { getToken } = useAuth();
   const { user } = useUser();
   const navigate = useNavigate();
-  const { needsOnboarding, setToken } = useAuthStore();
+  const { needsOnboarding, setToken, claims } = useAuthStore();
+  const plan = claims?.plan ?? "free";
   const [stage, setStage] = useState<Stage>(needsOnboarding ? "workspace" : "import");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -123,13 +128,26 @@ export function Onboarding() {
             "There are more people at this company; upgrade to Pro to add them.",
         );
       }
-      setStage("enriching");
+      setStage("review");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Import failed");
     } finally {
       clearInterval(tick);
       setBusy(false);
       setImportProgress(0);
+    }
+  }
+
+  async function startEnrichment() {
+    setBusy(true);
+    setError(null);
+    try {
+      await apiFetch("/api/employees/start-enrichment", { method: "POST" });
+      setStage("enriching");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Couldn't start enrichment");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -229,6 +247,10 @@ export function Onboarding() {
           </Card>
         )}
 
+        {displayStage === "review" && (
+          <ReviewStep plan={plan} busy={busy} onContinue={startEnrichment} />
+        )}
+
         {displayStage === "enriching" && (
           <Card title="Mapping your team's social capital…">
             <EnrichingNotes />
@@ -254,6 +276,112 @@ export function Onboarding() {
         )}
       </div>
     </div>
+  );
+}
+
+interface ReviewEmployee { id: string; name: string }
+
+function ReviewStep({
+  plan,
+  busy,
+  onContinue,
+}: {
+  plan: "free" | "pro";
+  busy: boolean;
+  onContinue: () => void;
+}) {
+  const qc = useQueryClient();
+  const roster = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => apiFetch<{ employees: ReviewEmployee[] }>("/api/employees"),
+  });
+  const employees = roster.data?.employees ?? [];
+
+  const [newUrl, setNewUrl] = useState("");
+  const [addBusy, setAddBusy] = useState(false);
+  const [addError, setAddError] = useState<string | null>(null);
+  const [removingId, setRemovingId] = useState<string | null>(null);
+
+  async function addPerson() {
+    if (!newUrl.trim()) return;
+    setAddBusy(true);
+    setAddError(null);
+    try {
+      await apiFetch("/api/employees/import", {
+        method: "POST",
+        body: JSON.stringify({ urls: [newUrl.trim()] }),
+      });
+      setNewUrl("");
+      await qc.invalidateQueries({ queryKey: ["employees"] });
+    } catch (e) {
+      setAddError(e instanceof Error ? e.message : "Couldn't add that person");
+    } finally {
+      setAddBusy(false);
+    }
+  }
+
+  async function removePerson(id: string) {
+    setRemovingId(id);
+    try {
+      await apiFetch(`/api/employees/${id}`, { method: "DELETE" });
+      await qc.invalidateQueries({ queryKey: ["employees"] });
+    } finally {
+      setRemovingId(null);
+    }
+  }
+
+  return (
+    <Card
+      title="Review your team"
+      subtitle={
+        `These are the first ${employees.length} people who work at your company, according to LinkedIn. ` +
+        "Add or remove anyone before we map their profiles."
+      }
+    >
+      <p className="rounded-lg bg-tint-accent p-4 text-sm text-ink">
+        Free trial: up to {TEAM_LIMITS.free} team members. Pro: up to {TEAM_LIMITS.pro}.{" "}
+        {plan === "free" ? "You're currently on the free trial." : "You're currently on Pro."}
+      </p>
+
+      <div className="max-h-72 space-y-1.5 overflow-y-auto">
+        {employees.length === 0 ? (
+          <p className="text-sm text-lavender">No team members yet.</p>
+        ) : (
+          employees.map((e) => (
+            <div key={e.id} className="flex items-center justify-between gap-3 rounded-md bg-gray-50 px-3 py-2">
+              <span className="text-sm text-ink">{e.name}</span>
+              <button
+                className="shrink-0 text-lavender hover:text-red-600"
+                disabled={removingId === e.id}
+                onClick={() => removePerson(e.id)}
+                aria-label={`Remove ${e.name}`}
+              >
+                ✕
+              </button>
+            </div>
+          ))
+        )}
+      </div>
+
+      <Field label="Add someone by LinkedIn profile URL">
+        <div className="flex gap-2">
+          <input
+            className="input flex-1"
+            value={newUrl}
+            onChange={(e) => setNewUrl(e.target.value)}
+            placeholder="https://www.linkedin.com/in/..."
+          />
+          <button className="btn-secondary" disabled={addBusy || !newUrl.trim()} onClick={addPerson}>
+            {addBusy ? "Adding…" : "Add"}
+          </button>
+        </div>
+      </Field>
+      {addError && <p className="text-sm text-red-600">{addError}</p>}
+
+      <button className="btn-primary" disabled={busy || employees.length === 0} onClick={onContinue}>
+        {busy ? "Starting…" : "Looks good - map their profiles"}
+      </button>
+    </Card>
   );
 }
 

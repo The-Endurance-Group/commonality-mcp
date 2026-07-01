@@ -123,8 +123,22 @@ export async function importRoster(
   const people = newAvailable.slice(0, status.remaining);
 
   const imported = await upsertRoster(companyId, people);
-  enrichRosterInBackground(companyId);
+  // Enrichment is NOT started here - callers that want it immediately (e.g.
+  // adding one person via the MCP tool) call enrichRosterInBackground()
+  // themselves. The web onboarding flow instead lets the admin review/edit
+  // the roster first, then explicitly kicks off enrichment.
   return { imported, remaining: Math.max(0, status.remaining - imported), limit: status.limit, trimmedByLimit };
+}
+
+/** Remove one person from a company's roster (admin action). */
+export async function removeFromRoster(companyId: string, employeeId: string): Promise<boolean> {
+  const { error, count } = await db()
+    .from("employees")
+    .delete({ count: "exact" })
+    .eq("company_id", companyId)
+    .eq("id", employeeId);
+  if (error) throw new Error(`roster delete failed: ${error.message}`);
+  return (count ?? 0) > 0;
 }
 
 export async function rosterStatus(companyId: string): Promise<{ total: number; enriched: number }> {
