@@ -2,6 +2,7 @@ import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
 import { deleteLinkedinConnections, insertLinkedinConnections } from "../db/queries.js";
 import {
+  claimEmployeeForSelf,
   enrichRosterInBackground,
   importRoster,
   removeFromRoster,
@@ -12,18 +13,29 @@ import { parseConnectionsCsv } from "../services/linkedinCsv.js";
 
 export const employeesRouter: RouterType = Router();
 
-// GET /api/employees - the workspace roster.
+// GET /api/employees - the workspace roster. claimedByMe/claimedByOther let
+// the web UI limit self-service pickers (leave team, delete connections) to
+// rows the caller can actually act on - never expose whose claim it actually is.
 employeesRouter.get("/", async (req, res) => {
   const { data, error } = await db()
     .from("employees")
-    .select("id, name, linkedin_url, location, schools, past_companies, enriched_at")
+    .select("id, name, linkedin_url, location, schools, past_companies, enriched_at, claimed_by_user_id")
     .eq("company_id", req.user!.company_id)
     .order("name");
   if (error) {
     res.status(500).json({ error: error.message });
     return;
   }
-  res.json({ employees: data ?? [] });
+  const userId = req.user!.user_id;
+  const employees = ((data ?? []) as { claimed_by_user_id: string | null; [k: string]: unknown }[]).map((e) => {
+    const { claimed_by_user_id, ...rest } = e;
+    return {
+      ...rest,
+      claimedByMe: claimed_by_user_id === userId,
+      claimedByOther: !!claimed_by_user_id && claimed_by_user_id !== userId,
+    };
+  });
+  res.json({ employees });
 });
 
 // POST /api/employees/import - admins import via company URL or profile URLs.
@@ -85,16 +97,28 @@ employeesRouter.delete("/:id", async (req, res) => {
 });
 
 // POST /api/employees/leave - self-service: any signed-in member removes
-// themselves from the roster. There's no stored link between a login and a
-// roster row, so the caller identifies which roster entry is theirs (the web
-// app has them pick their own name) - this intentionally mirrors the same
-// trust model as the connections upload/delete routes below.
+// themselves from the roster. There's no stored email/user link on roster
+// rows, so the caller picks which entry is theirs (the web app has them pick
+// their own name) - claimEmployeeForSelf() verifies that row isn't already
+// claimed by someone else before letting a non-admin touch it
+// (first-come-first-claim; admins bypass this and can remove anyone).
 employeesRouter.post("/leave", async (req, res) => {
   const user = req.user!;
   const { employeeId } = (req.body ?? {}) as { employeeId?: string };
   if (!employeeId) {
     res.status(400).json({ error: "provide employeeId" });
     return;
+  }
+  if (user.role !== "admin") {
+    const claim = await claimEmployeeForSelf(user.company_id, employeeId, user.user_id);
+    if (claim === "not_found") {
+      res.status(404).json({ error: "team member not found in your workspace" });
+      return;
+    }
+    if (claim === "claimed_by_other") {
+      res.status(403).json({ error: "This roster entry is linked to a different teammate's account." });
+      return;
+    }
   }
   const removed = await removeFromRoster(user.company_id, employeeId);
   if (!removed) {
@@ -153,22 +177,36 @@ employeesRouter.post("/:id/connections", async (req, res) => {
   }
 });
 
-// DELETE /api/employees/:id/connections - remove a teammate's uploaded
-// connections at any time. Same open trust model as the upload route above.
+// DELETE /api/employees/:id/connections - delete your own uploaded
+// connections at any time (admins may delete anyone's). Uses the same
+// first-come-first-claim ownership check as /leave, since a non-admin may
+// only delete connections tied to a roster row that's theirs.
 employeesRouter.delete("/:id/connections", async (req, res) => {
   const user = req.user!;
-  const { data: employee } = await db()
-    .from("employees")
-    .select("id")
-    .eq("company_id", user.company_id)
-    .eq("id", req.params.id)
-    .maybeSingle<{ id: string }>();
-  if (!employee) {
-    res.status(404).json({ error: "team member not found in your workspace" });
-    return;
+  if (user.role !== "admin") {
+    const claim = await claimEmployeeForSelf(user.company_id, req.params.id, user.user_id);
+    if (claim === "not_found") {
+      res.status(404).json({ error: "team member not found in your workspace" });
+      return;
+    }
+    if (claim === "claimed_by_other") {
+      res.status(403).json({ error: "This roster entry is linked to a different teammate's account." });
+      return;
+    }
+  } else {
+    const { data: employee } = await db()
+      .from("employees")
+      .select("id")
+      .eq("company_id", user.company_id)
+      .eq("id", req.params.id)
+      .maybeSingle<{ id: string }>();
+    if (!employee) {
+      res.status(404).json({ error: "team member not found in your workspace" });
+      return;
+    }
   }
   try {
-    const removed = await deleteLinkedinConnections(user.company_id, employee.id);
+    const removed = await deleteLinkedinConnections(user.company_id, req.params.id);
     res.json({ removed });
   } catch (err) {
     res.status(500).json({ error: err instanceof Error ? err.message : "failed to delete connections" });

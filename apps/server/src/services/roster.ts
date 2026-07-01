@@ -130,7 +130,7 @@ export async function importRoster(
   return { imported, remaining: Math.max(0, status.remaining - imported), limit: status.limit, trimmedByLimit };
 }
 
-/** Remove one person from a company's roster (admin action). */
+/** Remove one person from a company's roster (admin action - no ownership check). */
 export async function removeFromRoster(companyId: string, employeeId: string): Promise<boolean> {
   const { error, count } = await db()
     .from("employees")
@@ -139,6 +139,50 @@ export async function removeFromRoster(companyId: string, employeeId: string): P
     .eq("id", employeeId);
   if (error) throw new Error(`roster delete failed: ${error.message}`);
   return (count ?? 0) > 0;
+}
+
+export type ClaimResult = "ok" | "not_found" | "claimed_by_other";
+
+/**
+ * Verify a non-admin caller may act on a roster row as "themselves":
+ * first-come-first-claim. If the row is unclaimed, this claims it for the
+ * caller. If already claimed by the caller, succeeds. If claimed by someone
+ * else, fails - the row isn't the caller's to touch via a self-service route.
+ */
+export async function claimEmployeeForSelf(
+  companyId: string,
+  employeeId: string,
+  userId: string,
+): Promise<ClaimResult> {
+  const { data: employee } = await db()
+    .from("employees")
+    .select("id, claimed_by_user_id")
+    .eq("company_id", companyId)
+    .eq("id", employeeId)
+    .maybeSingle<{ id: string; claimed_by_user_id: string | null }>();
+  if (!employee) return "not_found";
+  if (employee.claimed_by_user_id === userId) return "ok";
+  if (employee.claimed_by_user_id) return "claimed_by_other";
+
+  // Conditional on still being unclaimed, so two concurrent first-claims
+  // can't both "win" - only one update actually matches a row.
+  const { error, count } = await db()
+    .from("employees")
+    .update({ claimed_by_user_id: userId }, { count: "exact" })
+    .eq("company_id", companyId)
+    .eq("id", employeeId)
+    .is("claimed_by_user_id", null);
+  if (error) throw new Error(`claim failed: ${error.message}`);
+  if (count && count > 0) return "ok";
+
+  // Someone else claimed it in the race window between our select and update.
+  const { data: recheck } = await db()
+    .from("employees")
+    .select("claimed_by_user_id")
+    .eq("company_id", companyId)
+    .eq("id", employeeId)
+    .maybeSingle<{ claimed_by_user_id: string | null }>();
+  return recheck?.claimed_by_user_id === userId ? "ok" : "claimed_by_other";
 }
 
 export async function rosterStatus(companyId: string): Promise<{ total: number; enriched: number }> {
