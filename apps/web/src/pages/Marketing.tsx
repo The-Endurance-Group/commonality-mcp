@@ -570,6 +570,25 @@ export function Marketing() {
           <CheckIcon className="text-brand" />
           Strongest connection, ranked automatically
         </div>
+
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
+          <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">LinkedIn tells you</p>
+            <p className="mt-3 text-sm text-ink">
+              Your top prospect is a 2nd-degree connection — and that's about it.
+            </p>
+          </div>
+          <div
+            className="animate-fade-up rounded-lg bg-tint-brand p-6"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Commonality tells you</p>
+            <p className="mt-3 text-sm font-medium text-ink">
+              A coworker went to the same school, another worked at the same past company — and
+              which of those shared bonds actually gets you the meeting.
+            </p>
+          </div>
+        </div>
       </section>
 
       {/* Workflow */}
