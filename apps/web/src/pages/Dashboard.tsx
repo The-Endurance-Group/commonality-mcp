@@ -7,6 +7,9 @@ import { useAuthStore } from "../lib/store";
 interface Usage { plan: string; used: number; limit: number; remaining: number }
 interface Employee { id: string; name: string; linkedin_url: string | null; location: string | null; enriched_at: string | null }
 
+// Matches TEAM_LIMITS in apps/server/src/services/roster.ts and the pricing page.
+const TEAM_LIMITS: Record<string, number> = { free: 25, pro: 150 };
+
 export function Dashboard() {
   const isAdmin = useAuthStore((s) => s.claims?.role === "admin");
   const qc = useQueryClient();
@@ -27,7 +30,14 @@ export function Dashboard() {
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label="Plan" value={usage.data?.plan ?? "—"} />
         <Stat label="Searches used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "—"} />
-        <Stat label="Team members" value={String(employees.length)} />
+        <Stat
+          label="Team members"
+          value={
+            usage.data && TEAM_LIMITS[usage.data.plan]
+              ? `${employees.length} / ${TEAM_LIMITS[usage.data.plan]}`
+              : String(employees.length)
+          }
+        />
       </section>
 
       <ConnectorCard mcpUrl={mcpUrl} appUrl={appUrl} />

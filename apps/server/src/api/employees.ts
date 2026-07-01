@@ -1,7 +1,7 @@
 import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
 import { insertLinkedinConnections } from "../db/queries.js";
-import { enrichRosterInBackground, importRoster, rosterStatus } from "../services/roster.js";
+import { enrichRosterInBackground, importRoster, rosterStatus, TeamLimitError } from "../services/roster.js";
 import { parseConnectionsCsv } from "../services/linkedinCsv.js";
 
 export const employeesRouter: RouterType = Router();
@@ -35,9 +35,13 @@ employeesRouter.post("/import", async (req, res) => {
     return;
   }
   try {
-    const result = await importRoster(user.company_id, { companyLinkedinUrl, urls, limit });
+    const result = await importRoster(user.company_id, user.plan, { companyLinkedinUrl, urls, limit });
     res.json(result);
   } catch (err) {
+    if (err instanceof TeamLimitError) {
+      res.status(403).json({ error: err.message });
+      return;
+    }
     res.status(502).json({ error: err instanceof Error ? err.message : "import failed" });
   }
 });
