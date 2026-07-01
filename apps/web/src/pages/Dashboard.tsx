@@ -30,6 +30,19 @@ export function Dashboard() {
     mutationFn: () => apiFetch("/api/employees/re-enrich", { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
   });
+  const removeEmployee = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/employees/${id}`, { method: "DELETE" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
+  });
+  const addEmployee = useMutation({
+    mutationFn: (linkedinUrl: string) =>
+      apiFetch("/api/employees/import", { method: "POST", body: JSON.stringify({ urls: [linkedinUrl] }) }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["employees"] });
+      setNewPersonUrl("");
+    },
+  });
+  const [newPersonUrl, setNewPersonUrl] = useState("");
 
   const employees = roster.data?.employees ?? [];
   const appUrl = window.location.origin;
@@ -78,10 +91,33 @@ export function Dashboard() {
           ) : undefined
         }
       >
-        <p className="mb-3 text-sm text-lavender">
-          Someone missing? Someone not belong? Reach out to your admin so they can add or remove people
-          {adminEmail && !isAdmin ? ` (${adminEmail})` : ""}.
-        </p>
+        {isAdmin ? (
+          <div className="mb-3 flex flex-wrap items-center gap-2">
+            <input
+              className="input flex-1"
+              value={newPersonUrl}
+              onChange={(e) => setNewPersonUrl(e.target.value)}
+              placeholder="Add someone by LinkedIn profile URL…"
+            />
+            <button
+              className="btn-secondary"
+              disabled={addEmployee.isPending || !newPersonUrl.trim()}
+              onClick={() => addEmployee.mutate(newPersonUrl.trim())}
+            >
+              {addEmployee.isPending ? "Adding…" : "Add"}
+            </button>
+          </div>
+        ) : (
+          <p className="mb-3 text-sm text-lavender">
+            Someone missing? Someone not belong? Reach out to your admin so they can add or remove people
+            {adminEmail ? ` (${adminEmail})` : ""}.
+          </p>
+        )}
+        {addEmployee.isError && (
+          <p className="mb-3 text-sm text-red-600">
+            {addEmployee.error instanceof Error ? addEmployee.error.message : "Couldn't add that person"}
+          </p>
+        )}
         <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-lavender">
@@ -91,11 +127,12 @@ export function Dashboard() {
                 <th className="px-4 py-2">Past companies</th>
                 <th className="px-4 py-2">Location</th>
                 <th className="px-4 py-2">Status</th>
+                {isAdmin && <th className="px-4 py-2" />}
               </tr>
             </thead>
             <tbody>
               {employees.length === 0 ? (
-                <tr><td className="px-4 py-6 text-lavender" colSpan={5}>No team members yet - click “Import team” to add your roster.</td></tr>
+                <tr><td className="px-4 py-6 text-lavender" colSpan={isAdmin ? 6 : 5}>No team members yet - click “Import team” to add your roster.</td></tr>
               ) : (
                 employees.map((e) => (
                   <tr key={e.id} className="border-t border-gray-100">
@@ -121,6 +158,18 @@ export function Dashboard() {
                         {e.enriched_at ? "Enriched" : "Pending"}
                       </span>
                     </td>
+                    {isAdmin && (
+                      <td className="px-4 py-2 text-right">
+                        <button
+                          className="text-lavender hover:text-red-600"
+                          disabled={removeEmployee.isPending}
+                          onClick={() => removeEmployee.mutate(e.id)}
+                          aria-label={`Remove ${e.name}`}
+                        >
+                          ✕
+                        </button>
+                      </td>
+                    )}
                   </tr>
                 ))
               )}
