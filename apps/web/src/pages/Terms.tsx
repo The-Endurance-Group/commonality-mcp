@@ -216,9 +216,9 @@ const sections: Section[] = [
     title: "13. Governing law",
     body: (
       <p>
-        These Terms are governed by the laws of the state in which The Endurance Group is incorporated, without
-        regard to conflict-of-law principles. Any dispute not resolved informally will be brought in the courts
-        located in that state, and both parties consent to that jurisdiction.
+        These Terms are governed by the laws of the State of Maine, without regard to conflict-of-law principles.
+        Any dispute not resolved informally will be brought in the state or federal courts located in Maine, and
+        both parties consent to that jurisdiction.
       </p>
     ),
   },
