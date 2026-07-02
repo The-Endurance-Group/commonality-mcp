@@ -258,7 +258,12 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
       </div>
       <p className="mt-2 text-sm text-lavender">
         Don't have Claude? Still want Commonality?{" "}
-        <a href="mailto:hello@theendurancegroup.com" className="font-medium text-brand hover:underline">
+        <a
+          href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
+          target="_blank"
+          rel="noreferrer"
+          className="font-medium text-brand hover:underline"
+        >
           Contact us
         </a>{" "}
         and we'll get you set up on whatever AI you do have.

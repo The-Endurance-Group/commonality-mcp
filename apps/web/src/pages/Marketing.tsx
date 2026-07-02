@@ -746,7 +746,12 @@ export function Marketing() {
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-tint-brand p-6">
           <p className="font-medium text-ink">Don't have Claude? Still want Commonality?</p>
           <p className="mt-1 text-sm text-lavender">
-            <a href="mailto:hello@theendurancegroup.com" className="font-medium text-brand hover:underline">
+            <a
+              href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-brand hover:underline"
+            >
               Contact us
             </a>{" "}
             and we'll get you set up on whatever AI you do have.
