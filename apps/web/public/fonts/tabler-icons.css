@@ -1,0 +1,34 @@
+/*!
+ * Trimmed Tabler Icons 2.47.0 subset (only glyphs used by ConnectorDemo)
+ * Source: https://tabler.io - self-hosted to avoid depending on an
+ * external CDN (some ad-blockers / corporate networks block cdn.jsdelivr.net).
+ */
+@font-face{font-family:"tabler-icons";font-style:normal;font-weight:400;src:url("/fonts/tabler-icons.woff2") format("woff2")}
+.ti{font-family:"tabler-icons" !important;speak:none;font-style:normal;font-weight:normal;font-variant:normal;text-transform:none;line-height:1;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale}
+.ti-alert-triangle:before{content:"\ea06"}
+.ti-arrow-left:before{content:"\ea19"}
+.ti-books:before{content:"\eff2"}
+.ti-brand-notion:before{content:"\ef7b"}
+.ti-brand-office:before{content:"\f398"}
+.ti-briefcase:before{content:"\ea46"}
+.ti-bulb:before{content:"\ea51"}
+.ti-chevron-down:before{content:"\ea5f"}
+.ti-chevron-up:before{content:"\ea62"}
+.ti-code:before{content:"\ea77"}
+.ti-compass:before{content:"\ea79"}
+.ti-copy:before{content:"\ea7a"}
+.ti-dots:before{content:"\ea95"}
+.ti-file-text:before{content:"\eaa2"}
+.ti-info-circle:before{content:"\eac5"}
+.ti-layout-grid:before{content:"\edba"}
+.ti-message-circle:before{content:"\eaed"}
+.ti-microphone:before{content:"\eaf0"}
+.ti-pencil:before{content:"\eb04"}
+.ti-planet:before{content:"\ec08"}
+.ti-plug:before{content:"\ebd9"}
+.ti-plus:before{content:"\eb0b"}
+.ti-puzzle:before{content:"\eb10"}
+.ti-search:before{content:"\eb1c"}
+.ti-shield-lock:before{content:"\ed58"}
+.ti-sparkles:before{content:"\f6d7"}
+.ti-x:before{content:"\eb55"}

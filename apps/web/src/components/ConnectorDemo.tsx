@@ -65,7 +65,7 @@ const DEMO_HTML = `
         <button style="padding:4px 10px; font-size:12px;">Connect</button>
       </div>
       <div style="display:flex; align-items:center; justify-content:space-between;">
-        <span style="display:flex; align-items:center; gap:8px;"><i class="ti ti-brand-atlassian" aria-hidden="true" style="font-size:16px;"></i>Atlassian</span>
+        <span style="display:flex; align-items:center; gap:8px;"><i class="ti ti-puzzle" aria-hidden="true" style="font-size:16px;"></i>Atlassian</span>
         <button style="padding:4px 10px; font-size:12px;">Connect</button>
       </div>
     </div>
