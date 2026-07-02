@@ -49,8 +49,15 @@ export const TOOL_DEFS: McpToolDef[] = [
       properties: {
         company_name: { type: "string", description: "Target company's name - use this to resolve the real LinkedIn URL. Prefer this over guessing company_url yourself." },
         company_url: { type: "string", description: "Target company's LinkedIn URL, from a prior company_name lookup - never guess this" },
-        role: { type: "string", description: "Job title/role to search for at that company, e.g. \"VP of Sales\" - must be a real title, not a vague description" },
-        role_retry: { type: "boolean", description: "Set true when retrying role with a reworded/broader title after zero results" },
+        role: {
+          type: "array",
+          items: { type: "string" },
+          description:
+            "3-6 real job-title variants for the role the user wants, e.g. [\"VP of Sales\", \"Vice President of Business Development\", " +
+            "\"Sales Director\", \"Head of Business Development\"] - LinkedIn titles vary a lot company to company, so include seniority " +
+            "and phrasing synonyms, not just one guess. Matched with OR (any variant counts).",
+        },
+        role_retry: { type: "boolean", description: "Set true when retrying role with a broader/different set of title variants after zero results" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
         confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },
       },

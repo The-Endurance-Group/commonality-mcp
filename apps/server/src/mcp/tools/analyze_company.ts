@@ -8,7 +8,7 @@ import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_pro
 interface Args {
   company_url?: string;
   company_name?: string;
-  role?: string;
+  role?: string[];
   role_retry?: boolean;
   candidate_urls?: string[];
   confirm?: boolean;
@@ -23,9 +23,13 @@ const MAX_CANDIDATES = 20;
 //      (or the user can paste one directly if none of the matches are right).
 //   1. company_url, no role          -> ask the user for a role, then search.
 //      company_url + role            -> LinkedIn people-search scoped to that
-//      company + title. Zero results: try one reworded/broader variation
-//      (role_retry:true) before asking the user to revise their filters -
-//      never silently falls back to an unfiltered roster.
+//      company + several title variants (LinkedIn titles vary a lot company
+//      to company, so a single exact guess like "VP of Sales" misses real
+//      titles like "Vice President of Business Development" - role is
+//      matched with OR across variants). Zero results: try one reworded/
+//      broader batch of variants (role_retry:true) before asking the user
+//      to revise their filters - never silently falls back to an unfiltered
+//      roster.
 //   2. + candidate_urls              -> preview how many NEW searches analyzing them would cost.
 //   3. + candidate_urls + confirm    -> run it, charging quota per new candidate, return a ranking.
 // Billing is handled inside run() (per-candidate, dedup'd by URL) rather than
@@ -62,18 +66,19 @@ export const analyze_company: ToolHandler<Args> = {
     }
 
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
-      if (!args.role) {
+      if (!args.role || args.role.length === 0) {
         return text(
-          "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\", \"Director of Finance\"). " +
-            "Turn their answer into a specific job-title filter value - this gets passed directly to a LinkedIn " +
-            "title search, so it needs to look like a real title, not a vague description. Then call analyze_company " +
-            "again with company_url + role to search for matching people at that company.",
+          "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\"). Turn their answer into " +
+            "3-6 real job-title variants (seniority and phrasing synonyms - LinkedIn titles vary a lot company to " +
+            "company) - this gets passed directly to a LinkedIn title search. Then call analyze_company again with " +
+            "company_url + role (the array of variants) to search for matching people at that company.",
         );
       }
 
+      const roleLabel = args.role.join(" / ");
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
-        candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: [args.role] }, ROLE_SEARCH_LIMIT);
+        candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: args.role }, ROLE_SEARCH_LIMIT);
       } catch {
         return text("Couldn't search that company's people right now. Please try again.", true);
       }
@@ -81,22 +86,22 @@ export const analyze_company: ToolHandler<Args> = {
       if (!candidates.length) {
         if (!args.role_retry) {
           return text(
-            `No matches for "${args.role}" at this company. Try a different phrasing or a related title ` +
-              "(e.g. a synonym, broader seniority, or alternate wording - don't ask the user yet), then call " +
-              "analyze_company again with company_url + the new role + role_retry:true.",
+            `No matches for "${roleLabel}" at this company. Try a broader or different set of title variants ` +
+              "(more synonyms, different seniority levels, department-only titles - don't ask the user yet), then " +
+              "call analyze_company again with company_url + the new role variants + role_retry:true.",
           );
         }
         return text(
-          `Still no matches after trying a different phrasing. Ask the user to revise their filters - a different ` +
-            "role, broader seniority, or a different title entirely - then call analyze_company again with the " +
-            "new role (and role_retry unset, to get a fresh two-try budget).",
+          `Still no matches after trying a broader set of title variants. Ask the user to revise their filters - a ` +
+            "different role, broader seniority, or a different title entirely - then call analyze_company again with " +
+            "the new role variants (and role_retry unset, to get a fresh two-try budget).",
           true,
         );
       }
 
       const lines = candidates.map((c, i) => `${i + 1}. ${c.name} - ${c.title}\n   ${c.linkedinUrl}`);
       return text(
-        `${candidates.length} people matching "${args.role}" at this company:\n${lines.join("\n")}\n\n` +
+        `${candidates.length} people matching "${roleLabel}" at this company:\n${lines.join("\n")}\n\n` +
           `Confirm with the user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call ` +
           "analyze_company again with company_url + candidate_urls to preview the cost before analyzing.",
       );
