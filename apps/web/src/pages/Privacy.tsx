@@ -122,6 +122,10 @@ export function Privacy() {
             Home
           </Link>
           <span>·</span>
+          <Link to="/terms" className="hover:text-white">
+            Terms
+          </Link>
+          <span>·</span>
           <SignedOut>
             <SignInButton mode="modal">
               <button className="hover:text-white">Sign in</button>

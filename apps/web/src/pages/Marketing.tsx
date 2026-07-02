@@ -823,6 +823,10 @@ export function Marketing() {
           <Link to="/privacy" className="hover:text-white">
             Privacy
           </Link>
+          <span>·</span>
+          <Link to="/terms" className="hover:text-white">
+            Terms
+          </Link>
         </div>
       </footer>
     </div>
