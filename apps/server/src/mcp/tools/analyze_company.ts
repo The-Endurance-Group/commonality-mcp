@@ -67,10 +67,12 @@ export const analyze_company: ToolHandler<Args> = {
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
       if (!args.role || args.role.length === 0) {
         return text(
-          "Ask the user what department/function they want to reach (e.g. \"sales\", \"business development\"). Turn " +
-            "their answer into 1-4 broad keyword terms, not full titles - skip seniority words like \"VP\" or " +
-            "\"Director\", since that only narrows the match and misses real title wording. Then call analyze_company " +
-            "again with company_url + role (the broad keyword terms) to search for matching people at that company.",
+          "Ask the user what department/function (and, optionally, seniority) they want to reach - e.g. \"sales\", " +
+            "\"a senior person in business development\". Turn the department/function part into 1-4 broad keyword " +
+            "terms for the role field, not full titles - skip seniority words like \"VP\" or \"Director\" there, " +
+            "since that only narrows the match and misses real title wording. If the user gave a seniority, apply " +
+            "it yourself afterward by reading the title on each returned candidate - don't put it in the search. " +
+            "Then call analyze_company again with company_url + role (the broad keyword terms).",
         );
       }
 
@@ -101,8 +103,11 @@ export const analyze_company: ToolHandler<Args> = {
       const lines = candidates.map((c, i) => `${i + 1}. ${c.name} - ${c.title}\n   ${c.linkedinUrl}`);
       return text(
         `${candidates.length} people matching "${roleLabel}" at this company:\n${lines.join("\n")}\n\n` +
-          `Confirm with the user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call ` +
-          "analyze_company again with company_url + candidate_urls to preview the cost before analyzing.",
+          "If the user specified a seniority (e.g. \"VP\", \"director-level\", \"senior\"), read each person's title " +
+          "above and filter/reorder this list yourself to lead with the ones that actually match it, noting that you " +
+          "narrowed it down - don't just dump the raw list when they asked for a seniority. Confirm with the user " +
+          `which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
+          "company_url + candidate_urls to preview the cost before analyzing.",
       );
     }
 
