@@ -155,11 +155,14 @@ export const analyze_company: ToolHandler<Args> = {
       const lines = candidates.map((c, i) => `${i + 1}. ${c.name} - ${c.title}\n   ${c.linkedinUrl}`);
       return text(
         `${candidates.length} people matching "${roleLabel}" at this company:\n${lines.join("\n")}\n\n` +
-          "If the user specified a seniority (e.g. \"VP\", \"director-level\", \"senior\"), read each person's title " +
-          "above and filter/reorder this list yourself to lead with the ones that actually match it, noting that you " +
-          "narrowed it down - don't just dump the raw list when they asked for a seniority. Confirm with the user " +
-          `which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
-          "company_url + candidate_urls to preview the cost before analyzing.",
+          `This search only covered: ${roleLabel}. Before presenting these results, check whether the user named ` +
+          "any other department/function you haven't searched yet (e.g. they said \"sales or marketing\" but " +
+          `${roleLabel} only covers one of those) - if so, call analyze_company again adding the missing term(s) to ` +
+          "role and merge both result sets before presenting. If specified a seniority (e.g. \"VP\", \"director-level\", " +
+          "\"senior\"), read each person's title above and filter/reorder this list yourself to lead with the ones " +
+          "that actually match it, noting that you narrowed it down - don't just dump the raw list when they asked " +
+          `for a seniority. Confirm with the user which of these to analyze (up to ${MAX_CANDIDATES} at a time), ` +
+          "then call analyze_company again with company_url + candidate_urls to preview the cost before analyzing.",
       );
     }
 
