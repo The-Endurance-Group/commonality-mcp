@@ -43,14 +43,31 @@ function stripSeniority(term: string): string {
   return term.replace(SENIORITY_PATTERN, " ").replace(/\bof\b/gi, " ").replace(/\s+/g, " ").trim();
 }
 
+// Departments that are the same function in practice but don't share a literal
+// substring, so a title-keyword search for one misses real people in the other
+// (observed in production: searching "Sales" missed a "Vice President of Business
+// Development" - neither title contains the other's word at all). Expand each
+// searched term to also include its known synonyms, keyed and matched lowercase.
+const DEPARTMENT_SYNONYMS: Record<string, string[]> = {
+  "sales": ["business development", "biz dev"],
+  "business development": ["sales"],
+  "biz dev": ["sales"],
+};
+
+function expandSynonyms(terms: string[]): string[] {
+  const extra = terms.flatMap((t) => DEPARTMENT_SYNONYMS[t.toLowerCase()] ?? []);
+  return [...terms, ...extra];
+}
+
 // role should be an array per the tool schema, but clients occasionally send a
 // bare string (stale cached schema, or a model not conforming exactly) - normalize
 // rather than crash on .join()/.length checks that assume an array. Also strips
-// seniority words from each term so the search stays broad (see stripSeniority).
+// seniority words and expands known department synonyms so the search stays broad
+// (see stripSeniority, expandSynonyms).
 function normalizeRole(role: Args["role"]): string[] {
   if (!role) return [];
   const terms = Array.isArray(role) ? role : [role];
-  const stripped = terms.map(stripSeniority).filter(Boolean);
+  const stripped = expandSynonyms(terms.map(stripSeniority).filter(Boolean));
   // dedupe case-insensitively while preserving first-seen casing
   const seen = new Set<string>();
   const out: string[] = [];
