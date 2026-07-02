@@ -203,7 +203,9 @@ export const analyze_company: ToolHandler<Args> = {
           `${candidates.length} matches:\n${lines.join("\n")}\n\n` +
           "If the user specified a seniority (e.g. \"VP\", \"director-level\", \"senior\"), read each person's title " +
           "above and filter/reorder this list yourself to lead with the ones that actually match it, noting that you " +
-          "narrowed it down - don't just dump the raw list when they asked for a seniority. If this missed a " +
+          "narrowed it down - don't just dump the raw list when they asked for a seniority. When you show the " +
+          "filtered/reordered list to the user, KEEP each person's LinkedIn URL next to their name exactly as shown " +
+          "above - don't summarize away the URL, the user needs it to click through to the profile. If this missed a " +
           "department/function the user actually named, or the wrong departments were searched, call analyze_company " +
           "again with corrected role terms (a fresh search, no special flag needed). Otherwise, confirm with the " +
           `user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
