@@ -1,8 +1,8 @@
 import type { McpToolResult } from "@commonality/shared";
 
-// Free-trial only: rotate through these after each charged search so users
-// discover more of the product during their 10 free searches. Stops once
-// plan is "pro" (callers gate on ctx.plan === "free").
+// Free-trial only: rotate through these after each charged call so users
+// discover more of the product during their 50 free credits/month. Stops
+// once plan is "pro" (callers gate on ctx.plan === "free").
 const FREE_TRIAL_TIPS: string[] = [
   "Did you know I can also find your best way into a whole company, not just one person? Try asking \"what's my best way into [Company]?\"",
   "Did you know I can draft your outreach too? Ask me to write a LinkedIn message and email for any prospect.",

@@ -36,7 +36,6 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "analyze_prospect",
     description: "Find warm paths to a prospect. Returns ranked connections from your team.",
     inputSchema: { type: "object", properties: { url: { type: "string", description: "Prospect LinkedIn URL" } }, required: ["url"] },
-    usesQuota: true,
   },
   {
     name: "analyze_company",
@@ -62,10 +61,9 @@ export const TOOL_DEFS: McpToolDef[] = [
         },
         role_retry: { type: "boolean", description: "Set true when retrying role with a broader/different set of title variants after zero results" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
-        confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },
+        confirm: { type: "boolean", description: "Set true to spend credits and run the analysis" },
       },
     },
-    usesQuota: true,
   },
   {
     name: "add_employee",
@@ -93,7 +91,6 @@ export const TOOL_DEFS: McpToolDef[] = [
         limit: { type: "number" },
       },
     },
-    usesQuota: true,
   },
   {
     name: "generate_outreach",
@@ -109,7 +106,6 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "prospect_of_day",
     description: "Get one fresh on-ICP prospect your team has a warm path to.",
     inputSchema: { type: "object", properties: {} },
-    usesQuota: true,
   },
   {
     name: "push_to_crm",
@@ -146,7 +142,7 @@ export const TOOL_DEFS: McpToolDef[] = [
   },
   {
     name: "get_usage",
-    description: "Show your current search usage and plan.",
+    description: "Show your current credit usage and plan.",
     inputSchema: { type: "object", properties: {} },
   },
 ];

@@ -1,7 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
-import { checkQuota, incrementUsage, isProspectUnlocked, recordProspectUnlock } from "../../auth/quota.js";
+import { chargeCredit, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
 import { searchCompanies, searchProfiles } from "../../services/apify.js";
-import { appendFreeTrialTip } from "../freeTrialTips.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
@@ -122,11 +121,12 @@ const MAX_CANDIDATES = 20;
 //      results: try one reworded/broader batch of terms (role_retry:true)
 //      before asking the user to revise their filters - never silently
 //      falls back to an unfiltered roster.
-//   2. + candidate_urls              -> preview how many NEW searches analyzing them would cost.
-//   3. + candidate_urls + confirm    -> run it, charging quota per new candidate, return a ranking.
-// Billing is handled inside run() (per-candidate, dedup'd by URL) rather than
-// the single usesQuota/billingKey-per-call path other tools use, since one
-// call here can cover anywhere from 0 to MAX_CANDIDATES billable units.
+//   2. + candidate_urls              -> preview how many NEW candidates analyzing them would cost.
+//   3. + candidate_urls + confirm    -> run it, charging 1 credit per new candidate, return a ranking.
+// Billing is handled inline throughout run() via chargeCredit() - 1 credit
+// for the role-search Apify call (including retries) and 1 per new (not
+// already unlocked) candidate's Cassidy call - since one invocation can cover
+// anywhere from 0 to MAX_CANDIDATES + 1 billable vendor calls.
 export const analyze_company: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
     if (!args.company_url) {
@@ -173,6 +173,9 @@ export const analyze_company: ToolHandler<Args> = {
       }
 
       const roleLabel = role.join(" / ");
+
+      const searchCharge = await chargeCredit(ctx);
+      if (!searchCharge.allowed) return text(quotaExceededMessage(searchCharge, ctx.plan, ctx.role), true);
 
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
@@ -233,37 +236,26 @@ export const analyze_company: ToolHandler<Args> = {
             "Call analyze_company again with the same candidate_urls and confirm:true to see the results.",
         );
       }
-      const quota = await checkQuota(ctx);
-      if (newCount > quota.remaining) {
-        return text(
-          `Analyzing all ${candidateUrls.length} candidates needs ${newCount} new searches, but you only have ${quota.remaining} remaining. ` +
-            "Pick fewer candidates, or call again with confirm:true to analyze as many as your quota allows.",
-        );
-      }
       return text(
         `This will analyze ${candidateUrls.length} candidates (${newCount} new - the rest were already analyzed and are free), ` +
-          `using ${newCount} of your ${quota.remaining} remaining searches. It analyzes one at a time, so this may take a few minutes. ` +
-          "Call analyze_company again with the same candidate_urls and confirm:true to proceed.",
+          `using ${newCount} credit${newCount === 1 ? "" : "s"}. It analyzes one at a time, so this may take a few minutes, ` +
+          "and stops early if you run out of credits partway through. Call analyze_company again with the same " +
+          "candidate_urls and confirm:true to proceed.",
       );
     }
 
     const outcomes: { analysis: ProspectAnalysis; charged: boolean }[] = [];
-    let lastUsedCount: number | null = null;
     for (const url of candidateUrls) {
       const alreadyUnlocked = await isProspectUnlocked(ctx.company_id, url);
       if (!alreadyUnlocked) {
-        const status = await checkQuota(ctx);
-        if (!status.allowed) break; // out of quota - stop gracefully, return what we have
+        const charge = await chargeCredit(ctx, url);
+        if (!charge.allowed) break; // out of credits - stop gracefully, return what we have
       }
       let analysis: ProspectAnalysis;
       try {
         analysis = await analyzeProspectUrl(url, ctx);
       } catch {
         continue; // skip a bad URL rather than failing the whole batch
-      }
-      if (!alreadyUnlocked) {
-        await recordProspectUnlock(ctx.company_id, url);
-        lastUsedCount = await incrementUsage(ctx.company_id);
       }
       outcomes.push({ analysis, charged: !alreadyUnlocked });
     }
@@ -285,11 +277,8 @@ export const analyze_company: ToolHandler<Args> = {
       : "None of these candidates share a connection with your team yet.";
 
     const charged = outcomes.filter((o) => o.charged).length;
-    const finalResult = text(
-      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} search${charged === 1 ? "" : "es"}.`,
+    return text(
+      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} credit${charged === 1 ? "" : "s"}.`,
     );
-    return ctx.plan === "free" && lastUsedCount !== null
-      ? appendFreeTrialTip(finalResult, lastUsedCount, ctx.role)
-      : finalResult;
   },
 };

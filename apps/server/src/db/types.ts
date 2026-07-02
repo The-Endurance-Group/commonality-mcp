@@ -249,17 +249,17 @@ export type Database = {
         Row: {
           company_id: string
           month: string
-          searches_used: number
+          credits_used: number
         }
         Insert: {
           company_id: string
           month: string
-          searches_used?: number
+          credits_used?: number
         }
         Update: {
           company_id?: string
           month?: string
-          searches_used?: number
+          credits_used?: number
         }
         Relationships: [
           {

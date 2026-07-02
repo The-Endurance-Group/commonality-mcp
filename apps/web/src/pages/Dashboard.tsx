@@ -55,7 +55,7 @@ export function Dashboard() {
     <div className="space-y-8">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label="Plan" value={usage.data ? usage.data.plan.charAt(0).toUpperCase() + usage.data.plan.slice(1) : "-"} />
-        <Stat label="Searches used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "-"} />
+        <Stat label="Credits used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "-"} />
         <Stat
           label="Team members"
           value={
@@ -431,7 +431,7 @@ const promptCategories: { title: string; prompts: string[] }[] = [
   },
   {
     title: "Usage",
-    prompts: ["How many searches do I have left this month?"],
+    prompts: ["How many credits do I have left this month?"],
   },
 ];
 

@@ -563,7 +563,7 @@ export function Marketing() {
               See how →
             </a>
           </div>
-          <p className="mt-3 text-sm text-white/70">No credit card · 10 searches free</p>
+          <p className="mt-3 text-sm text-white/70">No credit card · 50 credits/mo free</p>
         </div>
 
         <div className="mx-auto mt-12 max-w-md animate-float">
@@ -743,7 +743,7 @@ export function Marketing() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
-                10 searches
+                50 credits/mo
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
@@ -764,7 +764,7 @@ export function Marketing() {
               Most popular
             </div>
             <div className="font-semibold text-ink">Pro</div>
-            <div className="mt-2 text-3xl font-bold text-ink">$199/mo</div>
+            <div className="mt-2 text-3xl font-bold text-ink">$50/mo</div>
             <ul className="mt-4 space-y-2 text-sm text-lavender">
               <li className="flex items-center gap-2">
                 <CheckIcon />
@@ -772,7 +772,7 @@ export function Marketing() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
-                200 searches/mo
+                200 credits/mo
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
@@ -798,7 +798,7 @@ export function Marketing() {
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
-                200+ searches/mo
+                Custom credits/mo
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />

@@ -1,24 +1,22 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
-import { checkQuota, isProspectUnlocked } from "../../auth/quota.js";
+import { chargeCredit, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath } from "./_prospect.js";
 
 // Find warm paths from the team to a prospect. Returns a ranked, token-lean
-// summary - full enrichment stays in Supabase. Billed once per (company, URL):
-// re-analysing the same prospect is free.
+// summary - full enrichment stays in Supabase. 1 credit per (company, URL) -
+// this is one Cassidy enrichment call, and re-analysing the same prospect is
+// free.
 export const analyze_prospect: ToolHandler<{ url: string }> = {
-  usesQuota: true,
-  billingKey: (args) => args.url ?? null,
   async run(args: { url: string }, ctx: ToolContext) {
     if (!args.url) return text("Please provide the prospect's LinkedIn URL.", true);
 
-    // Determine billing line before the (post-run) charge happens.
-    const unlocked = await isProspectUnlocked(ctx.company_id, args.url);
+    const alreadyUnlocked = await isProspectUnlocked(ctx.company_id, args.url);
+    const charge = await chargeCredit(ctx, args.url);
+    if (!charge.allowed) return text(quotaExceededMessage(charge, ctx.plan, ctx.role), true);
+
     const { enriched, results } = await analyzeProspectUrl(args.url, ctx);
-    const quota = await checkQuota(ctx);
-    const billing = unlocked
-      ? "Already analyzed for your team - no credit used."
-      : `Uses 1 of your ${quota.remaining} remaining searches.`;
+    const billing = alreadyUnlocked ? "Already analyzed for your team - no credit used." : "Used 1 credit.";
 
     const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${args.url}`;
     if (results.length === 0) {

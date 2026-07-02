@@ -1,4 +1,5 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
+import { chargeCredit, quotaExceededMessage } from "../../auth/quota.js";
 import { searchProfiles, type ProfileSearchFilters } from "../../services/apify.js";
 import { text } from "./_result.js";
 
@@ -11,10 +12,13 @@ interface SearchArgs {
   limit?: number;
 }
 
-// LinkedIn people search via Apify. Returns a lean list of matches.
+// LinkedIn people search via Apify. Returns a lean list of matches. 1 credit
+// per call - this is one Apify actor invocation.
 export const search_prospects: ToolHandler<SearchArgs> = {
-  usesQuota: true,
-  async run(args: SearchArgs, _ctx: ToolContext) {
+  async run(args: SearchArgs, ctx: ToolContext) {
+    const charge = await chargeCredit(ctx);
+    if (!charge.allowed) return text(quotaExceededMessage(charge, ctx.plan, ctx.role), true);
+
     const filters: ProfileSearchFilters = {
       searchQuery: args.query,
       currentJobTitles: args.titles,

@@ -62,8 +62,8 @@ const sections: Section[] = [
     body: (
       <>
         <p>
-          Commonality offers a Free plan (10 lifetime searches, up to 25 team members), a Pro plan ($199/month, 200
-          searches/month, up to 150 team members), and custom Enterprise plans. Current plan details and pricing are
+          Commonality offers a Free plan (50 credits/month, up to 25 team members), a Pro plan ($50/month, 200
+          credits/month, up to 150 team members), and custom Enterprise plans. Current plan details and pricing are
           posted on our{" "}
           <Link to="/" className="font-medium text-brand hover:underline">
             pricing page
@@ -78,8 +78,8 @@ const sections: Section[] = [
           except where required by law. You're responsible for all applicable taxes.
         </p>
         <p className="mt-3">
-          If a payment fails, we may suspend access to paid features until the balance is resolved. Free-plan search
-          limits reset according to the terms shown in-product; unused searches don't roll over or carry a cash
+          If a payment fails, we may suspend access to paid features until the balance is resolved. Credit limits
+          reset monthly according to the terms shown in-product; unused credits don't roll over or carry a cash
           value.
         </p>
       </>

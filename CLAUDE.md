@@ -44,12 +44,13 @@ school/employer alias normalization intact.
 return cached data. Otherwise call Cassidy, store the result, increment
 `request_count`. We hit Cassidy at most once per URL.
 
-## Quota
+## Credits
 
-- free = 10 lifetime searches; pro = 200/month.
-- Tools that consume quota: `analyze_prospect`, `search_prospects`, `prospect_of_day`.
-- Check before running; increment atomically via the `increment_usage(company_id, month)` RPC after success.
-- At limit → return a friendly upgrade message as a tool result, do NOT throw.
+- free = 50 credits/month ($0/mo); pro = 200 credits/month ($50/mo); enterprise = custom, contact-sales only (no real backend plan value).
+- 1 credit = 1 real vendor call (one Apify actor invocation or one Cassidy enrichment) - charged inline via `chargeCredit()` (`apps/server/src/auth/quota.ts`) at each vendor-call site, not once per tool call. A single tool invocation (e.g. `analyze_company`) can spend multiple credits.
+- Check-then-increment via `chargeCredit()`; atomic increment itself via the `increment_usage(company_id, month)` RPC (writes `monthly_usage.credits_used`).
+- At limit → return a friendly upgrade message as a tool result, do NOT throw. `mcp/server.ts` also does a cheap up-front block if a company is already over the limit before running any tool.
+- Don't proactively state "N remaining" before/after a call. Instead, `usageThresholdNotice()` fires once, centrally in `mcp/server.ts`, the first time usage crosses 50%/75%/90%/100% of the plan limit. Exact used/limit/remaining is only ever shown on demand, via the `get_usage` tool or the dashboard.
 
 ## Deploy
 

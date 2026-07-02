@@ -1,20 +1,16 @@
 import type { McpToolResult, ToolContext, ToolName } from "@commonality/shared";
 import { Router, type Router as RouterType } from "express";
 import { requireAuth } from "../auth/middleware.js";
-import {
-  checkQuota,
-  incrementUsage,
-  isProspectUnlocked,
-  quotaExceededMessage,
-  recordProspectUnlock,
-} from "../auth/quota.js";
+import { checkQuota, quotaExceededMessage, usageThresholdNotice } from "../auth/quota.js";
 import { logger } from "../logger.js";
 import { appendFreeTrialTip } from "./freeTrialTips.js";
 import { HANDLERS, TOOL_DEFS } from "./registry.js";
 
 // MCP JSON-RPC 2.0 endpoint. Auth runs first (middleware) so unauthenticated
-// calls get 401 + WWW-Authenticate. Quota-consuming tools are gated before
-// running and incremented atomically only after a successful (non-error) result.
+// calls get 401 + WWW-Authenticate. Credits (1 per Apify/Cassidy vendor call)
+// are charged inline by each tool via chargeCredit(), not centrally here -
+// this handler only does a cheap up-front fast-path block if already over
+// the limit, and a before/after usage diff to surface a threshold notice.
 export const mcpRouter: RouterType = Router();
 
 const PROTOCOL_VERSION = "2024-11-05";
@@ -54,19 +50,12 @@ async function handleToolCall(
     return { content: [{ type: "text", text: `Unknown tool: ${name}` }], isError: true };
   }
 
-  // Billing: a quota tool may expose a per-call key (e.g. a prospect URL). If
-  // this company already unlocked that key, the call is free - no quota check,
-  // no charge. Otherwise gate on quota; at limit returns a friendly message.
-  const billingKey = handler.usesQuota ? handler.billingKey?.(args) ?? null : null;
-  let alreadyUnlocked = false;
-  if (handler.usesQuota) {
-    if (billingKey) alreadyUnlocked = await isProspectUnlocked(ctx.company_id, billingKey);
-    if (!alreadyUnlocked) {
-      const status = await checkQuota(ctx);
-      if (!status.allowed) {
-        return { content: [{ type: "text", text: quotaExceededMessage(status, ctx.plan, ctx.role) }], isError: true };
-      }
-    }
+  // Fast path: if this company is already at/over its credit limit, block
+  // before running the tool at all - individual vendor calls inside the
+  // handler (via chargeCredit) enforce the same limit mid-call too.
+  const before = await checkQuota(ctx);
+  if (!before.allowed) {
+    return { content: [{ type: "text", text: quotaExceededMessage(before, ctx.plan, ctx.role) }], isError: true };
   }
 
   let result: McpToolResult;
@@ -80,16 +69,25 @@ async function handleToolCall(
     };
   }
 
-  // Charge only on a successful (non-error) result that wasn't already unlocked.
-  // Record the unlock so re-analysing the same prospect is free next time.
-  if (handler.usesQuota && !result.isError && !alreadyUnlocked) {
-    try {
-      if (billingKey) await recordProspectUnlock(ctx.company_id, billingKey);
-      const used = await incrementUsage(ctx.company_id);
-      if (ctx.plan === "free") result = appendFreeTrialTip(result, used, ctx.role);
-    } catch (err) {
-      logger.error({ err, tool: name }, "billing update failed (result already returned)");
+  // Surface a one-time notice if this call's credit charges crossed a new
+  // 50/75/90/100% threshold - replaces proactively stating "N remaining"
+  // before/after every call. Otherwise, free-plan users still get the
+  // occasional feature-discovery tip after a charged call.
+  try {
+    const after = await checkQuota(ctx);
+    if (after.used > before.used) {
+      const notice = usageThresholdNotice(before.used, after.used, after.limit, ctx.plan, ctx.role);
+      if (notice) {
+        const content = result.content.map((c, i) =>
+          i === result.content.length - 1 && c.type === "text" ? { ...c, text: `${c.text}\n\n⚠️ ${notice}` } : c,
+        );
+        result = { ...result, content };
+      } else if (ctx.plan === "free") {
+        result = appendFreeTrialTip(result, after.used, ctx.role);
+      }
     }
+  } catch (err) {
+    logger.error({ err, tool: name }, "usage notice check failed (result already returned)");
   }
   return result;
 }
