@@ -8,10 +8,18 @@ import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_pro
 interface Args {
   company_url?: string;
   company_name?: string;
-  role?: string[];
+  role?: string[] | string;
   role_retry?: boolean;
   candidate_urls?: string[];
   confirm?: boolean;
+}
+
+// role should be an array per the tool schema, but clients occasionally send a
+// bare string (stale cached schema, or a model not conforming exactly) - normalize
+// rather than crash on .join()/.length checks that assume an array.
+function normalizeRole(role: Args["role"]): string[] {
+  if (!role) return [];
+  return Array.isArray(role) ? role.filter(Boolean) : [role].filter(Boolean);
 }
 
 const ROLE_SEARCH_LIMIT = 25;
@@ -65,7 +73,8 @@ export const analyze_company: ToolHandler<Args> = {
     }
 
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
-      if (!args.role || args.role.length === 0) {
+      const role = normalizeRole(args.role);
+      if (role.length === 0) {
         return text(
           "Ask the user what department/function (and, optionally, seniority) they want to reach - e.g. \"sales\", " +
             "\"a senior person in business development\". Turn the department/function part into 1-4 broad keyword " +
@@ -76,10 +85,10 @@ export const analyze_company: ToolHandler<Args> = {
         );
       }
 
-      const roleLabel = args.role.join(" / ");
+      const roleLabel = role.join(" / ");
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
-        candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: args.role }, ROLE_SEARCH_LIMIT);
+        candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: role }, ROLE_SEARCH_LIMIT);
       } catch {
         return text("Couldn't search that company's people right now. Please try again.", true);
       }
