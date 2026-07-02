@@ -12,25 +12,79 @@ const DEMO_NATURAL_HEIGHT = 676;
 
 // Scales ConnectorDemo to exactly fill its flex-stretched container's
 // height (matching the sibling step list), instead of a fixed size.
-function ScaledConnectorDemo() {
-  const wrapperRef = useRef<HTMLDivElement>(null);
-  const [scale, setScale] = useState(0.55);
+// Renders the "Set up once" / "Then ask anytime" step list beside the
+// connector demo, sized to match it exactly. Measures the step column's
+// own rendered height directly (rather than relying on flex-stretch to
+// propagate through several nested divs, which proved unreliable) and
+// applies it as an explicit pixel height/width to the demo, so the demo
+// can never render larger than the steps beside it.
+function WorkflowRow() {
+  const stepsRef = useRef<HTMLDivElement>(null);
+  const [demoHeight, setDemoHeight] = useState(460);
 
   useEffect(() => {
-    const el = wrapperRef.current;
+    const el = stepsRef.current;
     if (!el) return;
     const ro = new ResizeObserver((entries) => {
       const h = entries[0]?.contentRect.height;
-      if (h && h > 0) setScale(h / DEMO_NATURAL_HEIGHT);
+      if (h && h > 0) setDemoHeight(h);
     });
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
 
+  const scale = demoHeight / DEMO_NATURAL_HEIGHT;
+
   return (
-    <div ref={wrapperRef} className="min-h-[280px] flex-1 overflow-hidden rounded-lg">
-      <div style={{ width: DEMO_NATURAL_WIDTH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
-        <ConnectorDemo />
+    <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
+      <div ref={stepsRef} className="flex w-full max-w-xs flex-col gap-6 text-left lg:max-w-[240px]">
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">Set up once</p>
+          <div className="flex flex-col gap-3">
+            {setupSteps.map((s, i) => (
+              <div
+                key={s.label}
+                className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
+                  {i + 1}
+                </span>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+                  <Icon name={s.icon} className="" />
+                </div>
+                <p className="text-sm font-medium text-ink">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">Then ask anytime</p>
+          <div className="flex flex-col gap-3">
+            {askSteps.map((s, i) => (
+              <div
+                key={s.label}
+                className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
+                  {setupSteps.length + i + 1}
+                </span>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+                  <Icon name={s.icon} className="" />
+                </div>
+                <p className="text-sm font-medium text-ink">{s.label}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      <div style={{ height: demoHeight, width: DEMO_NATURAL_WIDTH * scale }} className="overflow-hidden rounded-lg">
+        <div style={{ width: DEMO_NATURAL_WIDTH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+          <ConnectorDemo />
+        </div>
       </div>
     </div>
   );
@@ -603,60 +657,7 @@ export function Marketing() {
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
 
-        <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-stretch lg:justify-center">
-          <div className="flex w-full max-w-xs flex-col gap-6 text-left lg:max-w-[240px]">
-            <div>
-              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">
-                Set up once
-              </p>
-              <div className="flex flex-col gap-3">
-                {setupSteps.map((s, i) => (
-                  <div
-                    key={s.label}
-                    className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
-                    style={{ animationDelay: `${i * 0.08}s` }}
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
-                      {i + 1}
-                    </span>
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-                      <Icon name={s.icon} className="" />
-                    </div>
-                    <p className="text-sm font-medium text-ink">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            <div>
-              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">
-                Then ask anytime
-              </p>
-              <div className="flex flex-col gap-3">
-                {askSteps.map((s, i) => (
-                  <div
-                    key={s.label}
-                    className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
-                    style={{ animationDelay: `${i * 0.08}s` }}
-                  >
-                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
-                      {setupSteps.length + i + 1}
-                    </span>
-                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-                      <Icon name={s.icon} className="" />
-                    </div>
-                    <p className="text-sm font-medium text-ink">{s.label}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-
-          <div className="flex flex-1 flex-col">
-            <p className="mb-3 text-sm font-medium text-ink">See how connecting to your AI works:</p>
-            <ScaledConnectorDemo />
-          </div>
-        </div>
+        <WorkflowRow />
 
         <div className="mt-10">
           <SignedOut>
