@@ -5,6 +5,28 @@ import { ConnectorDemo } from "../components/ConnectorDemo";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
+function SectionCta({ label }: { label: string }) {
+  return (
+    <div className="mt-10">
+      <SignedOut>
+        <SignUpButton mode="modal">
+          <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark">
+            {label}
+          </button>
+        </SignUpButton>
+      </SignedOut>
+      <SignedIn>
+        <Link
+          to="/dashboard"
+          className="inline-block rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark"
+        >
+          {label}
+        </Link>
+      </SignedIn>
+    </div>
+  );
+}
+
 function CheckIcon({ className = "text-brand" }: { className?: string }) {
   return (
     <svg
@@ -499,6 +521,8 @@ export function Marketing() {
             </div>
           </div>
         </div>
+
+        <SectionCta label="Find your way in to your top prospect now →" />
       </section>
 
       {/* How matching works */}
@@ -538,6 +562,8 @@ export function Marketing() {
             </p>
           </div>
         </div>
+
+        <SectionCta label="See my warmest path to a prospect →" />
       </section>
 
       {/* Workflow */}
@@ -668,6 +694,10 @@ export function Marketing() {
               </p>
             </div>
           ))}
+        </div>
+
+        <div className="text-center">
+          <SectionCta label="Get results like these →" />
         </div>
       </section>
 
