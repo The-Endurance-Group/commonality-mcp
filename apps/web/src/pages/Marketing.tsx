@@ -514,6 +514,9 @@ export function Marketing() {
       <header className="mx-auto flex max-w-content items-center justify-between px-6 py-5">
         <img src="/logo.png" alt="Commonality" className="h-7 w-auto" />
         <div className="flex items-center gap-4 text-sm">
+          <a href="#pricing" className="font-medium text-lavender hover:text-ink">
+            Pricing
+          </a>
           <SignedOut>
             <SignInButton mode="modal">
               <button className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition hover:bg-accent-dark">
@@ -563,7 +566,7 @@ export function Marketing() {
               See how →
             </a>
           </div>
-          <p className="mt-3 text-sm text-white/70">No credit card · 50 credits/mo free</p>
+          <p className="mt-3 text-sm text-white/70">Free plan: 50 credits every month, forever · no credit card required</p>
         </div>
 
         <div className="mx-auto mt-12 max-w-md animate-float">
@@ -729,11 +732,15 @@ export function Marketing() {
       </section>
 
       {/* Pricing */}
-      <section className="mx-auto max-w-content px-6 py-16">
+      <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
+        <p className="mt-2 text-center text-sm text-lavender">Free forever - no credit card, no trial to expire.</p>
 
         <div className="mt-10 grid gap-8 sm:grid-cols-3">
-          <div className="rounded-lg border border-gray-200 p-6 transition hover:scale-105">
+          <div className="relative rounded-lg border border-gray-200 p-6 transition hover:scale-105">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink px-3 py-1 text-xs font-medium text-white">
+              Free forever
+            </div>
             <div className="font-semibold text-ink">Free</div>
             <div className="mt-2 text-3xl font-bold text-ink">$0</div>
             <ul className="mt-4 space-y-2 text-sm text-lavender">
