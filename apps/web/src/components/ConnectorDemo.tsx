@@ -250,7 +250,20 @@ export function ConnectorDemo() {
     function centerOf(target: HTMLElement) {
       const s = stage.getBoundingClientRect();
       const r = target.getBoundingClientRect();
-      return { x: r.left - s.left + r.width / 2 - 8, y: r.top - s.top + r.height / 2 - 8 };
+      // getBoundingClientRect() reflects any ambient CSS transform scale
+      // applied by an ancestor (e.g. the scaled-down embed on the marketing
+      // page), but cursor.style.left/top are interpreted in the stage's own
+      // local (pre-transform) coordinate space, which the ancestor then
+      // re-scales again when rendering. Convert back to local units by
+      // dividing out the ambient scale (offsetWidth/Height never reflect a
+      // transform, only the rect does), or the cursor would only travel a
+      // fraction of the intended distance under any scaled embed.
+      const scaleX = s.width / stage.offsetWidth;
+      const scaleY = s.height / stage.offsetHeight;
+      return {
+        x: (r.left - s.left) / scaleX + r.width / scaleX / 2 - 8,
+        y: (r.top - s.top) / scaleY + r.height / scaleY / 2 - 8,
+      };
     }
     function moveCursorTo(target: HTMLElement) {
       const p = centerOf(target);

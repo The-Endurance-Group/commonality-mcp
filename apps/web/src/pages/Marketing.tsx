@@ -1,9 +1,40 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ConnectorDemo } from "../components/ConnectorDemo";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
+
+// ConnectorDemo's natural, unscaled size (its stage's min-height plus the
+// caption line below it).
+const DEMO_NATURAL_WIDTH = 604;
+const DEMO_NATURAL_HEIGHT = 676;
+
+// Scales ConnectorDemo to exactly fill its flex-stretched container's
+// height (matching the sibling step list), instead of a fixed size.
+function ScaledConnectorDemo() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(0.55);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const h = entries[0]?.contentRect.height;
+      if (h && h > 0) setScale(h / DEMO_NATURAL_HEIGHT);
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapperRef} className="min-h-[280px] flex-1 overflow-hidden rounded-lg">
+      <div style={{ width: DEMO_NATURAL_WIDTH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+        <ConnectorDemo />
+      </div>
+    </div>
+  );
+}
 
 function SectionCta({ label }: { label: string }) {
   return (
@@ -431,7 +462,9 @@ export function Marketing() {
         <div className="flex items-center gap-4 text-sm">
           <SignedOut>
             <SignInButton mode="modal">
-              <button className="text-lavender hover:text-ink">Sign in</button>
+              <button className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition hover:bg-accent-dark">
+                Sign in
+              </button>
             </SignInButton>
           </SignedOut>
           <SignedIn>
@@ -570,7 +603,7 @@ export function Marketing() {
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
 
-        <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
+        <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-stretch lg:justify-center">
           <div className="flex w-full max-w-xs flex-col gap-6 text-left lg:max-w-[240px]">
             <div>
               <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">
@@ -616,19 +649,12 @@ export function Marketing() {
                   </div>
                 ))}
               </div>
-              <p className="mt-3 text-sm text-lavender">
-                New prospect or new target account - just ask.
-              </p>
             </div>
           </div>
 
-          <div>
+          <div className="flex flex-1 flex-col">
             <p className="mb-3 text-sm font-medium text-ink">See how connecting to your AI works:</p>
-            <div style={{ width: 332, height: 372 }} className="overflow-hidden rounded-lg">
-              <div style={{ width: 604, transform: "scale(0.55)", transformOrigin: "top left" }}>
-                <ConnectorDemo />
-              </div>
-            </div>
+            <ScaledConnectorDemo />
           </div>
         </div>
 
