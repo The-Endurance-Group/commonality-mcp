@@ -764,7 +764,7 @@ export function Marketing() {
               Most popular
             </div>
             <div className="font-semibold text-ink">Pro</div>
-            <div className="mt-2 text-3xl font-bold text-ink">$50/mo</div>
+            <div className="mt-2 text-3xl font-bold text-ink">$49/mo</div>
             <ul className="mt-4 space-y-2 text-sm text-lavender">
               <li className="flex items-center gap-2">
                 <CheckIcon />

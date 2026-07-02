@@ -46,7 +46,7 @@ return cached data. Otherwise call Cassidy, store the result, increment
 
 ## Credits
 
-- free = 50 credits/month ($0/mo); pro = 200 credits/month ($50/mo); enterprise = custom, contact-sales only (no real backend plan value).
+- free = 50 credits/month ($0/mo); pro = 200 credits/month ($49/mo); enterprise = custom, contact-sales only (no real backend plan value).
 - 1 credit = 1 real vendor call (one Apify actor invocation or one Cassidy enrichment) - charged inline via `chargeCredit()` (`apps/server/src/auth/quota.ts`) at each vendor-call site, not once per tool call. A single tool invocation (e.g. `analyze_company`) can spend multiple credits.
 - Check-then-increment via `chargeCredit()`; atomic increment itself via the `increment_usage(company_id, month)` RPC (writes `monthly_usage.credits_used`).
 - At limit → return a friendly upgrade message as a tool result, do NOT throw. `mcp/server.ts` also does a cheap up-front block if a company is already over the limit before running any tool.

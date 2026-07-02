@@ -62,7 +62,7 @@ const sections: Section[] = [
     body: (
       <>
         <p>
-          Commonality offers a Free plan (50 credits/month, up to 25 team members), a Pro plan ($50/month, 200
+          Commonality offers a Free plan (50 credits/month, up to 25 team members), a Pro plan ($49/month, 200
           credits/month, up to 150 team members), and custom Enterprise plans. Current plan details and pricing are
           posted on our{" "}
           <Link to="/" className="font-medium text-brand hover:underline">

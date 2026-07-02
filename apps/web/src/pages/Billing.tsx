@@ -48,7 +48,7 @@ export function Billing() {
             </button>
           ) : (
             <button className="btn-primary" disabled={busy} onClick={() => go("/api/billing/checkout")}>
-              {busy ? "Redirecting…" : "Upgrade to Pro - $50/mo, 200 credits/mo"}
+              {busy ? "Redirecting…" : "Upgrade to Pro - $49/mo, 200 credits/mo"}
             </button>
           )}
         </div>
