@@ -742,6 +742,18 @@ export function Marketing() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-content px-6 pb-16 text-center">
+        <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-tint-brand p-6">
+          <p className="font-medium text-ink">Don't have Claude? Still want Commonality?</p>
+          <p className="mt-1 text-sm text-lavender">
+            <a href="mailto:hello@theendurancegroup.com" className="font-medium text-brand hover:underline">
+              Contact us
+            </a>{" "}
+            and we'll get you set up on whatever AI you do have.
+          </p>
+        </div>
+      </section>
+
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
         <div className="mx-auto max-w-content px-6">© Commonality - The Endurance Group</div>
       </footer>

@@ -256,6 +256,13 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
           {copiedUrl ? "Copied!" : "Copy"}
         </button>
       </div>
+      <p className="mt-2 text-sm text-lavender">
+        Don't have Claude? Still want Commonality?{" "}
+        <a href="mailto:hello@theendurancegroup.com" className="font-medium text-brand hover:underline">
+          Contact us
+        </a>{" "}
+        and we'll get you set up on whatever AI you do have.
+      </p>
 
       <div className="mt-5">
         <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
