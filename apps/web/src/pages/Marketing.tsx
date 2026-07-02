@@ -748,21 +748,6 @@ export function Marketing() {
         </div>
       </section>
 
-      <section className="mx-auto max-w-content px-6 pb-16 text-center">
-        <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-tint-brand p-6">
-          <p className="mt-1 text-sm text-lavender">
-            Having trouble connecting it to your AI?{" "}
-            <a
-              href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
-              target="_blank"
-              rel="noreferrer"
-              className="font-medium text-brand hover:underline"
-            >
-              Sign up for a time to meet with us.
-            </a>
-          </p>
-        </div>
-      </section>
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
         <div className="mx-auto max-w-content px-6">© Commonality - The Endurance Group</div>
