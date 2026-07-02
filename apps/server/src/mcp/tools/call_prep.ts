@@ -40,7 +40,7 @@ export const call_prep: ToolHandler<Args> = {
     });
 
     return text(
-      `Call prep - ${enriched.name}\n\n1. OPENING\n${prep.opening}\n\n2. DISCOVERY\n${prep.discovery}\n\n3. TRANSITION\n${prep.transition}\n\n4. OBJECTIONS\n${prep.objections}\n\n5. FOLLOW-UP\n${prep.followUp}`,
+      `Call prep - ${enriched.name} (${args.url})\n\n1. OPENING\n${prep.opening}\n\n2. DISCOVERY\n${prep.discovery}\n\n3. TRANSITION\n${prep.transition}\n\n4. OBJECTIONS\n${prep.objections}\n\n5. FOLLOW-UP\n${prep.followUp}`,
     );
   },
 };

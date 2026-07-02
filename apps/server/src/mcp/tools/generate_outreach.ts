@@ -16,7 +16,7 @@ export const generate_outreach: ToolHandler<Args> = {
       getCompany(ctx.company_id),
     ]);
     if (!companyRec) return text("Workspace not found.", true);
-    if (!results.length) return text(`No warm path to ${enriched.name} - outreach works best through a shared connection.`);
+    if (!results.length) return text(`No warm path to ${enriched.name} (${args.url}) - outreach works best through a shared connection.`);
 
     const chosen = args.employee_name
       ? results.find((r) => r.employee.name.toLowerCase() === args.employee_name!.toLowerCase()) ?? results[0]
@@ -32,8 +32,9 @@ export const generate_outreach: ToolHandler<Args> = {
       commonalities: chosen.commonalities,
     });
 
+    const employeeLabel = chosen.employee.linkedinUrl ? `${chosen.employee.name} (${chosen.employee.linkedinUrl})` : chosen.employee.name;
     return text(
-      `Outreach via ${chosen.employee.name} → ${enriched.name}\n\nLinkedIn:\n${out.linkedin}\n\nEmail:\n${out.email}\n\nNote for ${chosen.employee.name}:\n${out.note}`,
+      `Outreach via ${employeeLabel} → ${enriched.name} (${args.url})\n\nLinkedIn:\n${out.linkedin}\n\nEmail:\n${out.email}\n\nNote for ${chosen.employee.name}:\n${out.note}`,
     );
   },
 };

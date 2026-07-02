@@ -20,7 +20,7 @@ export const analyze_prospect: ToolHandler<{ url: string }> = {
       ? "Already analyzed for your team - no credit used."
       : `Uses 1 of your ${quota.remaining} remaining searches.`;
 
-    const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}.`;
+    const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${args.url}`;
     if (results.length === 0) {
       return text(`${header}\n\nNo warm paths found on your team yet.\n\n${billing}`);
     }

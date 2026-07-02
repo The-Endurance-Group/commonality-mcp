@@ -23,6 +23,6 @@ export const send_to_teammate: ToolHandler<Args> = {
     } catch {
       return text(`Couldn't email ${teammate.email}. Please try again.`, true);
     }
-    return text(`Sent ${enriched.name} to ${teammate.email}.`);
+    return text(`Sent ${enriched.name} (${args.url}) to ${teammate.email}.`);
   },
 };

@@ -21,6 +21,7 @@ export function toProspectProfile(e: EnrichmentData): ProspectProfile {
 }
 
 export interface ProspectAnalysis {
+  url: string;
   enriched: EnrichmentData;
   prospect: ProspectProfile;
   results: ConnectionResult[];
@@ -38,9 +39,12 @@ export async function analyzeProspectUrl(
     findLinkedInConnectors(ctx.company_id, url, enriched.name),
   ]);
   const results = findConnections(prospect, employees, connectors);
-  return { enriched, prospect, results };
+  return { url, enriched, prospect, results };
 }
 
+// Every returned person's name should be paired with their LinkedIn URL so
+// it's clickable - summarizePath names a teammate (r.employee), so include
+// their linkedinUrl whenever we have it.
 /** One-line description of a warm path's shared signals. */
 export function summarizePath(r: ConnectionResult): string {
   const sig = r.commonalities
@@ -51,5 +55,6 @@ export function summarizePath(r: ConnectionResult): string {
       return `both in ${c.value}`;
     })
     .join("; ");
-  return `${r.employee.name} - ${sig} (score ${r.strengthScore})`;
+  const name = r.employee.linkedinUrl ? `${r.employee.name} (${r.employee.linkedinUrl})` : r.employee.name;
+  return `${name} - ${sig} (score ${r.strengthScore})`;
 }

@@ -284,13 +284,13 @@ export const analyze_company: ToolHandler<Args> = {
       .sort((a, b) => (b.best?.strengthScore ?? -1) - (a.best?.strengthScore ?? -1));
 
     const lines = ranked.map((o, i) => {
-      const name = `${o.analysis.enriched.name}${o.analysis.enriched.title ? `, ${o.analysis.enriched.title}` : ""}`;
+      const name = `${o.analysis.enriched.name}${o.analysis.enriched.title ? `, ${o.analysis.enriched.title}` : ""} (${o.analysis.url})`;
       return o.best ? `${i + 1}. ${name} - ${summarizePath(o.best)}` : `${i + 1}. ${name} - no shared connections found.`;
     });
 
     const top = ranked[0];
     const headline = top?.best
-      ? `Your best way into this company is through ${top.analysis.enriched.name} - ${summarizePath(top.best)}.`
+      ? `Your best way into this company is through ${top.analysis.enriched.name} (${top.analysis.url}) - ${summarizePath(top.best)}.`
       : "None of these candidates share a connection with your team yet.";
 
     const charged = outcomes.filter((o) => o.charged).length;
