@@ -27,6 +27,9 @@
    UI chrome (not Commonality's) - kept neutral/cream to match, with our
    brand pink used only for Commonality-specific accents inside it. */
 .connector-demo {
+  /* Reset alignment regardless of an ancestor's text-center - the
+     demo's own markup controls its own layout per-element. */
+  text-align: left;
   --surface-1: #f5f4ee;
   --surface-2: #ffffff;
   --surface-3: #ffffff;

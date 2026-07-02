@@ -312,36 +312,6 @@ const askSteps = [
   { label: "Get the path, intro, and strategy", icon: "mail" },
 ];
 
-function PipelineGraphic({
-  steps,
-  startAt = 1,
-}: {
-  steps: { label: string; icon: string }[];
-  startAt?: number;
-}) {
-  const gridCols = steps.length === 2 ? "grid-cols-1 sm:grid-cols-2" : "grid-cols-1 sm:grid-cols-3";
-
-  return (
-    <div className={`mx-auto grid max-w-3xl gap-3 ${gridCols}`}>
-      {steps.map((s, i) => (
-        <div
-          key={s.label}
-          className="animate-fade-up relative flex flex-col items-center gap-2 rounded-lg border border-gray-100 bg-white px-3 py-5 text-center"
-          style={{ animationDelay: `${i * 0.08}s` }}
-        >
-          <span className="absolute left-2 top-2 flex h-5 w-5 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
-            {startAt + i}
-          </span>
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-            <Icon name={s.icon} className="" />
-          </div>
-          <p className="text-xs font-medium leading-tight text-ink sm:text-sm">{s.label}</p>
-        </div>
-      ))}
-    </div>
-  );
-}
-
 
 const caseStudies = [
   {
@@ -574,26 +544,56 @@ export function Marketing() {
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
 
-        <p className="mt-8 text-sm font-semibold uppercase tracking-wide text-lavender">
-          Set up once
-        </p>
-        <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-center">
-          <div className="flex w-full max-w-xs flex-col gap-3 text-left lg:max-w-[240px]">
-            {setupSteps.map((s, i) => (
-              <div
-                key={s.label}
-                className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
-                  {i + 1}
-                </span>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-                  <Icon name={s.icon} className="" />
-                </div>
-                <p className="text-sm font-medium text-ink">{s.label}</p>
+        <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
+          <div className="flex w-full max-w-xs flex-col gap-6 text-left lg:max-w-[240px]">
+            <div>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">
+                Set up once
+              </p>
+              <div className="flex flex-col gap-3">
+                {setupSteps.map((s, i) => (
+                  <div
+                    key={s.label}
+                    className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
+                    style={{ animationDelay: `${i * 0.08}s` }}
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
+                      {i + 1}
+                    </span>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+                      <Icon name={s.icon} className="" />
+                    </div>
+                    <p className="text-sm font-medium text-ink">{s.label}</p>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+
+            <div>
+              <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">
+                Then ask anytime
+              </p>
+              <div className="flex flex-col gap-3">
+                {askSteps.map((s, i) => (
+                  <div
+                    key={s.label}
+                    className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
+                    style={{ animationDelay: `${i * 0.08}s` }}
+                  >
+                    <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
+                      {setupSteps.length + i + 1}
+                    </span>
+                    <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+                      <Icon name={s.icon} className="" />
+                    </div>
+                    <p className="text-sm font-medium text-ink">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-3 text-sm text-lavender">
+                New prospect or new target account - just ask.
+              </p>
+            </div>
           </div>
 
           <div>
@@ -605,16 +605,6 @@ export function Marketing() {
             </div>
           </div>
         </div>
-
-        <p className="mt-10 text-sm font-semibold uppercase tracking-wide text-lavender">
-          Then ask anytime - about a person or a company
-        </p>
-        <div className="mt-4">
-          <PipelineGraphic steps={askSteps} startAt={4} />
-        </div>
-        <p className="mt-4 text-sm text-lavender">
-          New prospect or new target account - just ask.
-        </p>
 
         <div className="mt-10">
           <SignedOut>

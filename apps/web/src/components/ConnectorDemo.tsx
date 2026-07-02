@@ -86,7 +86,7 @@ const DEMO_HTML = `
     <i class="ti ti-x" aria-hidden="true" style="font-size:12px; color:var(--text-muted);"></i>
   </div>
 
-  <div data-el="cursor" style="position:absolute; width:16px; height:16px; z-index:30; transition:left 0.6s ease, top 0.6s ease; left:246px; top:146px;">
+  <div data-el="cursor" style="position:absolute; width:16px; height:16px; z-index:30; transition:left 0.9s ease-in-out, top 0.9s ease-in-out; left:246px; top:146px;">
     <svg viewBox="0 0 24 24" width="16" height="16" style="filter:drop-shadow(0 1px 1px rgba(0,0,0,0.3));"><path d="M4 2 L4 20 L9 15 L12 22 L15 21 L12 14 L19 14 Z" fill="var(--text-primary)"/></svg>
   </div>
 
@@ -355,14 +355,14 @@ export function ConnectorDemo() {
 
         caption.textContent = "1. Click the workspace icon";
         moveCursorTo(briefcase);
-        await wait(750);
+        await wait(1050);
         click(briefcase);
         briefcase.style.background = "var(--bg-accent)";
         await wait(750);
 
         caption.textContent = "2. Click Connectors in the sidebar";
         moveCursorTo(navConnectors);
-        await wait(750);
+        await wait(1050);
         click(navConnectors);
         navConnectors.style.background = "var(--bg-accent)";
         navConnectors.style.color = "var(--text-accent)";
@@ -370,7 +370,7 @@ export function ConnectorDemo() {
 
         caption.textContent = "3. Click the plus button";
         moveCursorTo(plusBtn);
-        await wait(750);
+        await wait(1050);
         click(plusBtn);
         await wait(250);
         popover.style.opacity = "1";
@@ -379,7 +379,7 @@ export function ConnectorDemo() {
 
         caption.textContent = '4. Choose "Add custom connector"';
         moveCursorTo(addCustomItem);
-        await wait(750);
+        await wait(1050);
         click(addCustomItem);
         addCustomItem.style.background = "var(--bg-accent)";
         await wait(600);
@@ -412,7 +412,7 @@ export function ConnectorDemo() {
         cursor.style.top = "146px";
         await wait(80);
         moveCursorTo(addBtn);
-        await wait(750);
+        await wait(1050);
         click(addBtn);
         await wait(500);
 
@@ -429,7 +429,7 @@ export function ConnectorDemo() {
         cursor.style.top = "520px";
         await wait(80);
         moveCursorTo(connectBtn);
-        await wait(750);
+        await wait(1050);
         click(connectBtn);
         await wait(500);
 
@@ -449,7 +449,7 @@ export function ConnectorDemo() {
         cursor.style.top = "520px";
         await wait(80);
         moveCursorTo(allowBtn);
-        await wait(750);
+        await wait(1050);
         click(allowBtn);
         await wait(500);
 
@@ -467,7 +467,7 @@ export function ConnectorDemo() {
         cursor.style.top = "400px";
         await wait(80);
         moveCursorTo(chatsIcon);
-        await wait(750);
+        await wait(1050);
         click(chatsIcon);
         chatsIcon.style.background = "var(--bg-accent)";
         await wait(500);
@@ -484,7 +484,7 @@ export function ConnectorDemo() {
         cursor.style.top = "30px";
         await wait(80);
         moveCursorTo(newChatBtn);
-        await wait(750);
+        await wait(1050);
         click(newChatBtn);
         await wait(500);
 
