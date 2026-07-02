@@ -53,9 +53,10 @@ export const TOOL_DEFS: McpToolDef[] = [
           type: "array",
           items: { type: "string" },
           description:
-            "3-6 real job-title variants for the role the user wants, e.g. [\"VP of Sales\", \"Vice President of Business Development\", " +
-            "\"Sales Director\", \"Head of Business Development\"] - LinkedIn titles vary a lot company to company, so include seniority " +
-            "and phrasing synonyms, not just one guess. Matched with OR (any variant counts).",
+            "1-4 broad keyword terms for the department/function the user wants, e.g. [\"Sales\", \"Business Development\"] - " +
+            "LinkedIn matches these against the full title, so a bare keyword catches every seniority (VP, Director, Associate, etc). " +
+            "Don't add seniority or full title phrases (e.g. \"VP of Sales\") - that narrows the match and misses real title " +
+            "wording. Matched with OR across terms; the user picks seniority from the returned candidate list instead.",
         },
         role_retry: { type: "boolean", description: "Set true when retrying role with a broader/different set of title variants after zero results" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },

@@ -23,13 +23,12 @@ const MAX_CANDIDATES = 20;
 //      (or the user can paste one directly if none of the matches are right).
 //   1. company_url, no role          -> ask the user for a role, then search.
 //      company_url + role            -> LinkedIn people-search scoped to that
-//      company + several title variants (LinkedIn titles vary a lot company
-//      to company, so a single exact guess like "VP of Sales" misses real
-//      titles like "Vice President of Business Development" - role is
-//      matched with OR across variants). Zero results: try one reworded/
-//      broader batch of variants (role_retry:true) before asking the user
-//      to revise their filters - never silently falls back to an unfiltered
-//      roster.
+//      company + a few broad keyword terms (e.g. "Sales", "Business
+//      Development" - not full titles with seniority like "VP of Sales",
+//      which only narrows the match and misses real title wording). Zero
+//      results: try one reworded/broader batch of terms (role_retry:true)
+//      before asking the user to revise their filters - never silently
+//      falls back to an unfiltered roster.
 //   2. + candidate_urls              -> preview how many NEW searches analyzing them would cost.
 //   3. + candidate_urls + confirm    -> run it, charging quota per new candidate, return a ranking.
 // Billing is handled inside run() (per-candidate, dedup'd by URL) rather than
@@ -68,10 +67,10 @@ export const analyze_company: ToolHandler<Args> = {
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
       if (!args.role || args.role.length === 0) {
         return text(
-          "Ask the user what role or seniority they want to reach (e.g. \"VP of Sales\"). Turn their answer into " +
-            "3-6 real job-title variants (seniority and phrasing synonyms - LinkedIn titles vary a lot company to " +
-            "company) - this gets passed directly to a LinkedIn title search. Then call analyze_company again with " +
-            "company_url + role (the array of variants) to search for matching people at that company.",
+          "Ask the user what department/function they want to reach (e.g. \"sales\", \"business development\"). Turn " +
+            "their answer into 1-4 broad keyword terms, not full titles - skip seniority words like \"VP\" or " +
+            "\"Director\", since that only narrows the match and misses real title wording. Then call analyze_company " +
+            "again with company_url + role (the broad keyword terms) to search for matching people at that company.",
         );
       }
 
@@ -86,15 +85,15 @@ export const analyze_company: ToolHandler<Args> = {
       if (!candidates.length) {
         if (!args.role_retry) {
           return text(
-            `No matches for "${roleLabel}" at this company. Try a broader or different set of title variants ` +
-              "(more synonyms, different seniority levels, department-only titles - don't ask the user yet), then " +
-              "call analyze_company again with company_url + the new role variants + role_retry:true.",
+            `No matches for "${roleLabel}" at this company. Try different or broader keyword terms (a related ` +
+              "department name or synonym, still no seniority words - don't ask the user yet), then call " +
+              "analyze_company again with company_url + the new role terms + role_retry:true.",
           );
         }
         return text(
-          `Still no matches after trying a broader set of title variants. Ask the user to revise their filters - a ` +
-            "different role, broader seniority, or a different title entirely - then call analyze_company again with " +
-            "the new role variants (and role_retry unset, to get a fresh two-try budget).",
+          `Still no matches after trying broader keyword terms. Ask the user to revise their filters - a different ` +
+            "department or function entirely - then call analyze_company again with the new role terms (and " +
+            "role_retry unset, to get a fresh two-try budget).",
           true,
         );
       }
