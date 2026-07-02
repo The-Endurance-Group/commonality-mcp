@@ -14,12 +14,53 @@ interface Args {
   confirm?: boolean;
 }
 
+// Seniority/level words to strip out of each role term before searching. LinkedIn's
+// title filter matches literally, so a term like "VP Marketing" only catches people
+// whose title contains that exact wording - missing "Director of Marketing",
+// "Marketing Lead", etc. Despite tool-description instructions asking for bare
+// department keywords, models don't reliably comply (observed in production: a
+// "director and above" request produced the literal search term "VP Marketing" and
+// returned only 1 match at a company with several marketing/sales people). Stripping
+// seniority words here guarantees a broad search regardless of what the model sends;
+// the model still does its own seniority filtering afterward from the returned titles.
+const SENIORITY_PATTERN = new RegExp(
+  "\\b(" +
+    [
+      "senior vice president", "executive vice president", "assistant vice president",
+      "vice president", "svp", "evp", "avp", "vp",
+      "senior director", "associate director", "director",
+      "head of", "head",
+      "chief", "president",
+      "senior", "sr\\.?",
+      "junior", "jr\\.?",
+      "principal", "lead",
+    ].join("|") +
+    ")\\b",
+  "gi",
+);
+
+function stripSeniority(term: string): string {
+  return term.replace(SENIORITY_PATTERN, " ").replace(/\bof\b/gi, " ").replace(/\s+/g, " ").trim();
+}
+
 // role should be an array per the tool schema, but clients occasionally send a
 // bare string (stale cached schema, or a model not conforming exactly) - normalize
-// rather than crash on .join()/.length checks that assume an array.
+// rather than crash on .join()/.length checks that assume an array. Also strips
+// seniority words from each term so the search stays broad (see stripSeniority).
 function normalizeRole(role: Args["role"]): string[] {
   if (!role) return [];
-  return Array.isArray(role) ? role.filter(Boolean) : [role].filter(Boolean);
+  const terms = Array.isArray(role) ? role : [role];
+  const stripped = terms.map(stripSeniority).filter(Boolean);
+  // dedupe case-insensitively while preserving first-seen casing
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const t of stripped) {
+    const key = t.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(t);
+  }
+  return out;
 }
 
 const ROLE_SEARCH_LIMIT = 25;
