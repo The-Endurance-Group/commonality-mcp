@@ -9,7 +9,6 @@ interface Args {
   company_url?: string;
   company_name?: string;
   role?: string[] | string;
-  role_confirmed?: boolean;
   role_retry?: boolean;
   candidate_urls?: string[];
   confirm?: boolean;
@@ -175,18 +174,6 @@ export const analyze_company: ToolHandler<Args> = {
 
       const roleLabel = role.join(" / ");
 
-      if (!args.role_confirmed) {
-        return text(
-          `Tell the user in plain language what you're about to do - e.g. "I'll search AArete for people with ` +
-            `${roleLabel} in their title, then narrow to director-level and above" (use their actual department ` +
-            "words and seniority, not this exact phrasing) - and ask them to confirm it's right, in ONE message. " +
-            `Mention every term in "${roleLabel}" as-is (it already includes related synonyms added automatically, ` +
-            "e.g. a sales search also covers business development - don't second-guess or re-derive this list, just " +
-            "state it). As soon as the user confirms, call analyze_company again with the exact same role array + " +
-            "role_confirmed:true to run the search - do not change the role terms at this point.",
-        );
-      }
-
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
         candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: role }, ROLE_SEARCH_LIMIT);
@@ -212,17 +199,15 @@ export const analyze_company: ToolHandler<Args> = {
 
       const lines = candidates.map((c, i) => `${i + 1}. ${c.name} - ${c.title}\n   ${c.linkedinUrl}`);
       return text(
-        `${candidates.length} people matching "${roleLabel}" at this company:\n${lines.join("\n")}\n\n` +
-          `This search only covered: ${roleLabel}. Before presenting these results, check whether the user named ` +
-          "any other department/function you haven't searched yet (e.g. they said \"sales or marketing\" but " +
-          `${roleLabel} only covers one of those) - if so, call analyze_company again with company_url + role set to ` +
-          "the missing term(s) + role_confirmed:true (this is just completing the search the user already approved, " +
-          "so don't ask them to confirm it again), then merge both result sets before presenting. If the user " +
-          "specified a seniority (e.g. \"VP\", \"director-level\", \"senior\"), read each person's title above and " +
-          "filter/reorder this list yourself to lead with the ones that actually match it, noting that you narrowed " +
-          `it down - don't just dump the raw list when they asked for a seniority. Confirm with the user which of ` +
-          `these to analyze (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with company_url + ` +
-          "candidate_urls to preview the cost before analyzing.",
+        `Searched for "${roleLabel}" (title keywords, already includes related synonyms) at this company - ` +
+          `${candidates.length} matches:\n${lines.join("\n")}\n\n` +
+          "If the user specified a seniority (e.g. \"VP\", \"director-level\", \"senior\"), read each person's title " +
+          "above and filter/reorder this list yourself to lead with the ones that actually match it, noting that you " +
+          "narrowed it down - don't just dump the raw list when they asked for a seniority. If this missed a " +
+          "department/function the user actually named, or the wrong departments were searched, call analyze_company " +
+          "again with corrected role terms (a fresh search, no special flag needed). Otherwise, confirm with the " +
+          `user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
+          "company_url + candidate_urls to preview the cost before analyzing.",
       );
     }
 
