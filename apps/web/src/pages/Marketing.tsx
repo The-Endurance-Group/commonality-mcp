@@ -1,6 +1,7 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
 import { useEffect, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
+import { ConnectorDemo } from "../components/ConnectorDemo";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
@@ -580,6 +581,11 @@ export function Marketing() {
           <PipelineGraphic steps={setupSteps} />
         </div>
 
+        <div className="mx-auto mt-8 max-w-lg">
+          <p className="mb-3 text-sm font-medium text-ink">See how connecting to your AI works:</p>
+          <ConnectorDemo />
+        </div>
+
         <p className="mt-10 text-sm font-semibold uppercase tracking-wide text-lavender">
           Then ask anytime - about a person or a company
         </p>
@@ -744,17 +750,16 @@ export function Marketing() {
 
       <section className="mx-auto max-w-content px-6 pb-16 text-center">
         <div className="mx-auto max-w-lg rounded-lg border border-gray-200 bg-tint-brand p-6">
-          <p className="font-medium text-ink">Don't have Claude? Still want Commonality?</p>
           <p className="mt-1 text-sm text-lavender">
+            Having trouble connecting it to your AI?{" "}
             <a
               href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
               target="_blank"
               rel="noreferrer"
               className="font-medium text-brand hover:underline"
             >
-              Contact us
-            </a>{" "}
-            and we'll get you set up on whatever AI you do have.
+              Sign up for a time to meet with us.
+            </a>
           </p>
         </div>
       </section>

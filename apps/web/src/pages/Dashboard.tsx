@@ -228,8 +228,8 @@ function defaultInviteMessage(appUrl: string, mcpUrl: string): string {
     `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
     `our team's shared schools, past employers, and connections:\n` +
     `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. In Claude, go to Settings → Connectors → Add custom connector, and paste this URL: ${mcpUrl}\n` +
-    `3. Sign in with your email when prompted, then ask Claude to find a warm path to a prospect.`
+    `2. Add Commonality as a custom connector in your AI, using this URL: ${mcpUrl}\n` +
+    `3. Sign in with your email when prompted, then ask it to find a warm path to a prospect.`
   );
 }
 
@@ -240,8 +240,8 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
 
   return (
     <CollapsibleCard
-      title="Connect to Claude"
-      subtitle="Add this URL as a custom connector in Claude → Settings → Connectors, then ask Claude to find a warm path."
+      title="Connect to your AI"
+      subtitle="Add this URL as a custom connector in your AI, then ask it to find a warm path."
     >
       <div className="flex items-center gap-2">
         <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
@@ -257,16 +257,15 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         </button>
       </div>
       <p className="mt-2 text-sm text-lavender">
-        Don't have Claude? Still want Commonality?{" "}
+        Having trouble connecting it to your AI?{" "}
         <a
           href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
           target="_blank"
           rel="noreferrer"
           className="font-medium text-brand hover:underline"
         >
-          Contact us
-        </a>{" "}
-        and we'll get you set up on whatever AI you do have.
+          Sign up for a time to meet with us.
+        </a>
       </p>
 
       <div className="mt-5">

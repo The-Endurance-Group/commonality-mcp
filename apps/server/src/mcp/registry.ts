@@ -103,7 +103,7 @@ export const TOOL_DEFS: McpToolDef[] = [
   },
   {
     name: "push_to_crm",
-    description: "Explains how to log a prospect's findings to HubSpot or Salesforce via Claude's native CRM connectors.",
+    description: "Explains how to log a prospect's findings to HubSpot or Salesforce via your AI's native CRM connectors.",
     inputSchema: { type: "object", properties: {} },
   },
   {

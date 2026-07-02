@@ -505,11 +505,11 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
 function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void }) {
   return (
     <Card
-      title="Add the Commonality connector in Claude"
+      title="Connect Commonality to your AI"
       subtitle="One link to your AI, and you can start asking for warm paths immediately."
     >
       <ol className="list-decimal space-y-2 pl-5 text-sm text-lavender">
-        <li>Open Claude → Settings → Connectors → Add custom connector.</li>
+        <li>Open your AI assistant's settings and add a custom connector.</li>
         <li>Paste this URL:</li>
       </ol>
       <div className="mt-2 flex items-center gap-2">
@@ -519,7 +519,7 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
         </button>
       </div>
       <p className="mt-3 text-sm text-lavender">
-        Sign in with your email when prompted, then ask Claude to find a warm path.
+        Sign in with your email when prompted, then ask it to find a warm path.
       </p>
       <button className="btn-primary mt-4" onClick={onDone}>
         Go to dashboard
@@ -528,6 +528,17 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
       <div className="mt-6 border-t border-gray-100 pt-6">
         <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
         <ConnectorDemo />
+        <p className="mt-3 text-sm text-lavender">
+          Having trouble connecting it to your AI?{" "}
+          <a
+            href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
+            target="_blank"
+            rel="noreferrer"
+            className="font-medium text-brand hover:underline"
+          >
+            Sign up for a time to meet with us.
+          </a>
+        </p>
       </div>
     </Card>
   );
