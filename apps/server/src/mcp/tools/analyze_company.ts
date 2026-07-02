@@ -120,9 +120,11 @@ export const analyze_company: ToolHandler<Args> = {
           "Ask the user what department/function (and, optionally, seniority) they want to reach - e.g. \"sales\", " +
             "\"a senior person in business development\". Turn the department/function part into 1-4 broad keyword " +
             "terms for the role field, not full titles - skip seniority words like \"VP\" or \"Director\" there, " +
-            "since that only narrows the match and misses real title wording. If the user gave a seniority, apply " +
-            "it yourself afterward by reading the title on each returned candidate - don't put it in the search. " +
-            "Then call analyze_company again with company_url + role (the broad keyword terms).",
+            "since that only narrows the match and misses real title wording. If the user names more than one " +
+            "department (e.g. \"sales or marketing\"), include a separate term for EACH one in the same array - " +
+            "don't only search one of them. If the user gave a seniority, apply it yourself afterward by reading " +
+            "the title on each returned candidate - don't put it in the search. Then call analyze_company again " +
+            "with company_url + role (the broad keyword terms).",
         );
       }
 

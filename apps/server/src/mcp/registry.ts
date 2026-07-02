@@ -53,8 +53,9 @@ export const TOOL_DEFS: McpToolDef[] = [
           type: "array",
           items: { type: "string" },
           description:
-            "1-4 broad keyword terms for the department/function the user wants, e.g. [\"Sales\", \"Business Development\"] - " +
-            "LinkedIn matches these against the full title, so a bare keyword catches every seniority (VP, Director, Associate, etc). " +
+            "1-4 broad keyword terms, one per department/function the user named - e.g. if they said \"sales or marketing\", " +
+            "send [\"Sales\", \"Marketing\"], not just one of them. LinkedIn matches these against the full title, so a bare " +
+            "keyword catches every seniority (VP, Director, Associate, etc). " +
             "Don't add seniority or full title phrases (e.g. \"VP of Sales\") - that narrows the match and misses real title " +
             "wording. Matched with OR across terms; the user picks seniority from the returned candidate list instead.",
         },
