@@ -177,15 +177,18 @@ export const analyze_company: ToolHandler<Args> = {
 
       if (!args.role_confirmed) {
         return text(
-          `Before searching, tell the user in plain language what you're about to do - e.g. "I'll search AArete for ` +
-            `people with ${roleLabel} in their title, then narrow to director-level and above" (use their actual ` +
-            "department words and seniority, not this exact phrasing) - and ask them to confirm it's right. Mention " +
-            `EVERY term in "${roleLabel}" (it already includes any related synonyms added automatically, e.g. sales ` +
-            "searches also cover business development) so the user isn't surprised later by a term that was already " +
-            "included, or asks you to add something that's already covered. Once they confirm, call analyze_company " +
-            "again with the same company_url + role + role_confirmed:true to run the search - this should only need " +
-            "one confirmation round, not one per term. If they say it's wrong, call again with corrected role terms " +
-            "instead (role_confirmed left unset).",
+          `Before presenting this, re-read the user's original request one more time and check: does role cover ` +
+            "EVERY department/function they named (splitting on \"and\"/\"or\"/\"/\", e.g. \"sales/marketing\" is 2)? " +
+            `Right now role only covers: ${roleLabel}. If you dropped one, call analyze_company again right now with ` +
+            "the corrected, complete role array - don't present a partial plan and ask the user to add the rest " +
+            "themselves. Once role is complete, tell the user in plain language what you're about to do - e.g. " +
+            `"I'll search AArete for people with ${roleLabel} in their title, then narrow to director-level and ` +
+            "above\" (use their actual department words and seniority) - and ask them to confirm it's right. Mention " +
+            `EVERY term in role (it already includes any related synonyms added automatically, e.g. sales searches ` +
+            "also cover business development) so nothing looks missing. Once they confirm, call analyze_company again " +
+            "with the same company_url + role + role_confirmed:true to run the search - this should only need one " +
+            "confirmation round total. If they say it's wrong, call again with corrected role terms instead " +
+            "(role_confirmed left unset).",
         );
       }
 
