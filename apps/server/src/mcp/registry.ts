@@ -42,8 +42,9 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "analyze_company",
     description:
       "Find the best way into a company (account-based, not one person). Call with company_name to resolve a URL, " +
-      "or company_url + role to search their people by title; pick candidates, call again with candidate_urls to " +
-      "preview cost, then confirm:true to run it.",
+      "or company_url + role to search their people by title; confirm the search plan with the user, then " +
+      "role_confirmed:true to run it; pick candidates, call again with candidate_urls to preview cost, then " +
+      "confirm:true to run the analysis.",
     inputSchema: {
       type: "object",
       properties: {
@@ -59,6 +60,7 @@ export const TOOL_DEFS: McpToolDef[] = [
             "Don't add seniority or full title phrases (e.g. \"VP of Sales\") - that narrows the match and misses real title " +
             "wording. Matched with OR across terms; the user picks seniority from the returned candidate list instead.",
         },
+        role_confirmed: { type: "boolean", description: "Set true only after telling the user what you're about to search and they've confirmed it's right" },
         role_retry: { type: "boolean", description: "Set true when retrying role with a broader/different set of title variants after zero results" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
         confirm: { type: "boolean", description: "Set true to spend quota and run the analysis" },

@@ -9,6 +9,7 @@ interface Args {
   company_url?: string;
   company_name?: string;
   role?: string[] | string;
+  role_confirmed?: boolean;
   role_retry?: boolean;
   candidate_urls?: string[];
   confirm?: boolean;
@@ -173,6 +174,17 @@ export const analyze_company: ToolHandler<Args> = {
       }
 
       const roleLabel = role.join(" / ");
+
+      if (!args.role_confirmed) {
+        return text(
+          `Before searching, tell the user in plain language what you're about to do - e.g. "I'll search AArete for ` +
+            `people with ${roleLabel} in their title, then narrow to director-level and above" (use their actual ` +
+            "department words and seniority, not this exact phrasing) - and ask them to confirm it's right. Once " +
+            "they confirm, call analyze_company again with the same company_url + role + role_confirmed:true to run " +
+            "the search. If they say it's wrong, call again with corrected role terms instead (role_confirmed left unset).",
+        );
+      }
+
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
         candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: role }, ROLE_SEARCH_LIMIT);
