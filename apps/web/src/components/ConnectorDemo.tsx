@@ -1,12 +1,12 @@
 import { useEffect, useRef } from "react";
 
 // Looping animated demo of adding the Commonality custom MCP connector in
-// Claude, ending with Claude using it to find a warm intro. This depicts
-// Claude's own UI chrome, not Commonality's - see the scoped .connector-demo
-// CSS variables in index.css for its palette, and the Tabler Icons webfont
-// link in index.html for its icons.
+// Claude, ending with it using the connector to find a warm intro. This
+// depicts Claude's own UI chrome (though captions stay AI-agnostic) - see
+// the scoped .connector-demo CSS variables in index.css for its palette, and
+// the Tabler Icons webfont link in index.html for its icons.
 const DEMO_HTML = `
-<h2 class="sr-only">Looping animated demo of adding a custom MCP connector in Claude, ending with Claude typing out a warm-intro answer using the connected tool</h2>
+<h2 class="sr-only">Looping animated demo of adding a custom MCP connector in your AI assistant, ending with it typing out a warm-intro answer using the connected tool</h2>
 
 <div data-el="stage" style="position:relative; display:flex; background:var(--surface-2); border-radius:12px; border:0.5px solid var(--border); overflow:hidden; font-size:13px; min-height:640px;">
 
@@ -171,7 +171,7 @@ const DEMO_HTML = `
       <i class="ti ti-search" aria-hidden="true" style="font-size:15px;"></i>Search chats...
     </div>
     <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 0; border-bottom:0.5px solid var(--border); font-size:13px;">
-      <span>Adding MCP URL to Claude</span>
+      <span>Adding Commonality's MCP URL</span>
       <span style="color:var(--text-muted); font-size:12px;">3 minutes ago</span>
     </div>
   </div>
@@ -495,7 +495,7 @@ export function ConnectorDemo() {
         newChatScreen.style.pointerEvents = "auto";
         await wait(700);
 
-        caption.textContent = "16. Ask Claude to use Commonality";
+        caption.textContent = "16. Ask it to use Commonality";
         await typeInto(promptText, "Find a warm path to https://www.linkedin.com/in/janedoe/", 24);
         await wait(900);
 
@@ -505,7 +505,7 @@ export function ConnectorDemo() {
         resultScreen.style.pointerEvents = "auto";
         await wait(600);
 
-        caption.textContent = "17. Claude uses Commonality to find a warm intro";
+        caption.textContent = "17. It uses Commonality to find a warm intro";
         mutedLine(resultBody, "Viewed 2 files");
         await wait(300);
         await typeLine(resultBody, "Now let me scrape the prospect's profile.", 16, false);
