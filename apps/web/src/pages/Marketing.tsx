@@ -817,7 +817,13 @@ export function Marketing() {
 
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
-        <div className="mx-auto max-w-content px-6">© Commonality - The Endurance Group</div>
+        <div className="mx-auto flex max-w-content flex-wrap items-center justify-center gap-2 px-6">
+          <span>© Commonality - The Endurance Group</span>
+          <span>·</span>
+          <Link to="/privacy" className="hover:text-white">
+            Privacy
+          </Link>
+        </div>
       </footer>
     </div>
   );

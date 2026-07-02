@@ -7,6 +7,7 @@ import { Dashboard } from "./pages/Dashboard";
 import { Invites } from "./pages/Invites";
 import { Marketing } from "./pages/Marketing";
 import { Onboarding } from "./pages/Onboarding";
+import { Privacy } from "./pages/Privacy";
 
 export default function App() {
   useSessionBootstrap();
@@ -14,6 +15,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Marketing />} />
+      <Route path="/privacy" element={<Privacy />} />
       <Route
         path="/onboarding"
         element={
