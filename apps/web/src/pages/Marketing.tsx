@@ -577,13 +577,33 @@ export function Marketing() {
         <p className="mt-8 text-sm font-semibold uppercase tracking-wide text-lavender">
           Set up once
         </p>
-        <div className="mt-4">
-          <PipelineGraphic steps={setupSteps} />
-        </div>
+        <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-center lg:justify-center">
+          <div className="flex w-full max-w-xs flex-col gap-3 text-left lg:max-w-[240px]">
+            {setupSteps.map((s, i) => (
+              <div
+                key={s.label}
+                className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
+                style={{ animationDelay: `${i * 0.08}s` }}
+              >
+                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
+                  {i + 1}
+                </span>
+                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
+                  <Icon name={s.icon} className="" />
+                </div>
+                <p className="text-sm font-medium text-ink">{s.label}</p>
+              </div>
+            ))}
+          </div>
 
-        <div className="mx-auto mt-8 max-w-lg">
-          <p className="mb-3 text-sm font-medium text-ink">See how connecting to your AI works:</p>
-          <ConnectorDemo />
+          <div>
+            <p className="mb-3 text-sm font-medium text-ink">See how connecting to your AI works:</p>
+            <div style={{ width: 332, height: 372 }} className="overflow-hidden rounded-lg">
+              <div style={{ width: 604, transform: "scale(0.55)", transformOrigin: "top left" }}>
+                <ConnectorDemo />
+              </div>
+            </div>
+          </div>
         </div>
 
         <p className="mt-10 text-sm font-semibold uppercase tracking-wide text-lavender">
