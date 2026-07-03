@@ -41,7 +41,7 @@ const sections: Section[] = [
     ),
   },
   {
-    title: "3. Accounts &amp; workspaces",
+    title: "3. Accounts & workspaces",
     body: (
       <>
         <p>
@@ -58,7 +58,7 @@ const sections: Section[] = [
     ),
   },
   {
-    title: "4. Plans, billing &amp; cancellation",
+    title: "4. Plans, billing & cancellation",
     body: (
       <>
         <p>
