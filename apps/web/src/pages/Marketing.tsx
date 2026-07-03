@@ -511,10 +511,10 @@ export function Marketing() {
 
   return (
     <div className="min-h-screen overflow-x-hidden">
-      <header className="mx-auto flex max-w-content items-center justify-between px-6 py-5">
-        <img src="/logo.png" alt="Commonality" className="h-7 w-auto" />
+      <header className="mx-auto flex max-w-content items-center justify-between gap-4 px-6 py-5">
+        <img src="/logo.png" alt="Commonality" className="h-7 w-auto shrink-0" />
         <div className="flex items-center gap-4 text-sm">
-          <a href="#pricing" className="font-medium text-lavender hover:text-ink">
+          <a href="#pricing" className="hidden font-medium text-lavender hover:text-ink sm:inline">
             Pricing
           </a>
           <SignedOut>
