@@ -1,5 +1,5 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
-import { chargeCredit, quotaExceededMessage } from "../../auth/quota.js";
+import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
 import { searchProfiles, type ProfileSearchFilters } from "../../services/apify.js";
 import { getCompany } from "../../db/queries.js";
 import { text } from "./_result.js";
@@ -9,13 +9,16 @@ import { analyzeProspectUrl, summarizePath } from "./_prospect.js";
 // Uses the workspace ICP (or company context) to search, then checks the first
 // few candidates for a warm path. Capped to limit enrichment cost. 1 credit for
 // the search itself, plus 1 credit per candidate actually enriched (up to
-// MAX_ENRICH) - stops early if credits run out mid-scan.
+// MAX_ENRICH) - stops early if credits run out mid-scan. Each credit is
+// charged only after its vendor call succeeds; quota is pre-checked (without
+// charging) beforehand so a clearly-over-limit company skips the vendor call
+// entirely.
 const MAX_ENRICH = 3;
 
 export const prospect_of_day: ToolHandler<Record<string, never>> = {
   async run(_args, ctx: ToolContext) {
-    const searchCharge = await chargeCredit(ctx);
-    if (!searchCharge.allowed) return text(quotaExceededMessage(searchCharge, ctx.plan, ctx.role), true);
+    const searchStatus = await checkQuota(ctx);
+    if (!searchStatus.allowed) return text(quotaExceededMessage(searchStatus, ctx.plan, ctx.role), true);
 
     const company = await getCompany(ctx.company_id);
     if (!company) return text("Workspace not found.", true);
@@ -32,16 +35,26 @@ export const prospect_of_day: ToolHandler<Record<string, never>> = {
     } catch {
       return text("Couldn't fetch today's prospect right now. Please try again.", true);
     }
+    await chargeCredit(ctx);
     if (!candidates.length) return text("No prospects matched your ICP today. Refine your ICP in the dashboard.");
 
     let stoppedForCredits = false;
     for (const cand of candidates.slice(0, MAX_ENRICH)) {
-      const charge = await chargeCredit(ctx, cand.linkedinUrl);
-      if (!charge.allowed) {
-        stoppedForCredits = true;
-        break;
+      const alreadyUnlocked = await isProspectUnlocked(ctx.company_id, cand.linkedinUrl);
+      if (!alreadyUnlocked) {
+        const status = await checkQuota(ctx);
+        if (!status.allowed) {
+          stoppedForCredits = true;
+          break;
+        }
       }
-      const { enriched, results } = await analyzeProspectUrl(cand.linkedinUrl, ctx);
+      let enriched, results;
+      try {
+        ({ enriched, results } = await analyzeProspectUrl(cand.linkedinUrl, ctx));
+      } catch {
+        continue; // skip a bad candidate rather than failing the whole scan
+      }
+      await chargeCredit(ctx, cand.linkedinUrl);
       if (results.length) {
         return text(
           `Prospect of the day: ${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${cand.linkedinUrl}\n\nWarm path:\n${summarizePath(results[0])}`,

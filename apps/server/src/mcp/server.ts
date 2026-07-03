@@ -72,10 +72,12 @@ async function handleToolCall(
   // Surface a one-time notice if this call's credit charges crossed a new
   // 50/75/90/100% threshold - replaces proactively stating "N remaining"
   // before/after every call. Otherwise, free-plan users still get the
-  // occasional feature-discovery tip after a charged call.
+  // occasional feature-discovery tip after a charged call. Skip entirely on
+  // an error result - a threshold notice or upsell tip has no business being
+  // appended to a "Search failed. Try again." message.
   try {
     const after = await checkQuota(ctx);
-    if (after.used > before.used) {
+    if (!result.isError && after.used > before.used) {
       const notice = usageThresholdNotice(before.used, after.used, after.limit, ctx.plan, ctx.role);
       if (notice) {
         const content = result.content.map((c, i) =>

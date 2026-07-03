@@ -71,18 +71,24 @@ export async function recordProspectUnlock(companyId: string, url: string): Prom
 
 /**
  * Charge 1 credit for one real vendor call (an Apify actor invocation or a
- * Cassidy enrichment). Pass dedupeKey (a prospect URL) for calls that should
- * stay free on repeat, same as today's "re-analyzing an unlocked prospect is
- * free" behavior - omit it for calls that should always cost (e.g. a fresh
- * people-search). Known race window (check-then-increment isn't one atomic
- * statement) matches the pre-existing risk tolerance of this codebase.
+ * Cassidy enrichment). Call this ONLY after the vendor call has already
+ * succeeded - a failed call must never cost a credit. Call checkQuota()
+ * beforehand to fail fast (skip the vendor call entirely) when clearly over
+ * limit. Pass dedupeKey (a prospect URL) for calls that should stay free on
+ * repeat, same as "re-analyzing an unlocked prospect is free" - already
+ * unlocked is always free, even if the company is currently over its limit,
+ * since nothing new is being charged. Omit dedupeKey for calls that should
+ * always cost (e.g. a fresh people-search). Known race window
+ * (check-then-increment isn't one atomic statement) matches the pre-existing
+ * risk tolerance of this codebase.
  */
 export async function chargeCredit(
   ctx: Pick<ToolContext, "company_id" | "plan">,
   dedupeKey?: string | null,
 ): Promise<QuotaStatus> {
   if (dedupeKey && (await isProspectUnlocked(ctx.company_id, dedupeKey))) {
-    return checkQuota(ctx);
+    const status = await checkQuota(ctx);
+    return { ...status, allowed: true };
   }
   const status = await checkQuota(ctx);
   if (!status.allowed) return status;

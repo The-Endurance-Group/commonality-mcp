@@ -1,5 +1,5 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
-import { chargeCredit, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
+import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
 import { searchCompanies, searchProfiles } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
@@ -174,8 +174,8 @@ export const analyze_company: ToolHandler<Args> = {
 
       const roleLabel = role.join(" / ");
 
-      const searchCharge = await chargeCredit(ctx);
-      if (!searchCharge.allowed) return text(quotaExceededMessage(searchCharge, ctx.plan, ctx.role), true);
+      const searchStatus = await checkQuota(ctx);
+      if (!searchStatus.allowed) return text(quotaExceededMessage(searchStatus, ctx.plan, ctx.role), true);
 
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
@@ -183,6 +183,7 @@ export const analyze_company: ToolHandler<Args> = {
       } catch {
         return text("Couldn't search that company's people right now. Please try again.", true);
       }
+      await chargeCredit(ctx);
 
       if (!candidates.length) {
         if (!args.role_retry) {
@@ -248,15 +249,16 @@ export const analyze_company: ToolHandler<Args> = {
     for (const url of candidateUrls) {
       const alreadyUnlocked = await isProspectUnlocked(ctx.company_id, url);
       if (!alreadyUnlocked) {
-        const charge = await chargeCredit(ctx, url);
-        if (!charge.allowed) break; // out of credits - stop gracefully, return what we have
+        const status = await checkQuota(ctx);
+        if (!status.allowed) break; // out of credits - stop gracefully, return what we have
       }
       let analysis: ProspectAnalysis;
       try {
         analysis = await analyzeProspectUrl(url, ctx);
       } catch {
-        continue; // skip a bad URL rather than failing the whole batch
+        continue; // skip a bad URL rather than failing the whole batch (and never charged for it)
       }
+      if (!alreadyUnlocked) await chargeCredit(ctx, url);
       outcomes.push({ analysis, charged: !alreadyUnlocked });
     }
 
