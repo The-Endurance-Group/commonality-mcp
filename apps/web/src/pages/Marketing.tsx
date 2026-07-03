@@ -752,10 +752,6 @@ export function Marketing() {
                 <CheckIcon />
                 50 credits/mo
               </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                CRM sync
-              </li>
             </ul>
             <SignedOut>
               <SignUpButton mode="modal">
@@ -781,10 +777,6 @@ export function Marketing() {
                 <CheckIcon />
                 200 credits/mo
               </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                Unlimited users
-              </li>
             </ul>
             <SignedOut>
               <SignUpButton mode="modal">
@@ -806,10 +798,6 @@ export function Marketing() {
               <li className="flex items-center gap-2">
                 <CheckIcon />
                 Custom credits/mo
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                Custom contract
               </li>
             </ul>
             <a
