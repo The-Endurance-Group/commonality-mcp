@@ -23,10 +23,6 @@ function apifyToken(): string | undefined {
   return process.env.APIFY_API_KEY ?? process.env.APIFY_TOKEN;
 }
 
-export function apifyEnabled(): boolean {
-  return !!apifyToken();
-}
-
 function getClient(): ApifyClient {
   const token = apifyToken();
   if (!token) throw new Error("APIFY_API_KEY is not configured");
@@ -202,15 +198,6 @@ function isLikelyInputValidationError(err: unknown): boolean {
   return /input schema|is not allowed|should (be|match)|invalid input|not a valid/i.test(e?.message || "");
 }
 
-// Stashed for admin debugging - the raw shape of the most recent profile-search
-// result, so field-mapping issues (e.g. title/company not populating) can be
-// diagnosed without direct Apify dataset access.
-let lastProfileSearchRawSample: unknown;
-
-export function getLastProfileSearchRawSample(): unknown {
-  return lastProfileSearchRawSample;
-}
-
 // Direct LinkedIn people-search: returns real, currently-employed profiles matching
 // LinkedIn's own job-title/location/company filters (no AI guessing involved).
 // profileScraperMode "Short" returns basic profile fields incl. linkedinUrl with no
@@ -247,7 +234,6 @@ async function runProfileSearch(filters: ProfileSearchFilters, limit: number): P
     PROFILE_SEARCH_WAIT_SECS,
     PROFILE_SEARCH_TIMEOUT_MS
   );
-  lastProfileSearchRawSample = items[0];
   const seen = new Set<string>();
   const out: ApifyProfile[] = [];
   for (const p of items) {

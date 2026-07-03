@@ -14,7 +14,6 @@ export interface CompanyRecord {
   context: string | null;
   website: string | null;
   linkedin_company_url: string | null;
-  icp_profile: unknown;
 }
 
 interface EmployeeRow {
@@ -52,7 +51,7 @@ export function mapEmployee(row: EmployeeRow, enriched?: EnrichmentData): Employ
 export async function getCompany(companyId: string): Promise<CompanyRecord | null> {
   const { data } = await db()
     .from("companies")
-    .select("id, name, plan, domain, context, website, linkedin_company_url, icp_profile")
+    .select("id, name, plan, domain, context, website, linkedin_company_url")
     .eq("id", companyId)
     .maybeSingle();
   return (data as CompanyRecord | null) ?? null;

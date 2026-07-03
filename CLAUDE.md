@@ -16,8 +16,8 @@ runtime.
 ## Layout
 
 - `apps/server` — Express + TypeScript. MCP endpoint, OAuth, REST API for the web app, static host for `apps/web/dist`.
-- `apps/web` — React + Vite. 5 pages: Marketing, Onboarding, Dashboard, Invites, Billing.
-- `packages/shared` — Zod schemas + shared types (`Employee`, `Prospect`, `WarmPath`, `EnrichmentData`).
+- `apps/web` — React + Vite. 7 pages: Marketing, Onboarding, Dashboard, Invites, Billing, Privacy, Terms.
+- `packages/shared` — Zod schemas + shared types (`Employee`, `ProspectProfile`, `EnrichmentData`).
 - `supabase/migrations` — schema, RLS policies, atomic quota function.
 
 ## Operating principles

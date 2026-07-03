@@ -78,14 +78,3 @@ export const prospectProfileSchema = z.object({
   connectionCount: z.number().optional(),
 });
 export type ProspectProfile = z.infer<typeof prospectProfileSchema>;
-
-/**
- * A ranked warm path: one employee, the commonalities they share with the
- * prospect, and the aggregate strength score. (ConnectionResult in the
- * reference repo.)
- */
-export interface WarmPath {
-  employee: Employee;
-  commonalities: Commonality[];
-  strengthScore: number;
-}

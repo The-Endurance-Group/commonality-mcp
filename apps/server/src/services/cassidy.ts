@@ -6,31 +6,6 @@ import { logger } from "../logger.js";
 // NOTE: callers should go through enrichmentCache.ts so we hit Cassidy at most
 // once per LinkedIn URL.
 
-export async function getRawProfile(linkedinUrl: string, timeoutMs = 30_000): Promise<any> {
-  const webhookUrl = process.env.CASSIDY_WEBHOOK_URL;
-  if (!webhookUrl) throw new Error("CASSIDY_WEBHOOK_URL not set");
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  let response: Response;
-  try {
-    response = await fetch(webhookUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ linkedin_url: linkedinUrl }),
-      signal: controller.signal,
-    });
-  } catch (err) {
-    if (err instanceof Error && err.name === "AbortError") throw new Error("AI enrichment timed out - will retry");
-    throw err;
-  } finally {
-    clearTimeout(timeout);
-  }
-  if (!response.ok) throw new Error(`Enrichment error: ${response.status} ${response.statusText}`);
-  const data = await response.json() as any;
-  const raw = data.workflowRun?.actionResults?.[0]?.output?.value;
-  return raw ? JSON.parse(raw) : data;
-}
-
 function logRawCassidyResponse(profileData: any, linkedinUrl: string) {
   logger.debug({ linkedinUrl, profileData }, "CASSIDY_DEBUG raw response");
 }
