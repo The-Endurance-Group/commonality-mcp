@@ -1,9 +1,15 @@
 import type { ToolContext } from "@commonality/shared";
 import { db } from "../db/client.js";
 
-// Credits: 1 credit = 1 real vendor call (an Apify actor invocation or a
-// Cassidy enrichment call), charged at the point of use rather than once per
-// tool call. Free = 50/calendar month, Pro = 200/calendar month.
+// Credits: 1 credit = 1 result-producing action, charged at the point of use
+// rather than once per tool call. Two kinds: (1) a search (Apify actor
+// invocation) always charges, every time - no caching/dedup. (2) analyzing a
+// person charges 1 credit the first time a given company gets a result for a
+// given LinkedIn URL, whether that result came from a fresh Cassidy call or
+// the shared 90-day enrichment cache (a company always pays for its own
+// first look, even if another company already paid to enrich that URL) -
+// re-analyzing the same URL for the same company afterward is free forever.
+// Free = 50/calendar month, Pro = 200/calendar month.
 
 const PLAN_LIMITS = { free: 50, pro: 200 } as const;
 
@@ -70,15 +76,16 @@ export async function recordProspectUnlock(companyId: string, url: string): Prom
 }
 
 /**
- * Charge 1 credit for one real vendor call (an Apify actor invocation or a
- * Cassidy enrichment). Call this ONLY after the vendor call has already
- * succeeded - a failed call must never cost a credit. Call checkQuota()
- * beforehand to fail fast (skip the vendor call entirely) when clearly over
- * limit. Pass dedupeKey (a prospect URL) for calls that should stay free on
- * repeat, same as "re-analyzing an unlocked prospect is free" - already
- * unlocked is always free, even if the company is currently over its limit,
- * since nothing new is being charged. Omit dedupeKey for calls that should
- * always cost (e.g. a fresh people-search). Known race window
+ * Charge 1 credit for one result-producing action - a search (Apify), or a
+ * person analysis (Cassidy or a shared-cache hit; a company pays for its own
+ * first look at a URL either way). Call this ONLY after the underlying call
+ * has already succeeded - a failed call must never cost a credit. Call
+ * checkQuota() beforehand to fail fast (skip the call entirely) when clearly
+ * over limit. Pass dedupeKey (a prospect URL) for calls that should stay
+ * free on repeat, same as "re-analyzing an unlocked prospect is free" -
+ * already unlocked is always free, even if the company is currently over its
+ * limit, since nothing new is being charged. Omit dedupeKey for calls that
+ * should always cost (e.g. a fresh people-search). Known race window
  * (check-then-increment isn't one atomic statement) matches the pre-existing
  * risk tolerance of this codebase.
  */

@@ -47,7 +47,8 @@ return cached data. Otherwise call Cassidy, store the result, increment
 ## Credits
 
 - free = 50 credits/month ($0/mo); pro = 200 credits/month ($49/mo); enterprise = custom, contact-sales only (no real backend plan value).
-- 1 credit = 1 real vendor call (one Apify actor invocation or one Cassidy enrichment) - charged inline via `chargeCredit()` (`apps/server/src/auth/quota.ts`) at each vendor-call site, not once per tool call. A single tool invocation (e.g. `analyze_company`) can spend multiple credits.
+- 1 credit = 1 result-producing action: a search (one Apify actor invocation, always charges) or a person analysis (one Cassidy call OR a shared enrichment-cache hit - a company pays for its own first look at a URL either way, even if another company already paid to enrich it; re-analyzing that same URL for the same company afterward is free forever). Charged inline via `chargeCredit()` (`apps/server/src/auth/quota.ts`) at each result-producing site, not once per tool call. A single tool invocation (e.g. `analyze_company`) can spend multiple credits.
+- Charge only AFTER the underlying call succeeds (pre-check with `checkQuota()` first to skip the call entirely when clearly over limit) - a failed Apify/Cassidy call must never cost a credit.
 - Check-then-increment via `chargeCredit()`; atomic increment itself via the `increment_usage(company_id, month)` RPC (writes `monthly_usage.credits_used`).
 - At limit → return a friendly upgrade message as a tool result, do NOT throw. `mcp/server.ts` also does a cheap up-front block if a company is already over the limit before running any tool.
 - Don't proactively state "N remaining" before/after a call. Instead, `usageThresholdNotice()` fires once, centrally in `mcp/server.ts`, the first time usage crosses 50%/75%/90%/100% of the plan limit. Exact used/limit/remaining is only ever shown on demand, via the `get_usage` tool or the dashboard.
