@@ -15,15 +15,8 @@ const subprocessors: Subprocessor[] = [
   },
   {
     name: "Apify",
-    usedFor:
-      "Finding your company on LinkedIn during onboarding, pulling your team roster, and searching for prospects matching your ideal customer profile.",
-    dataShared: "Your company name/LinkedIn URL and search filters derived from your company description.",
-  },
-  {
-    name: "Anthropic (Claude)",
-    usedFor: "Generating AI-written outreach messages, call prep scripts, and ideal-customer-profile filters.",
-    dataShared:
-      "Prospect and team profile details (name, title, company, school, location) and your company description, only as needed to generate the requested content.",
+    usedFor: "Finding your company on LinkedIn during onboarding, pulling your team roster, and searching LinkedIn for prospects by title, location, company, or school.",
+    dataShared: "Your company name/LinkedIn URL and the search filters you provide.",
   },
   {
     name: "Perplexity",
@@ -32,20 +25,13 @@ const subprocessors: Subprocessor[] = [
   },
   {
     name: "Resend",
-    usedFor: "Sending transactional email - password resets and lead-referral notifications.",
-    dataShared: "Recipient email address and the relevant message content (e.g. a reset link, or a referred prospect's name).",
+    usedFor: "Sending transactional email - password resets and workspace invites.",
+    dataShared: "Recipient email address and the relevant message content (e.g. a reset link or invite).",
   },
   {
     name: "Stripe",
     usedFor: "Billing and subscription management for paid plans.",
     dataShared: "Your billing email and payment details (handled entirely by Stripe - Commonality never sees your card number).",
-  },
-  {
-    name: "HubSpot & Salesforce (optional, customer-configured)",
-    usedFor:
-      "If you connect your own HubSpot or Salesforce account in Integration settings, pushing prospect contacts and commonality findings into your CRM.",
-    dataShared:
-      "Only the prospect and connection data you choose to push, sent directly to the CRM account you configure. Credentials are encrypted at rest.",
   },
 ];
 
@@ -90,9 +76,9 @@ export function Privacy() {
         </div>
 
         <p className="mt-6 max-w-2xl text-lavender">
-          Commonality uses a small set of trusted third-party services to enrich LinkedIn profile data, generate
-          AI-written outreach and call prep, research companies, send email, process payments, and (optionally)
-          sync findings to your CRM. This page lists each one, what it's used for, and what data it sees.
+          Commonality uses a small set of trusted third-party services to enrich LinkedIn profile data, research
+          companies, send email, and process payments. This page lists each one, what it's used for, and what data
+          it sees.
         </p>
 
         <div className="mt-10 space-y-4">

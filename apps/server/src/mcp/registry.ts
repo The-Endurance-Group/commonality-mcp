@@ -3,11 +3,6 @@ import { analyze_prospect } from "./tools/analyze_prospect.js";
 import { analyze_company } from "./tools/analyze_company.js";
 import { add_employee } from "./tools/add_employee.js";
 import { search_prospects } from "./tools/search_prospects.js";
-import { generate_outreach } from "./tools/generate_outreach.js";
-import { call_prep } from "./tools/call_prep.js";
-import { prospect_of_day } from "./tools/prospect_of_day.js";
-import { push_to_crm } from "./tools/push_to_crm.js";
-import { send_to_teammate } from "./tools/send_to_teammate.js";
 import { upload_connections } from "./tools/upload_connections.js";
 import { social_capital_dashboard } from "./tools/social_capital_dashboard.js";
 import { invite_member } from "./tools/invite_member.js";
@@ -19,11 +14,6 @@ export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
   analyze_company,
   add_employee,
   search_prospects,
-  generate_outreach,
-  call_prep,
-  prospect_of_day,
-  push_to_crm,
-  send_to_teammate,
   upload_connections,
   social_capital_dashboard,
   invite_member,
@@ -91,31 +81,6 @@ export const TOOL_DEFS: McpToolDef[] = [
         limit: { type: "number" },
       },
     },
-  },
-  {
-    name: "generate_outreach",
-    description: "Draft a LinkedIn message, email, and intro note for a warm path.",
-    inputSchema: { type: "object", properties: { url: { type: "string" }, employee_name: { type: "string" } }, required: ["url"] },
-  },
-  {
-    name: "call_prep",
-    description: "Get a 5-part call script for a prospect, opening with your shared commonality.",
-    inputSchema: { type: "object", properties: { url: { type: "string" } }, required: ["url"] },
-  },
-  {
-    name: "prospect_of_day",
-    description: "Get one fresh on-ICP prospect your team has a warm path to.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "push_to_crm",
-    description: "Explains how to log a prospect's findings to HubSpot or Salesforce via your AI's native CRM connectors.",
-    inputSchema: { type: "object", properties: {} },
-  },
-  {
-    name: "send_to_teammate",
-    description: "Hand a prospect to a teammate with a stronger connection.",
-    inputSchema: { type: "object", properties: { teammate_email: { type: "string" }, url: { type: "string" }, note: { type: "string" } }, required: ["teammate_email", "url"] },
   },
   {
     name: "upload_connections",

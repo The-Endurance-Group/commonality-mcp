@@ -142,17 +142,3 @@ export async function deleteLinkedinConnections(companyId: string, employeeId: s
   if (error) throw new Error(error.message);
   return count ?? 0;
 }
-
-/** Find a teammate in the same workspace by email. */
-export async function getTeammateByEmail(
-  companyId: string,
-  email: string,
-): Promise<{ id: string; email: string } | null> {
-  const { data } = await db()
-    .from("users")
-    .select("id, email")
-    .eq("company_id", companyId)
-    .eq("email", email.toLowerCase().trim())
-    .maybeSingle();
-  return (data as { id: string; email: string } | null) ?? null;
-}

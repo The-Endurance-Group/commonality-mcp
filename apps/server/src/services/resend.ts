@@ -1,8 +1,7 @@
 import { config } from "../config.js";
 import { logger } from "../logger.js";
 
-// Minimal Resend client. NEW (not in the reference repo). Sends invite emails
-// and teammate hand-offs.
+// Minimal Resend client. NEW (not in the reference repo). Sends invite emails.
 
 const RESEND_API = "https://api.resend.com/emails";
 
@@ -43,19 +42,4 @@ To get started:
 
 The full team roster is already set up - you'll have access immediately.`;
   await sendEmail(email, subject, text);
-}
-
-export async function sendTeammateHandoff(
-  toEmail: string,
-  fromName: string,
-  prospectSummary: string,
-  note?: string,
-): Promise<void> {
-  const subject = `${fromName} sent you a prospect on Commonality`;
-  const text = `${fromName} thinks you have a warm path to this prospect:
-
-${prospectSummary}
-${note ? `\nNote from ${fromName}:\n${note}\n` : ""}
-Open Claude and ask Commonality to analyze them for the full breakdown.`;
-  await sendEmail(toEmail, subject, text);
 }
