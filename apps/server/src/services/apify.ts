@@ -8,6 +8,8 @@ import { logger } from "../logger.js";
 const COMPANY_SEARCH_ACTOR = "harvestapi/linkedin-company-search";
 const COMPANY_EMPLOYEES_ACTOR = "harvestapi/linkedin-company-employees";
 const PROFILE_SEARCH_ACTOR = "harvestapi/linkedin-profile-search";
+const PROFILE_POSTS_ACTOR = "harvestapi/linkedin-profile-posts";
+const COMPANY_POSTS_ACTOR = "harvestapi/linkedin-company-posts";
 
 // waitSecs is passed to the Apify SDK and controls how long to wait for a run to FINISH after it starts.
 // It does NOT bound how long the SDK spends trying to submit/start the run - that can hang indefinitely.
@@ -15,9 +17,11 @@ const PROFILE_SEARCH_ACTOR = "harvestapi/linkedin-profile-search";
 const SEARCH_WAIT_SECS = 8;
 const EMPLOYEES_WAIT_SECS = 55;
 const PROFILE_SEARCH_WAIT_SECS = 55;
+const POSTS_WAIT_SECS = 55;
 const SEARCH_TIMEOUT_MS = 9_000;   // abort company search after 9 s (frontend aborts at 12 s)
 const EMPLOYEES_TIMEOUT_MS = 65_000;
 const PROFILE_SEARCH_TIMEOUT_MS = 65_000;
+const POSTS_TIMEOUT_MS = 65_000;
 
 function apifyToken(): string | undefined {
   return process.env.APIFY_API_KEY ?? process.env.APIFY_TOKEN;
@@ -132,6 +136,64 @@ export async function getCompanyEmployees(companyLinkedinUrl: string, limit: num
     if (out.length >= limit) break;
   }
   return out.filter((e) => e.name);
+}
+
+// NOTE: unlike the other actors in this file, the exact input field names for
+// PROFILE_POSTS_ACTOR/COMPANY_POSTS_ACTOR ("profiles"/"companies" + maxItems)
+// are inferred from HarvestAPI's established convention on their other actors
+// (getCompanyEmployees above uses the identical {companies, maxItems} shape),
+// not confirmed against a live schema - this sandbox's network policy blocks
+// reaching apify.com/api.apify.com to verify. If the actor rejects the input,
+// the real validation error message (logged via runActor's failure path) will
+// name the correct field - fix here the same way COMPANY_HEADCOUNT_CODES above
+// was fixed from a live error.
+export interface ApifyPost {
+  text: string;
+  postedAt?: string;
+  likeCount?: number;
+  commentCount?: number;
+  url?: string;
+}
+
+function mapPosts(items: any[], limit: number): ApifyPost[] {
+  const out: ApifyPost[] = [];
+  for (const p of items) {
+    const text = firstString(p.text, p.content, p.postText, p.commentary, p.description);
+    if (!text) continue;
+    const likeCount = p.likeCount ?? p.reactionsCount ?? p.numLikes ?? p.totalReactionCount;
+    const commentCount = p.commentCount ?? p.commentsCount ?? p.numComments;
+    out.push({
+      text,
+      postedAt: firstString(p.postedAt, p.date, p.publishedAt, p.time, p.postedAtISO),
+      likeCount: typeof likeCount === "number" ? likeCount : undefined,
+      commentCount: typeof commentCount === "number" ? commentCount : undefined,
+      url: firstString(p.postUrl, p.url, p.link),
+    });
+    if (out.length >= limit) break;
+  }
+  return out;
+}
+
+/** A person's most recent public LinkedIn posts (for outreach personalization). */
+export async function getProfilePosts(profileLinkedinUrl: string, limit = 5): Promise<ApifyPost[]> {
+  const items = await runActor(
+    PROFILE_POSTS_ACTOR,
+    { profiles: [profileLinkedinUrl], maxItems: limit },
+    POSTS_WAIT_SECS,
+    POSTS_TIMEOUT_MS
+  );
+  return mapPosts(items, limit);
+}
+
+/** A company's most recent public LinkedIn posts (for account-timing signal). */
+export async function getCompanyPosts(companyLinkedinUrl: string, limit = 5): Promise<ApifyPost[]> {
+  const items = await runActor(
+    COMPANY_POSTS_ACTOR,
+    { companies: [companyLinkedinUrl], maxItems: limit },
+    POSTS_WAIT_SECS,
+    POSTS_TIMEOUT_MS
+  );
+  return mapPosts(items, limit);
 }
 
 export interface ApifyProfile {

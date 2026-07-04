@@ -1,6 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
-import { searchCompanies, searchProfiles } from "../../services/apify.js";
+import { getCompanyPosts, searchCompanies, searchProfiles } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
@@ -279,8 +279,27 @@ export const analyze_company: ToolHandler<Args> = {
       : "None of these candidates share a connection with your team yet.";
 
     const charged = outcomes.filter((o) => o.charged).length;
+
+    // Recent company activity - a timing signal for the outreach, not part of
+    // the warm-path scoring. Own credit each time (posts change, unlike a
+    // person's warm path, so this isn't a permanent per-company unlock).
+    let activityNote = "";
+    const postsStatus = await checkQuota(ctx);
+    if (postsStatus.allowed) {
+      try {
+        const posts = await getCompanyPosts(args.company_url, 3);
+        if (posts.length) {
+          await chargeCredit(ctx);
+          const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
+          activityNote = `\n\nRecent company activity:\n${postLines.join("\n")}`;
+        }
+      } catch {
+        // no posts available - not worth failing the whole result over
+      }
+    }
+
     return text(
-      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged} credit${charged === 1 ? "" : "s"}.`,
+      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged + (activityNote ? 1 : 0)} credit${charged + (activityNote ? 1 : 0) === 1 ? "" : "s"}.${activityNote}`,
     );
   },
 };

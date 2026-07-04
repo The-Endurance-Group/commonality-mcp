@@ -1,5 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
+import { getProfilePosts } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath } from "./_prospect.js";
 
@@ -27,14 +28,36 @@ export const analyze_prospect: ToolHandler<{ url: string }> = {
       return text("Couldn't analyze that prospect right now. Please try again.", true);
     }
     await chargeCredit(ctx, args.url);
-    const billing = alreadyUnlocked ? "Already analyzed for your team - no credit used." : "Used 1 credit.";
+    let creditsUsed = alreadyUnlocked ? 0 : 1;
 
     const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${args.url}`;
+
+    // Recent posts - a personalization signal, not part of warm-path scoring.
+    // Own credit each time (posts change over time, unlike the warm path
+    // itself, so this isn't a permanent per-prospect unlock).
+    let activityNote = "";
+    const postsStatus = await checkQuota(ctx);
+    if (postsStatus.allowed) {
+      try {
+        const posts = await getProfilePosts(args.url, 3);
+        if (posts.length) {
+          await chargeCredit(ctx);
+          creditsUsed += 1;
+          const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
+          activityNote = `\n\nRecent posts:\n${postLines.join("\n")}`;
+        }
+      } catch {
+        // no posts available - not worth failing the whole result over
+      }
+    }
+
+    const billing = `Used ${creditsUsed} credit${creditsUsed === 1 ? "" : "s"}.`;
+
     if (results.length === 0) {
-      return text(`${header}\n\nNo warm paths found on your team yet.\n\n${billing}`);
+      return text(`${header}\n\nNo warm paths found on your team yet.${activityNote}\n\n${billing}`);
     }
 
     const top = results.slice(0, 5).map((r, i) => `${i + 1}. ${summarizePath(r)}`).join("\n");
-    return text(`${header}\n\nTop warm paths:\n${top}\n\n${billing}`);
+    return text(`${header}\n\nTop warm paths:\n${top}${activityNote}\n\n${billing}`);
   },
 };
