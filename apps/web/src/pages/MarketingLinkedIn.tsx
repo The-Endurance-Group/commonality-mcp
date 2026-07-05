@@ -541,6 +541,32 @@ export function MarketingLinkedIn() {
         </div>
       </section>
 
+      {/* Just ask */}
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Just ask - no LinkedIn tab required.</h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          Look up a specific profile, or find the right person at a company. Either way, just ask
+          in plain English.
+        </p>
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
+          <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Look up a person</p>
+            <p className="mt-3 text-sm italic text-ink">
+              &ldquo;Tell me about John Doe - profile is linkedin.com/in/johndoe&rdquo;
+            </p>
+          </div>
+          <div
+            className="animate-fade-up rounded-lg border border-gray-200 p-6"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Find the right person</p>
+            <p className="mt-3 text-sm italic text-ink">
+              &ldquo;Who should I reach out to at Acme Inc?&rdquo;
+            </p>
+          </div>
+        </div>
+      </section>
+
       {/* Two ways in */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">There's always a way in.</h2>
