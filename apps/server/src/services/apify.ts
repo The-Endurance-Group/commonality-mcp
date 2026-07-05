@@ -138,15 +138,17 @@ export async function getCompanyEmployees(companyLinkedinUrl: string, limit: num
   return out.filter((e) => e.name);
 }
 
-// NOTE: unlike the other actors in this file, the exact input field names for
+// NOTE: unlike the other actors in this file, the exact INPUT field names for
 // PROFILE_POSTS_ACTOR/COMPANY_POSTS_ACTOR ("profiles"/"companies" + maxItems)
-// are inferred from HarvestAPI's established convention on their other actors
-// (getCompanyEmployees above uses the identical {companies, maxItems} shape),
-// not confirmed against a live schema - this sandbox's network policy blocks
-// reaching apify.com/api.apify.com to verify. If the actor rejects the input,
-// the real validation error message (logged via runActor's failure path) will
-// name the correct field - fix here the same way COMPANY_HEADCOUNT_CODES above
-// was fixed from a live error.
+// are still inferred from HarvestAPI's established convention on their other
+// actors (getCompanyEmployees above uses the identical {companies, maxItems}
+// shape), not confirmed against a live schema - this sandbox's network policy
+// blocks reaching apify.com/api.apify.com to verify. OUTPUT parsing below, by
+// contrast, is confirmed against a real sample response (profile posts):
+// { content, linkedinUrl, postedAt: {date, postedAgoText}, engagement: {likes, comments} }.
+// If the actor rejects the INPUT, the real validation error message (logged
+// via runActor's failure path) will name the correct field - fix the same way
+// COMPANY_HEADCOUNT_CODES above was fixed from a live error.
 export interface ApifyPost {
   text: string;
   postedAt?: string;
@@ -158,16 +160,16 @@ export interface ApifyPost {
 function mapPosts(items: any[], limit: number): ApifyPost[] {
   const out: ApifyPost[] = [];
   for (const p of items) {
-    const text = firstString(p.text, p.content, p.postText, p.commentary, p.description);
+    const text = firstString(p.content, p.text, p.postText, p.commentary, p.description);
     if (!text) continue;
-    const likeCount = p.likeCount ?? p.reactionsCount ?? p.numLikes ?? p.totalReactionCount;
-    const commentCount = p.commentCount ?? p.commentsCount ?? p.numComments;
+    const likeCount = p.engagement?.likes ?? p.likeCount ?? p.reactionsCount ?? p.numLikes ?? p.totalReactionCount;
+    const commentCount = p.engagement?.comments ?? p.commentCount ?? p.commentsCount ?? p.numComments;
     out.push({
       text,
-      postedAt: firstString(p.postedAt, p.date, p.publishedAt, p.time, p.postedAtISO),
+      postedAt: firstString(p.postedAt?.date, p.postedAt?.postedAgoText, p.date, p.publishedAt, p.time),
       likeCount: typeof likeCount === "number" ? likeCount : undefined,
       commentCount: typeof commentCount === "number" ? commentCount : undefined,
-      url: firstString(p.postUrl, p.url, p.link),
+      url: firstString(p.linkedinUrl, p.postUrl, p.url, p.link, p.shareUrl, p.socialContent?.shareUrl),
     });
     if (out.length >= limit) break;
   }
