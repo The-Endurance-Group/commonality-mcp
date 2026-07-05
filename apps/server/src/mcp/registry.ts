@@ -25,7 +25,14 @@ export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_prospect",
     description: "Find warm paths to a prospect. Returns ranked connections from your team.",
-    inputSchema: { type: "object", properties: { url: { type: "string", description: "Prospect LinkedIn URL" } }, required: ["url"] },
+    inputSchema: {
+      type: "object",
+      properties: {
+        url: { type: "string", description: "Prospect LinkedIn URL" },
+        include_posts: { type: "boolean", description: "Set true only after the user says yes to seeing this person's recent posts" },
+      },
+      required: ["url"],
+    },
   },
   {
     name: "analyze_company",
@@ -33,7 +40,7 @@ export const TOOL_DEFS: McpToolDef[] = [
       "Find the best way into a company (account-based, not one person). Call with company_name to resolve a URL, " +
       "or company_url + role to search their people by title (runs immediately, no confirmation round - re-call " +
       "with corrected role terms if the results are wrong); pick candidates, call again with candidate_urls to " +
-      "preview cost, then confirm:true to run the analysis.",
+      "preview scope, then confirm:true to run the analysis.",
     inputSchema: {
       type: "object",
       properties: {
@@ -51,7 +58,8 @@ export const TOOL_DEFS: McpToolDef[] = [
         },
         role_retry: { type: "boolean", description: "Set true when retrying role with a broader/different set of title variants after zero results" },
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
-        confirm: { type: "boolean", description: "Set true to spend credits and run the analysis" },
+        confirm: { type: "boolean", description: "Set true to run the analysis" },
+        include_posts: { type: "boolean", description: "Set true only after the user says yes to seeing this company's recent posts - works with just company_url" },
       },
     },
   },

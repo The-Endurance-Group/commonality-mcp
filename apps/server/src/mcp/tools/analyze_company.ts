@@ -11,6 +11,7 @@ interface Args {
   role_retry?: boolean;
   candidate_urls?: string[];
   confirm?: boolean;
+  include_posts?: boolean;
 }
 
 // Seniority/level words to strip out of each role term before searching. LinkedIn's
@@ -113,6 +114,7 @@ const MAX_CANDIDATES = 20;
 // the same per-prospect pipeline analyze_prospect uses (Cassidy enrich + match):
 //   0. company_name, no company_url  -> resolve the name to a LinkedIn company URL
 //      (or the user can paste one directly if none of the matches are right).
+//      1 credit - this is a real Apify actor call, same as any other search.
 //   1. company_url, no role          -> ask the user for a role, then search.
 //      company_url + role            -> LinkedIn people-search scoped to that
 //      company + a few broad keyword terms (e.g. "Sales", "Business
@@ -120,17 +122,22 @@ const MAX_CANDIDATES = 20;
 //      which only narrows the match and misses real title wording). Zero
 //      results: try one reworded/broader batch of terms (role_retry:true)
 //      before asking the user to revise their filters - never silently
-//      falls back to an unfiltered roster.
-//   2. + candidate_urls              -> preview how many NEW candidates analyzing them would cost.
+//      falls back to an unfiltered roster. 1 credit for the search itself.
+//   2. + candidate_urls              -> preview how many NEW candidates analyzing them would cover.
 //   3. + candidate_urls + confirm    -> run it, charging 1 credit per new candidate, return a ranking.
-// Billing is handled inline throughout run() via chargeCredit() - 1 credit
-// for the role-search Apify call (including retries) and 1 per new (not
-// already unlocked) candidate's Cassidy call - since one invocation can cover
-// anywhere from 0 to MAX_CANDIDATES + 1 billable vendor calls.
+//   4. + include_posts (standalone, just needs company_url) -> the company's
+//      recent posts, 1 credit - opt-in only, never fetched automatically.
+// Billing is handled inline throughout run() via chargeCredit(). Never state
+// credit cost or remaining balance in any response here - that's only ever
+// surfaced on demand via get_usage, or via the separate, deliberate
+// usageThresholdNotice() system in mcp/server.ts.
 export const analyze_company: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
     if (!args.company_url) {
       if (!args.company_name) return text("Provide the target company's LinkedIn URL or name.", true);
+
+      const nameSearchStatus = await checkQuota(ctx);
+      if (!nameSearchStatus.allowed) return text(quotaExceededMessage(nameSearchStatus, ctx.plan, ctx.role), true);
 
       let companies;
       try {
@@ -138,6 +145,7 @@ export const analyze_company: ToolHandler<Args> = {
       } catch {
         return text("Couldn't look up that company right now. Please try again.", true);
       }
+      await chargeCredit(ctx);
       if (!companies.length) return text(`No company found matching "${args.company_name}".`, true);
 
       const lines = companies.map((c, i) => `${i + 1}. ${c.name}${c.location ? ` - ${c.location}` : ""}\n   ${c.linkedinUrl}`);
@@ -155,6 +163,24 @@ export const analyze_company: ToolHandler<Args> = {
           "Don't guess one - call analyze_company with company_name instead to resolve the real URL first.",
         true,
       );
+    }
+
+    // Opt-in, standalone: recent company posts, only when explicitly requested
+    // (e.g. after asking the user post-analysis and they said yes) - works
+    // independent of role/candidate state, just needs company_url.
+    if (args.include_posts) {
+      const postsStatus = await checkQuota(ctx);
+      if (!postsStatus.allowed) return text(quotaExceededMessage(postsStatus, ctx.plan, ctx.role), true);
+      let posts;
+      try {
+        posts = await getCompanyPosts(args.company_url, 3);
+      } catch {
+        return text("Couldn't fetch this company's recent posts right now. Please try again.", true);
+      }
+      if (!posts.length) return text("No recent public posts found for this company.");
+      await chargeCredit(ctx);
+      const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
+      return text(`Recent company activity:\n${postLines.join("\n")}`);
     }
 
     if (!args.candidate_urls || args.candidate_urls.length === 0) {
@@ -213,7 +239,7 @@ export const analyze_company: ToolHandler<Args> = {
           "department/function the user actually named, or the wrong departments were searched, call analyze_company " +
           "again with corrected role terms (a fresh search, no special flag needed). Otherwise, confirm with the " +
           `user which of these to analyze (up to ${MAX_CANDIDATES} at a time), then call analyze_company again with ` +
-          "company_url + candidate_urls to preview the cost before analyzing.",
+          "company_url + candidate_urls to run the analysis.",
       );
     }
 
@@ -233,15 +259,14 @@ export const analyze_company: ToolHandler<Args> = {
       const newCount = unlocked.filter((u) => !u).length;
       if (newCount === 0) {
         return text(
-          `All ${candidateUrls.length} candidates have already been analyzed for your team - this will be free. ` +
+          `All ${candidateUrls.length} candidates have already been analyzed for your team. ` +
             "Call analyze_company again with the same candidate_urls and confirm:true to see the results.",
         );
       }
       return text(
-        `This will analyze ${candidateUrls.length} candidates (${newCount} new - the rest were already analyzed and are free), ` +
-          `using ${newCount} credit${newCount === 1 ? "" : "s"}. It analyzes one at a time, so this may take a few minutes, ` +
-          "and stops early if you run out of credits partway through. Call analyze_company again with the same " +
-          "candidate_urls and confirm:true to proceed.",
+        `This will analyze ${candidateUrls.length} candidates (${newCount} new). It analyzes one at a time, so this ` +
+          "may take a few minutes. Confirm with the user that you're about to do this, then call analyze_company " +
+          "again with the same candidate_urls and confirm:true to proceed.",
       );
     }
 
@@ -278,28 +303,13 @@ export const analyze_company: ToolHandler<Args> = {
       ? `Your best way into this company is through ${top.analysis.enriched.name} (${top.analysis.url}) - ${summarizePath(top.best)}.`
       : "None of these candidates share a connection with your team yet.";
 
-    const charged = outcomes.filter((o) => o.charged).length;
-
-    // Recent company activity - a timing signal for the outreach, not part of
-    // the warm-path scoring. Own credit each time (posts change, unlike a
-    // person's warm path, so this isn't a permanent per-company unlock).
-    let activityNote = "";
-    const postsStatus = await checkQuota(ctx);
-    if (postsStatus.allowed) {
-      try {
-        const posts = await getCompanyPosts(args.company_url, 3);
-        if (posts.length) {
-          await chargeCredit(ctx);
-          const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
-          activityNote = `\n\nRecent company activity:\n${postLines.join("\n")}`;
-        }
-      } catch {
-        // no posts available - not worth failing the whole result over
-      }
-    }
-
+    // Recent company posts are opt-in only - ask the user, only fetch (call
+    // analyze_company again with company_url + include_posts:true) if they
+    // say yes. Don't fetch them automatically here.
     return text(
-      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\nUsed ${charged + (activityNote ? 1 : 0)} credit${charged + (activityNote ? 1 : 0) === 1 ? "" : "s"}.${activityNote}`,
+      `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\n` +
+        "Ask the user if they'd like this company's recent LinkedIn posts too - only fetch them (call " +
+        "analyze_company again with company_url + include_posts:true) if they say yes.",
     );
   },
 };
