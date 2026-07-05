@@ -141,6 +141,9 @@ export async function getCompanyEmployees(companyLinkedinUrl: string, limit: num
 // Input and output shapes for PROFILE_POSTS_ACTOR/COMPANY_POSTS_ACTOR are both
 // confirmed against real actor input/output samples (see postsActorInput()
 // below and mapPosts()) - not guessed.
+export const DEFAULT_POSTS_COUNT = 3;
+export const MAX_POSTS_COUNT = 10;
+
 export interface ApifyPost {
   text: string;
   postedAt?: string;

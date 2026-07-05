@@ -1,12 +1,13 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
-import { getProfilePosts } from "../../services/apify.js";
+import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getProfilePosts } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath } from "./_prospect.js";
 
 interface Args {
   url: string;
   include_posts?: boolean;
+  posts_count?: number;
 }
 
 // Find warm paths from the team to a prospect. Returns a ranked, token-lean
@@ -47,8 +48,9 @@ export const analyze_prospect: ToolHandler<Args> = {
     if (args.include_posts) {
       const postsStatus = await checkQuota(ctx);
       if (postsStatus.allowed) {
+        const count = Math.min(Math.max(args.posts_count ?? DEFAULT_POSTS_COUNT, 1), MAX_POSTS_COUNT);
         try {
-          const posts = await getProfilePosts(args.url, 3);
+          const posts = await getProfilePosts(args.url, count);
           if (posts.length) {
             await chargeCredit(ctx);
             const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
@@ -60,7 +62,8 @@ export const analyze_prospect: ToolHandler<Args> = {
       }
     } else {
       askAboutPosts = "\n\nAsk the user if they'd like this person's recent LinkedIn posts too - only fetch them " +
-        "(call analyze_prospect again with the same url + include_posts:true) if they say yes.";
+        "(call analyze_prospect again with the same url + include_posts:true) if they say yes. " +
+        `Defaults to ${DEFAULT_POSTS_COUNT} posts - if they ask for a specific number, pass posts_count too (max ${MAX_POSTS_COUNT}).`;
     }
 
     if (results.length === 0) {

@@ -1,6 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
-import { getCompanyPosts, searchCompanies, searchProfiles } from "../../services/apify.js";
+import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getCompanyPosts, searchCompanies, searchProfiles } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
@@ -12,6 +12,7 @@ interface Args {
   candidate_urls?: string[];
   confirm?: boolean;
   include_posts?: boolean;
+  posts_count?: number;
 }
 
 // Seniority/level words to strip out of each role term before searching. LinkedIn's
@@ -171,9 +172,10 @@ export const analyze_company: ToolHandler<Args> = {
     if (args.include_posts) {
       const postsStatus = await checkQuota(ctx);
       if (!postsStatus.allowed) return text(quotaExceededMessage(postsStatus, ctx.plan, ctx.role), true);
+      const count = Math.min(Math.max(args.posts_count ?? DEFAULT_POSTS_COUNT, 1), MAX_POSTS_COUNT);
       let posts;
       try {
-        posts = await getCompanyPosts(args.company_url, 3);
+        posts = await getCompanyPosts(args.company_url, count);
       } catch {
         return text("Couldn't fetch this company's recent posts right now. Please try again.", true);
       }
@@ -309,7 +311,8 @@ export const analyze_company: ToolHandler<Args> = {
     return text(
       `${headline}\n\nFull ranking:\n${lines.join("\n")}\n\n` +
         "Ask the user if they'd like this company's recent LinkedIn posts too - only fetch them (call " +
-        "analyze_company again with company_url + include_posts:true) if they say yes.",
+        "analyze_company again with company_url + include_posts:true) if they say yes. " +
+        `Defaults to ${DEFAULT_POSTS_COUNT} posts - if they ask for a specific number, pass posts_count too (max ${MAX_POSTS_COUNT}).`,
     );
   },
 };

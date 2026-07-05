@@ -30,6 +30,7 @@ export const TOOL_DEFS: McpToolDef[] = [
       properties: {
         url: { type: "string", description: "Prospect LinkedIn URL" },
         include_posts: { type: "boolean", description: "Set true only after the user says yes to seeing this person's recent posts" },
+        posts_count: { type: "number", description: "How many recent posts to fetch (default 3, max 10) - only used with include_posts" },
       },
       required: ["url"],
     },
@@ -60,6 +61,7 @@ export const TOOL_DEFS: McpToolDef[] = [
         candidate_urls: { type: "array", items: { type: "string" }, description: "LinkedIn URLs of employees you selected" },
         confirm: { type: "boolean", description: "Set true to run the analysis" },
         include_posts: { type: "boolean", description: "Set true only after the user says yes to seeing this company's recent posts - works with just company_url" },
+        posts_count: { type: "number", description: "How many recent posts to fetch (default 3, max 10) - only used with include_posts" },
       },
     },
   },
