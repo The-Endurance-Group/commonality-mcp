@@ -6,6 +6,7 @@ import { Billing } from "./pages/Billing";
 import { Dashboard } from "./pages/Dashboard";
 import { Invites } from "./pages/Invites";
 import { Marketing } from "./pages/Marketing";
+import { MarketingLinkedIn } from "./pages/MarketingLinkedIn";
 import { Onboarding } from "./pages/Onboarding";
 import { Privacy } from "./pages/Privacy";
 import { Terms } from "./pages/Terms";
@@ -16,6 +17,7 @@ export default function App() {
   return (
     <Routes>
       <Route path="/" element={<Marketing />} />
+      <Route path="/access-linkedin" element={<MarketingLinkedIn />} />
       <Route path="/privacy" element={<Privacy />} />
       <Route path="/terms" element={<Terms />} />
       <Route
