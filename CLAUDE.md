@@ -58,5 +58,5 @@ return cached data. Otherwise call Cassidy, store the result, increment
 ## Deploy
 
 Railway, Dockerfile multi-stage build, auto-deploy on push to `main`.
-`/healthz` is the health check. Custom domains: `commonality.co` (web),
+`/healthz` is the health check. Custom domains: `commonality.theendurancegroup.com` (web),
 `mcp.commonality.co` (MCP).
