@@ -453,13 +453,13 @@ export function MarketingLinkedIn() {
       <section className="animate-gradient bg-gradient-to-br from-purple via-brand to-accent px-6 py-20 text-center">
         <div className="mx-auto max-w-2xl animate-fade-up">
           <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
-            LinkedIn Research, Right From Claude
+            LinkedIn Research, Right From Your AI
           </p>
           <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
-            Access LinkedIn, right from Claude.
+            Access LinkedIn, right from your AI.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
-            Ask Claude to research a prospect or a company and get real answers - who you know
+            Ask your AI to research a prospect or a company and get real answers - who you know
             there, what they've posted lately, what's worth mentioning when you reach out.
           </p>
 
@@ -499,7 +499,7 @@ export function MarketingLinkedIn() {
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">There's always a way in.</h2>
         <p className="mx-auto mt-2 max-w-xl text-lavender">
           Commonality is our proprietary matching tech, and it's the strongest way in when it
-          applies. When it doesn't, Claude still does the legwork.
+          applies. When it doesn't, your AI still does the legwork.
         </p>
         <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
           <div
@@ -517,7 +517,7 @@ export function MarketingLinkedIn() {
           >
             <p className="text-xs font-semibold uppercase tracking-wide text-lavender">No warm path (yet)</p>
             <p className="mt-3 text-sm text-ink">
-              Claude pulls the prospect's background and recent posts, checks what their company's
+              Your AI pulls the prospect's background and recent posts, checks what their company's
               been talking about, and gives you something real to open with.
             </p>
           </div>
@@ -550,9 +550,9 @@ export function MarketingLinkedIn() {
 
       {/* Research fallback */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">No warm path? Claude still finds an angle.</h2>
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">No warm path? Your AI still finds an angle.</h2>
         <p className="mx-auto mt-2 max-w-xl text-lavender">
-          Ask, and Claude pulls the prospect's recent LinkedIn posts and the target company's
+          Ask, and your AI pulls the prospect's recent LinkedIn posts and the target company's
           recent activity - real, specific material for your opener, not a generic cold message.
         </p>
         <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
@@ -629,7 +629,11 @@ export function MarketingLinkedIn() {
       <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
         <p className="mt-2 text-center text-sm text-lavender">
-          Commonality is built and installed for you by The Endurance Group.
+          Commonality is built and installed for you by{" "}
+          <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+            The Endurance Group
+          </a>
+          .
         </p>
 
         <div className="mx-auto mt-10 max-w-md rounded-lg border-2 border-brand p-6 text-center transition hover:scale-105">
@@ -649,6 +653,12 @@ export function MarketingLinkedIn() {
               Access to more TEG automations for your team
             </li>
           </ul>
+          <p className="mt-3 text-xs text-lavender">
+            Learn more at{" "}
+            <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+              theendurancegroup.com
+            </a>
+          </p>
           <SignedOut>
             <SignUpButton mode="modal">
               <button className="mt-6 w-full rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
