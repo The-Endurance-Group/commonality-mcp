@@ -412,12 +412,59 @@ const askSteps = [
   { label: "Get a warm path - or a real angle in", icon: "mail" },
 ];
 
-const realtyOneTestimonial = {
-  quote:
-    "Working with The Endurance Group was absolutely amazing. They introduced a LinkedIn outreach solution that has been a fantastic addition to our prospecting strategy. TEG totally exceeded our expectations.",
-  name: "Sevag Sarkissian",
-  title: "VP Growth Marketing, Realty ONE Group",
-};
+const testimonials = [
+  {
+    quote:
+      "Working with The Endurance Group was absolutely amazing. They introduced a LinkedIn outreach solution that has been a fantastic addition to our prospecting strategy. TEG totally exceeded our expectations.",
+    name: "Sevag Sarkissian",
+    title: "VP Growth Marketing, Realty ONE Group",
+  },
+  {
+    quote:
+      "The Endurance Group's strategy of using shared experiences to establish connections and book meetings with prospects has worked incredibly well. Their efforts have resulted in an average 30% response rate and started conversations with key firms that we'd been interested in pursuing for years.",
+    name: "David Palmer",
+    title: "CEO & Founder, FenestraPro",
+  },
+  {
+    quote:
+      "TEG's relationship expansion campaigns are well-named. By connecting with prospects you share backgrounds with, you develop authentic connections and become a known entity in your space.",
+    name: "Ben Chrischelles",
+    title: "Senior Director, Huron",
+  },
+  {
+    quote: "TEG found and landed the meeting that turned into our largest client. I recommend TEG without reservation.",
+    name: "Michael Prevost",
+    title: "CEO, VividCloud",
+  },
+  {
+    quote:
+      "The Endurance Group's efforts to expand our business through networking with like-minded health and safety leaders have helped SaltGrid develop new business relationships across the globe.",
+    name: "Chris Aitken",
+    title: "CEO, SaltGrid",
+  },
+  {
+    quote: "Their lead generation and business development strategies resulted in measurable connections made and new projects for our firm.",
+    name: "Jay Connolly",
+    title: "President, Connolly Brothers",
+  },
+  {
+    quote: "The team's expertise and insight into how social capital works were so valuable for our company and had a very high return on investment.",
+    name: "Kevin Finn",
+    title: "CEO, Mutual Capital Analytics",
+  },
+  {
+    quote:
+      "I highly recommend The Endurance Group for their outstanding social capital campaign services. They are a reliable and trusted partner - responsive and quite proactive.",
+    name: "Nikki Blacksmith",
+    title: "CEO, Symeta Inc.",
+  },
+  {
+    quote:
+      "Their approach to reaching new people is very effective and efficient. If you're looking for a \"way in\" to a large group of targeted people, they'll improve your efficiency.",
+    name: "Jason Benavidez",
+    title: "Director of Strategic Business, The Tyson Group, Inc.",
+  },
+];
 
 export function MarketingLinkedIn() {
   // Same session-aware redirect behavior as the primary Marketing page.
@@ -555,8 +602,8 @@ export function MarketingLinkedIn() {
           Ask, and your AI pulls the prospect's recent LinkedIn posts and the target company's
           recent activity - real, specific material for your opener, not a generic cold message.
         </p>
-        <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
-          <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
+          <div className="animate-fade-up flex flex-col items-center rounded-lg border border-gray-200 p-6 text-center">
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tint-brand text-brand">
               <Icon name="post" />
             </div>
@@ -566,7 +613,7 @@ export function MarketingLinkedIn() {
             </p>
           </div>
           <div
-            className="animate-fade-up rounded-lg border border-gray-200 p-6"
+            className="animate-fade-up flex flex-col items-center rounded-lg border border-gray-200 p-6 text-center"
             style={{ animationDelay: "0.1s" }}
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tint-brand text-brand">
@@ -611,13 +658,15 @@ export function MarketingLinkedIn() {
           Trusted by teams who needed a real way in
         </h2>
 
-        <div className="mx-auto mt-10 max-w-2xl rounded-lg bg-tint-brand p-6 text-left sm:p-8">
-          <blockquote className="text-base italic text-ink">
-            &ldquo;{realtyOneTestimonial.quote}&rdquo;
-          </blockquote>
-          <p className="mt-4 text-sm font-medium text-lavender">
-            - {realtyOneTestimonial.name}, {realtyOneTestimonial.title}
-          </p>
+        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {testimonials.map((t) => (
+            <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
+              <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
+              <p className="mt-3 text-xs font-medium text-lavender">
+                {t.name} · {t.title}
+              </p>
+            </div>
+          ))}
         </div>
 
         <div className="text-center">
