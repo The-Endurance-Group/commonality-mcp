@@ -138,17 +138,9 @@ export async function getCompanyEmployees(companyLinkedinUrl: string, limit: num
   return out.filter((e) => e.name);
 }
 
-// NOTE: unlike the other actors in this file, the exact INPUT field names for
-// PROFILE_POSTS_ACTOR/COMPANY_POSTS_ACTOR ("profiles"/"companies" + maxItems)
-// are still inferred from HarvestAPI's established convention on their other
-// actors (getCompanyEmployees above uses the identical {companies, maxItems}
-// shape), not confirmed against a live schema - this sandbox's network policy
-// blocks reaching apify.com/api.apify.com to verify. OUTPUT parsing below, by
-// contrast, is confirmed against a real sample response (profile posts):
-// { content, linkedinUrl, postedAt: {date, postedAgoText}, engagement: {likes, comments} }.
-// If the actor rejects the INPUT, the real validation error message (logged
-// via runActor's failure path) will name the correct field - fix the same way
-// COMPANY_HEADCOUNT_CODES above was fixed from a live error.
+// Input and output shapes for PROFILE_POSTS_ACTOR/COMPANY_POSTS_ACTOR are both
+// confirmed against real actor input/output samples (see postsActorInput()
+// below and mapPosts()) - not guessed.
 export interface ApifyPost {
   text: string;
   postedAt?: string;
@@ -176,11 +168,27 @@ function mapPosts(items: any[], limit: number): ApifyPost[] {
   return out;
 }
 
+// Confirmed input schema (from real actor input samples): both actors take
+// {targetUrls, maxPosts, includeQuotePosts, includeReposts, scrapeReactions,
+// scrapeComments} - targetUrls accepts a profile or company URL directly.
+// We don't need per-reaction/per-comment detail, just the post itself, so
+// scrapeReactions/scrapeComments stay false to keep the run cheap and fast.
+function postsActorInput(url: string, limit: number): Record<string, unknown> {
+  return {
+    targetUrls: [url],
+    maxPosts: limit,
+    includeQuotePosts: true,
+    includeReposts: true,
+    scrapeReactions: false,
+    scrapeComments: false,
+  };
+}
+
 /** A person's most recent public LinkedIn posts (for outreach personalization). */
 export async function getProfilePosts(profileLinkedinUrl: string, limit = 5): Promise<ApifyPost[]> {
   const items = await runActor(
     PROFILE_POSTS_ACTOR,
-    { profiles: [profileLinkedinUrl], maxItems: limit },
+    postsActorInput(profileLinkedinUrl, limit),
     POSTS_WAIT_SECS,
     POSTS_TIMEOUT_MS
   );
@@ -191,7 +199,7 @@ export async function getProfilePosts(profileLinkedinUrl: string, limit = 5): Pr
 export async function getCompanyPosts(companyLinkedinUrl: string, limit = 5): Promise<ApifyPost[]> {
   const items = await runActor(
     COMPANY_POSTS_ACTOR,
-    { companies: [companyLinkedinUrl], maxItems: limit },
+    postsActorInput(companyLinkedinUrl, limit),
     POSTS_WAIT_SECS,
     POSTS_TIMEOUT_MS
   );
