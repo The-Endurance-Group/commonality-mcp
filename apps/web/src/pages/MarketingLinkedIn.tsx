@@ -429,33 +429,39 @@ const testimonials = [
       "The Endurance Group's strategy of using shared experiences to establish connections and book meetings with prospects has worked incredibly well. Their efforts have resulted in an average 30% response rate and started conversations with key firms that we'd been interested in pursuing for years.",
     name: "David Palmer",
     title: "CEO & Founder, FenestraPro",
+    logo: "/logos/fenestrapro.webp",
   },
   {
     quote:
       "TEG's relationship expansion campaigns are well-named. By connecting with prospects you share backgrounds with, you develop authentic connections and become a known entity in your space.",
     name: "Ben Chrischelles",
     title: "Senior Director, Huron",
+    logo: "/logos/huron.webp",
   },
   {
     quote: "TEG found and landed the meeting that turned into our largest client. I recommend TEG without reservation.",
     name: "Michael Prevost",
     title: "CEO, VividCloud",
+    logo: "/logos/vividcloud.webp",
   },
   {
     quote:
       "The Endurance Group's efforts to expand our business through networking with like-minded health and safety leaders have helped SaltGrid develop new business relationships across the globe.",
     name: "Chris Aitken",
     title: "CEO, SaltGrid",
+    logo: "/logos/saltgrid.webp",
   },
   {
     quote: "Their lead generation and business development strategies resulted in measurable connections made and new projects for our firm.",
     name: "Jay Connolly",
     title: "President, Connolly Brothers",
+    logo: "/logos/connolly-brothers.webp",
   },
   {
     quote: "The team's expertise and insight into how social capital works were so valuable for our company and had a very high return on investment.",
     name: "Kevin Finn",
     title: "CEO, Mutual Capital Analytics",
+    logo: "/logos/mutual-capital-analytics.webp",
   },
   {
     quote:
@@ -692,6 +698,7 @@ export function MarketingLinkedIn() {
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((t) => (
             <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
+              {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
               <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
               <p className="mt-3 text-xs font-medium text-lavender">
                 {t.name} · {t.title}
