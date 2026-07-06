@@ -722,8 +722,10 @@ export function MarketingLinkedIn() {
       <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
-          One subscription per company - your whole team shares it, no separate sign-ups. A
-          credit is used each time we look something up for you (a company search or a person
+          One subscription per company - your whole team shares it, no separate sign-ups.
+        </p>
+        <p className="mx-auto mt-1 max-w-lg text-center text-sm text-lavender">
+          A credit is used each time we look something up for you (a company search or a person
           lookup); most conversations use just 1-2 credits.
         </p>
 
