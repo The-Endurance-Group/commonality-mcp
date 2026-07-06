@@ -807,6 +807,10 @@ export function MarketingLinkedIn() {
           </a>
           .
         </p>
+        <p className="mt-3 text-center text-xs text-lavender">
+          A credit is used each time we look something up for you - a company search or a person
+          lookup. Most conversations use just 1-2 credits.
+        </p>
       </section>
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
