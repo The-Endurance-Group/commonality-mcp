@@ -583,28 +583,6 @@ export function MarketingLinkedIn() {
         </div>
       </section>
 
-      {/* How matching works */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
-          How Commonality finds your way in
-        </h2>
-        <p className="mx-auto mt-2 max-w-xl text-lavender">
-          We analyze social capital on both sides - every person on your team, and your
-          prospect - then rank every possible path.
-        </p>
-
-        <div className="animate-fade-up mt-10">
-          <SocialMapGraphic />
-        </div>
-
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-brand px-4 py-2 text-sm font-medium text-brand">
-          <CheckIcon className="text-brand" />
-          Strongest connection, ranked automatically
-        </div>
-
-        <SectionCta label="See my warmest path to a prospect →" />
-      </section>
-
       {/* Two ways in */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">There's always a way in.</h2>
@@ -637,6 +615,53 @@ export function MarketingLinkedIn() {
         <SectionCta label="Find your way in to your top prospect now →" />
       </section>
 
+      {/* Workflow */}
+      <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to your next warm intro</h2>
+
+        <WorkflowRow />
+
+        <div className="mt-10">
+          <SignedOut>
+            <SignUpButton mode="modal">
+              <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark">
+                Try it free →
+              </button>
+            </SignUpButton>
+          </SignedOut>
+          <SignedIn>
+            <Link
+              to="/dashboard"
+              className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark"
+            >
+              Open your workspace
+            </Link>
+          </SignedIn>
+        </div>
+      </section>
+
+      {/* How matching works */}
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+          How Commonality finds your way in
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          We analyze social capital on both sides - every person on your team, and your
+          prospect - then rank every possible path.
+        </p>
+
+        <div className="animate-fade-up mt-10">
+          <SocialMapGraphic />
+        </div>
+
+        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-brand px-4 py-2 text-sm font-medium text-brand">
+          <CheckIcon className="text-brand" />
+          Strongest connection, ranked automatically
+        </div>
+
+        <SectionCta label="See my warmest path to a prospect →" />
+      </section>
+
       {/* Research fallback */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">No warm path? Your AI still finds an angle.</h2>
@@ -666,31 +691,6 @@ export function MarketingLinkedIn() {
               What the target company's been talking about - context that makes your outreach land.
             </p>
           </div>
-        </div>
-      </section>
-
-      {/* Workflow */}
-      <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to your next warm intro</h2>
-
-        <WorkflowRow />
-
-        <div className="mt-10">
-          <SignedOut>
-            <SignUpButton mode="modal">
-              <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark">
-                Try it free →
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <Link
-              to="/dashboard"
-              className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark"
-            >
-              Open your workspace
-            </Link>
-          </SignedIn>
         </div>
       </section>
 
