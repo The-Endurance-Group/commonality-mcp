@@ -476,6 +476,7 @@ const testimonials = [
       "Their approach to reaching new people is very effective and efficient. If you're looking for a \"way in\" to a large group of targeted people, they'll improve your efficiency.",
     name: "Jason Benavidez",
     title: "Director of Strategic Business, The Tyson Group, Inc.",
+    photo: "/people/jason-benavidez.jpeg",
   },
 ];
 
@@ -702,9 +703,14 @@ export function MarketingLinkedIn() {
             <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
               {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
               <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
-              <p className="mt-3 text-xs font-medium text-lavender">
-                {t.name} · {t.title}
-              </p>
+              <div className="mt-3 flex items-center gap-2">
+                {t.photo && (
+                  <img src={t.photo} alt={t.name} className="h-7 w-7 rounded-full object-cover" />
+                )}
+                <p className="text-xs font-medium text-lavender">
+                  {t.name} · {t.title}
+                </p>
+              </div>
             </div>
           ))}
         </div>
