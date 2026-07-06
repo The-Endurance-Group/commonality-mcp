@@ -31,15 +31,13 @@ export async function sendInviteEmail(
   companyName: string,
   inviterName: string,
 ): Promise<void> {
-  const mcpUrl = `${config.publicBaseUrl.replace(/\/$/, "").replace(/^https?:\/\//, "")}/mcp`;
-  const subject = `Join ${companyName} on Commonality`;
+  const appUrl = config.publicBaseUrl.replace(/\/$/, "");
+  const subject = `${inviterName} invited you to ${companyName} on Commonality`;
   const text = `${inviterName} has invited you to join the ${companyName} workspace on Commonality.
 
-To get started:
-1. Open Claude → Settings → Connectors → Add custom connector
-2. Paste this URL: ${mcpUrl}
-3. Sign in with this email (${email}) when prompted
+Sign in with this email address to get started:
+${appUrl}
 
-The full team roster is already set up - you'll have access immediately.`;
+Once you're in, you'll find setup instructions on the dashboard.`;
   await sendEmail(email, subject, text);
 }
