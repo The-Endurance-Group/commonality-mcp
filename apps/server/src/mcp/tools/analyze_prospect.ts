@@ -1,4 +1,4 @@
-import type { ToolContext, ToolHandler } from "@commonality/shared";
+import type { EnrichmentData, ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
 import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getProfilePosts } from "../../services/apify.js";
 import { text } from "./_result.js";
@@ -38,6 +38,7 @@ export const analyze_prospect: ToolHandler<Args> = {
     await chargeCredit(ctx, args.url);
 
     const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${args.url}`;
+    const background = summarizeBackground(enriched);
 
     // Recent posts - a personalization signal, not part of warm-path scoring.
     // Opt-in only: ask the user first, only fetch if they said yes. Own
@@ -67,10 +68,22 @@ export const analyze_prospect: ToolHandler<Args> = {
     }
 
     if (results.length === 0) {
-      return text(`${header}\n\nNo warm paths found on your team yet.${activityNote}${askAboutPosts}`);
+      return text(`${header}${background}\n\nNo warm paths found on your team yet.${activityNote}${askAboutPosts}`);
     }
 
     const top = results.slice(0, 5).map((r, i) => `${i + 1}. ${summarizePath(r)}`).join("\n");
-    return text(`${header}\n\nTop warm paths:\n${top}${activityNote}${askAboutPosts}`);
+    return text(`${header}${background}\n\nTop warm paths:\n${top}${activityNote}${askAboutPosts}`);
   },
 };
+
+// Same enrichment call already covers background - no extra vendor call or
+// credit, just surfacing fields that were being silently dropped. Keep it
+// short; this is a summary, not the full profile dump.
+function summarizeBackground(e: EnrichmentData): string {
+  const parts: string[] = [];
+  if (e.almaMater) parts.push(`Studied at ${e.almaMater}${e.graduationYear ? ` ('${e.graduationYear.slice(-2)})` : ""}`);
+  if (e.pastCompanies?.length) parts.push(`Previously at ${e.pastCompanies.join(", ")}`);
+  if (e.currentLocation) parts.push(`Based in ${e.currentLocation}`);
+  if (e.bio) parts.push(e.bio);
+  return parts.length ? `\n${parts.join(" - ")}` : "";
+}
