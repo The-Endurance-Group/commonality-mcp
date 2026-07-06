@@ -467,6 +467,7 @@ function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
 }
 
 function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void }) {
+  const [copied, setCopied] = useState(false);
   return (
     <Card
       title="Connect Commonality to your AI"
@@ -478,8 +479,15 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
       </ol>
       <div className="mt-2 flex items-center gap-2">
         <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
-        <button className="btn-secondary" onClick={() => navigator.clipboard.writeText(mcpUrl)}>
-          Copy
+        <button
+          className="btn-secondary"
+          onClick={() => {
+            navigator.clipboard.writeText(mcpUrl);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
+          }}
+        >
+          {copied ? "Copied!" : "Copy"}
         </button>
       </div>
       <p className="mt-3 text-sm text-lavender">
