@@ -708,53 +708,92 @@ export function MarketingLinkedIn() {
       {/* Pricing */}
       <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
-        <p className="mt-2 text-center text-sm text-lavender">
+        <p className="mt-2 text-center text-sm text-lavender">Free forever - no credit card, no trial to expire.</p>
+
+        <div className="mt-10 grid gap-8 sm:grid-cols-3">
+          <div className="relative rounded-lg border border-gray-200 p-6 transition hover:scale-105">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink px-3 py-1 text-xs font-medium text-white">
+              Free forever
+            </div>
+            <div className="font-semibold text-ink">Free</div>
+            <div className="mt-2 text-3xl font-bold text-ink">$0</div>
+            <ul className="mt-4 space-y-2 text-sm text-lavender">
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                25 team members
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                50 credits/mo
+              </li>
+            </ul>
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <button className="mt-6 w-full rounded-lg border border-gray-300 px-6 py-3 font-medium text-ink hover:bg-gray-50">
+                  Start for free
+                </button>
+              </SignUpButton>
+            </SignedOut>
+          </div>
+
+          <div className="relative rounded-lg border-2 border-brand p-6 transition hover:scale-105">
+            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-medium text-white">
+              Most popular
+            </div>
+            <div className="font-semibold text-ink">Pro</div>
+            <div className="mt-2 text-3xl font-bold text-ink">$49/mo</div>
+            <ul className="mt-4 space-y-2 text-sm text-lavender">
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                150 team members
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                200 credits/mo
+              </li>
+            </ul>
+            <SignedOut>
+              <SignUpButton mode="modal">
+                <button className="mt-6 w-full rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
+                  Start free
+                </button>
+              </SignUpButton>
+            </SignedOut>
+          </div>
+
+          <div className="rounded-lg border border-gray-200 p-6 transition hover:scale-105">
+            <div className="font-semibold text-ink">Enterprise</div>
+            <div className="mt-2 text-3xl font-bold text-ink">Custom</div>
+            <ul className="mt-4 space-y-2 text-sm text-lavender">
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                150+ team members
+              </li>
+              <li className="flex items-center gap-2">
+                <CheckIcon />
+                Custom credits/mo
+              </li>
+            </ul>
+            <a
+              href="mailto:hello@theendurancegroup.com"
+              className="mt-6 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center font-medium text-ink hover:bg-gray-50"
+            >
+              Contact us
+            </a>
+          </div>
+        </div>
+
+        <p className="mt-8 text-center text-sm text-lavender">
           Commonality is built and installed for you by{" "}
           <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
             The Endurance Group
           </a>
+          . Want more AI automations for your team?{" "}
+          <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+            Give us a call
+          </a>
           .
         </p>
-
-        <div className="mx-auto mt-10 max-w-md rounded-lg border-2 border-brand p-6 text-center transition hover:scale-105">
-          <div className="font-semibold text-ink">Free</div>
-          <div className="mt-2 text-3xl font-bold text-ink">$0</div>
-          <ul className="mt-4 space-y-2 text-left text-sm text-lavender">
-            <li className="flex items-center gap-2">
-              <CheckIcon />
-              50 credits/mo, no credit card required
-            </li>
-            <li className="flex items-center gap-2">
-              <CheckIcon />
-              Full access - person lookups, company search, warm paths
-            </li>
-          </ul>
-          <SignedOut>
-            <SignUpButton mode="modal">
-              <button className="mt-6 w-full rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
-                Start free
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <p className="mt-4 text-xs text-lavender">
-            Need more credits? Upgrade any time from your dashboard.
-          </p>
-        </div>
-
-        <div className="mx-auto mt-8 max-w-md rounded-lg border border-gray-200 bg-tint-brand p-6 text-center">
-          <p className="text-sm font-semibold text-ink">You're also joining The Endurance Group</p>
-          <p className="mt-2 text-sm text-lavender">
-            Commonality is one of TEG's automations - normally $750 to build, free as a new member.
-            TEG Membership (starting at $149/mo) keeps your whole automation portfolio running and
-            opens the door to whatever TEG builds you next.
-          </p>
-          <p className="mt-3 text-xs text-lavender">
-            Learn more at{" "}
-            <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
-              theendurancegroup.com
-            </a>
-          </p>
-        </div>
       </section>
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
