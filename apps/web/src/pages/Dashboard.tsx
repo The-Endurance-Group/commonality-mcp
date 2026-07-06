@@ -256,6 +256,18 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
           {copiedUrl ? "Copied!" : "Copy"}
         </button>
       </div>
+      <p className="mt-2 text-sm text-lavender">
+        Having trouble connecting?{" "}
+        <a
+          href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-brand hover:underline"
+        >
+          Set up a meeting with us today
+        </a>
+        .
+      </p>
 
       <div className="mt-5">
         <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
