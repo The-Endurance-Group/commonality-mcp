@@ -45,6 +45,16 @@ authRouter.post("/token", async (req, res) => {
   }
 });
 
+const GENERIC_EMAIL_DOMAINS = new Set([
+  "gmail.com", "yahoo.com", "outlook.com", "hotmail.com", "icloud.com",
+  "aol.com", "live.com", "msn.com", "protonmail.com", "proton.me", "mail.com", "gmx.com",
+]);
+
+function domainFromEmail(email: string): string | undefined {
+  const d = email.split("@")[1]?.toLowerCase().trim();
+  return d && !GENERIC_EMAIL_DOMAINS.has(d) ? d : undefined;
+}
+
 // POST /api/auth/onboarding - first-time admin creates their workspace.
 authRouter.post("/onboarding", async (req, res) => {
   let email: string;
@@ -54,17 +64,13 @@ authRouter.post("/onboarding", async (req, res) => {
     res.status(401).json({ error: "invalid_clerk_session" });
     return;
   }
-  const { companyName, domain } = (req.body ?? {}) as { companyName?: string; domain?: string };
+  const { companyName } = (req.body ?? {}) as { companyName?: string };
   if (!companyName || !companyName.trim()) {
     res.status(400).json({ error: "companyName required" });
     return;
   }
-  if (!domain || !domain.trim()) {
-    res.status(400).json({ error: "domain required" });
-    return;
-  }
   try {
-    const claims = await createWorkspace(email, companyName.trim(), domain);
+    const claims = await createWorkspace(email, companyName.trim(), domainFromEmail(email));
     const { token, expiresIn } = signAccessToken(claims);
     res.status(201).json({ access_token: token, expires_in: expiresIn, token_type: "Bearer" });
   } catch (err) {
