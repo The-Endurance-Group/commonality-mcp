@@ -490,7 +490,9 @@ export function MarketingLinkedIn() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <header className="mx-auto flex max-w-content items-center justify-between gap-4 px-6 py-5">
-        <img src="/logo.png" alt="Commonality" className="h-7 w-auto shrink-0" />
+        <a href="https://theendurancegroup.com" className="flex shrink-0 items-center">
+          <img src="/logos/teg.webp" alt="The Endurance Group" className="h-8 w-auto" />
+        </a>
         <div className="flex items-center gap-4 text-sm">
           <a href="#pricing" className="hidden font-medium text-lavender hover:text-ink sm:inline">
             Pricing
@@ -513,7 +515,11 @@ export function MarketingLinkedIn() {
       {/* Hero */}
       <section className="animate-gradient bg-gradient-to-br from-purple via-brand to-accent px-6 py-20 text-center">
         <div className="mx-auto max-w-2xl animate-fade-up">
-          <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
+          <div className="mx-auto flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-white/90">
+            <img src="/logo.png" alt="Commonality" className="h-4 w-auto" />
+            An AI automation by The Endurance Group
+          </div>
+          <p className="mt-6 text-sm font-semibold uppercase tracking-wide text-white/80">
             LinkedIn Research, Right From Your AI
           </p>
           <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
@@ -521,7 +527,8 @@ export function MarketingLinkedIn() {
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
             Ask your AI to research a prospect or a company and get real answers - who you know
-            there, what they've posted lately, what's worth mentioning when you reach out.
+            there, what they've posted lately, what's worth mentioning when you reach out. Built
+            by The Endurance Group, using our proprietary matching tech, Commonality.
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
