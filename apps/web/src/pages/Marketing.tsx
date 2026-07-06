@@ -5,19 +5,12 @@ import { ConnectorDemo } from "../components/ConnectorDemo";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
-// ConnectorDemo's natural, unscaled size (its stage's min-height plus the
-// caption line below it).
+// The site's main marketing page - "access LinkedIn via your AI," with
+// Commonality's team-network matching as the standout feature.
+
 const DEMO_NATURAL_WIDTH = 604;
 const DEMO_NATURAL_HEIGHT = 676;
 
-// Scales ConnectorDemo to exactly fill its flex-stretched container's
-// height (matching the sibling step list), instead of a fixed size.
-// Renders the "Set up once" / "Then ask anytime" step list beside the
-// connector demo, sized to match it exactly. Measures the step column's
-// own rendered height directly (rather than relying on flex-stretch to
-// propagate through several nested divs, which proved unreliable) and
-// applies it as an explicit pixel height/width to the demo, so the demo
-// can never render larger than the steps beside it.
 function WorkflowRow() {
   const stepsRef = useRef<HTMLDivElement>(null);
   const [demoHeight, setDemoHeight] = useState(460);
@@ -144,6 +137,7 @@ const ICON_PATHS: Record<string, string> = {
   pencil: "M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z",
   school: "M22 10 12 5 2 10l10 5 10-5z M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5 M22 10v6",
   pin: "M12 22s8-7.58 8-13a8 8 0 1 0-16 0c0 5.42 8 13 8 13z M12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
+  post: "M4 4h16v16H4z M4 9h16 M9 4v16",
 };
 
 function Icon({ name, className = "text-brand" }: { name: string; className?: string }) {
@@ -180,19 +174,24 @@ function TypingDotsRow() {
 
 const chatExamples = [
   {
-    q: "Find a warm path to Jane Doe, VP Sales at Acme",
-    title: "1st-degree connection",
-    detail: "Sam K. is already connected to Jane on LinkedIn",
+    q: "Tell me about John Doe - profile is linkedin.com/in/johndoe",
+    title: "Profile lookup",
+    detail: "Background, role, and how you're connected to John",
   },
   {
-    q: "What's our best way into Acme Corp as a target account?",
+    q: "Who should I reach out to at Acme Inc?",
     title: "Account-based path",
     detail: "Sam K. has the strongest combined connection across Acme's leadership",
   },
   {
-    q: "Best way into Globex Corp for Marcus Lee, Head of Procurement?",
-    title: "Past company",
-    detail: "Priya N. worked with Marcus at Initech for 3 years",
+    q: "Research Jane Doe, VP Sales at Acme, before I reach out",
+    title: "1st-degree connection found",
+    detail: "Sam K. is already connected to Jane on LinkedIn",
+  },
+  {
+    q: "No one on our team knows Marcus Lee at Globex - what's my angle?",
+    title: "Research fallback",
+    detail: "Marcus posted about supply-chain automation last week - good opener",
   },
   {
     q: "Anyone with a connection to Dana Ruiz, CTO at Vantage?",
@@ -200,9 +199,9 @@ const chatExamples = [
     detail: "Devon R. and Dana both went to Wharton - MBA '16",
   },
   {
-    q: "Anyone close to our prospect in Portland, ME?",
-    title: "Same hometown",
-    detail: "Alex P. is also based in Portland, Maine",
+    q: "What's Vantage Corp been posting about lately?",
+    title: "Company research",
+    detail: "3 recent posts on their new product line - use it in your opener",
   },
 ];
 
@@ -269,9 +268,6 @@ const socialMapPaths = [
   { name: "Alex P.", signal: "Both live in Portland, ME", x: 550, strongest: false },
 ];
 
-// Wide enough that the line from the topmost (strongest) node to the
-// prospect clears every other node's circle on the way down, instead of
-// grazing through them.
 const mobileFanX = [-70, -25, 25, 70];
 
 function SocialMapMobile() {
@@ -416,52 +412,31 @@ const setupSteps = [
 
 const askSteps = [
   { label: "Ask about a person or company", icon: "message" },
-  { label: "Get the path, intro, and strategy", icon: "mail" },
+  { label: "Get a warm path - or a real angle in", icon: "mail" },
 ];
 
-
-const caseStudies = [
+const testimonials = [
   {
-    company: "FenestraPro",
-    logo: "/logos/fenestrapro.webp",
-    tags: ["B2B Technology", "Sales Execution"],
-    story:
-      "FenestraPro had a list of target firms they'd been trying to reach for years with no traction. We mapped the shared history between their team and those target firms, found the warm paths in, and ran an outreach motion built on those real connections.",
-    result:
-      "Average response rate: 30%. Real conversations opened with firms that had been unreachable through conventional outreach.",
+    quote:
+      "Working with The Endurance Group was absolutely amazing. They introduced a LinkedIn outreach solution that has been a fantastic addition to our prospecting strategy. TEG totally exceeded our expectations.",
+    name: "Sevag Sarkissian",
+    title: "VP Growth Marketing, Realty ONE Group",
+    logo: "/logos/realty-one-group.webp",
+  },
+  {
     quote:
       "The Endurance Group's strategy of using shared experiences to establish connections and book meetings with prospects has worked incredibly well. Their efforts have resulted in an average 30% response rate and started conversations with key firms that we'd been interested in pursuing for years.",
     name: "David Palmer",
     title: "CEO & Founder, FenestraPro",
+    logo: "/logos/fenestrapro.webp",
   },
   {
-    company: "Huron",
-    logo: "/logos/huron.webp",
-    tags: ["Professional Services", "Relationship Expansion"],
-    story:
-      "Huron's team wanted to grow their network in a way that felt authentic rather than another round of cold outreach. We ran relationship expansion campaigns that connected their people with prospects who shared real, specific backgrounds with them, turning cold contacts into known entities.",
-    result:
-      "TEG's relationship expansion campaigns are well-named. By connecting with prospects you share backgrounds with, you develop authentic connections and become a known entity in your space.",
     quote:
-      "You build your brand and network among individuals who may look to you in the near future for your perspective or when they have business needs aligned to your areas of expertise.",
+      "TEG's relationship expansion campaigns are well-named. By connecting with prospects you share backgrounds with, you develop authentic connections and become a known entity in your space.",
     name: "Ben Chrischelles",
     title: "Senior Director, Huron",
+    logo: "/logos/huron.webp",
   },
-  {
-    company: "Edify Software",
-    logo: "/logos/edify.webp",
-    tags: ["Professional Services", "Sales Execution"],
-    story:
-      "Edify had grown entirely through referrals but had no consistent pipeline. We built the sales infrastructure, generated leads, created content, and executed outreach that resulted in long-term client relationships worth hundreds of thousands of dollars.",
-    result: "Edify has since grown to 60 full-time employees.",
-    quote:
-      "Over the course of several years, our work with The Endurance Group has been instrumental in gaining valuable insights about our market space and establishing connections with the right individuals and organizations, ultimately leading to new long-term client relationships.",
-    name: "Federico Hess",
-    title: "Partner & CEO, Edify Software",
-  },
-];
-
-const shortQuotes = [
   {
     quote: "TEG found and landed the meeting that turned into our largest client. I recommend TEG without reservation.",
     name: "Michael Prevost",
@@ -492,18 +467,19 @@ const shortQuotes = [
       "I highly recommend The Endurance Group for their outstanding social capital campaign services. They are a reliable and trusted partner - responsive and quite proactive.",
     name: "Nikki Blacksmith",
     title: "CEO, Symeta Inc.",
+    logo: "/logos/symeta.png",
   },
   {
     quote:
       "Their approach to reaching new people is very effective and efficient. If you're looking for a \"way in\" to a large group of targeted people, they'll improve your efficiency.",
     name: "Jason Benavidez",
     title: "Director of Strategic Business, The Tyson Group, Inc.",
+    photo: "/people/jason-benavidez.jpeg",
   },
 ];
 
 export function Marketing() {
-  // Once the session has resolved, send signed-in users straight to their
-  // workspace - first-timers to onboarding, returning users to the dashboard.
+  // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, joinNotice } = useAuthStore();
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
@@ -512,7 +488,9 @@ export function Marketing() {
   return (
     <div className="min-h-screen overflow-x-hidden">
       <header className="mx-auto flex max-w-content items-center justify-between gap-4 px-6 py-5">
-        <img src="/logo.png" alt="Commonality" className="h-7 w-auto shrink-0" />
+        <a href="https://theendurancegroup.com" className="flex shrink-0 items-center">
+          <img src="/logos/teg.webp" alt="The Endurance Group" className="h-8 w-auto" />
+        </a>
         <div className="flex items-center gap-4 text-sm">
           <a href="#pricing" className="hidden font-medium text-lavender hover:text-ink sm:inline">
             Pricing
@@ -535,15 +513,18 @@ export function Marketing() {
       {/* Hero */}
       <section className="animate-gradient bg-gradient-to-br from-purple via-brand to-accent px-6 py-20 text-center">
         <div className="mx-auto max-w-2xl animate-fade-up">
-          <p className="text-sm font-semibold uppercase tracking-wide text-white/80">
-            Warm Introductions, Instantly
+          <div className="mx-auto w-fit rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-white/90">
+            One of our most popular AI automations is now available for free. Try it today.
+          </div>
+          <p className="mt-6 text-sm font-semibold uppercase tracking-wide text-white/80">
+            LinkedIn Research, Right From Your AI
           </p>
           <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
-            Your next deal is already in your team's network.
+            Access LinkedIn, right from your AI.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
-            Ask your AI &ldquo;what's the best way into Acme?&rdquo; or &ldquo;find me a warm
-            intro to John Smith, VP of Finance at Global Inc.&rdquo;
+            Ask Claude, ChatGPT, or whatever AI you use to research a prospect or company and get
+            real answers - who you know there, and what to say when you reach out.
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
@@ -566,7 +547,6 @@ export function Marketing() {
               See how →
             </a>
           </div>
-          <p className="mt-3 text-sm text-white/70">Free plan: 50 credits every month, forever · no credit card required</p>
         </div>
 
         <div className="mx-auto mt-12 max-w-md animate-float">
@@ -575,90 +555,67 @@ export function Marketing() {
         </div>
       </section>
 
-      {/* Why cold outreach is broken */}
+      {/* Just ask */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
-          A warm path gets you in the door. Cold outreach doesn't.
-        </h2>
-        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
-          <div className="animate-fade-up rounded-lg border border-gray-200 p-6 text-left">
-            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">
-              Without a warm path
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Just ask - no LinkedIn tab required.</h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          Look up a specific profile, or find the right person at a company. Either way, just ask
+          in plain English.
+        </p>
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
+          <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Look up a person</p>
+            <p className="mt-3 text-sm italic text-ink">
+              &ldquo;Tell me about John Doe - profile is linkedin.com/in/johndoe&rdquo;
             </p>
-            <div className="mt-4 space-y-3">
-              <div>
-                <span className="text-2xl font-bold text-ink">~2%</span>
-                <span className="ml-2 text-sm text-lavender">of cold emails get a reply</span>
-              </div>
-              <div>
-                <span className="text-2xl font-bold text-ink">&lt; 30%</span>
-                <span className="ml-2 text-sm text-lavender">of cold LinkedIn requests are accepted</span>
-              </div>
-            </div>
           </div>
           <div
-            className="animate-fade-up rounded-lg bg-tint-brand p-6 text-left"
+            className="animate-fade-up rounded-lg border border-gray-200 p-6"
             style={{ animationDelay: "0.1s" }}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand">
-              With a warm path
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Find the right person</p>
+            <p className="mt-3 text-sm italic text-ink">
+              &ldquo;Who should I reach out to at Acme Inc?&rdquo;
             </p>
-            <div className="mt-4">
-              <span className="text-5xl font-bold text-brand">5–10×</span>
-              <p className="mt-2 text-sm font-medium text-ink">
-                more likely to land a meeting when you go through someone you know
-              </p>
-            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Two ways in */}
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">There's always a way in.</h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          Commonality is our proprietary matching tech, and it's the strongest way in when it
+          applies. When it doesn't, your AI still does the legwork.
+        </p>
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
+          <div
+            className="animate-fade-up rounded-lg bg-tint-brand p-6 text-left"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Warm path found</p>
+            <p className="mt-3 text-sm font-medium text-ink">
+              Commonality checks your whole team's LinkedIn connections, schools, and employers to
+              find who can make the intro - the strongest way in there is.
+            </p>
+          </div>
+          <div
+            className="animate-fade-up rounded-lg border border-gray-200 p-6 text-left"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">No warm path (yet)</p>
+            <p className="mt-3 text-sm text-ink">
+              Your AI pulls the prospect's background and recent posts, checks what their company's
+              been talking about, and gives you something real to open with.
+            </p>
           </div>
         </div>
 
         <SectionCta label="Find your way in to your top prospect now →" />
       </section>
 
-      {/* How matching works */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
-          How we find the strongest connection
-        </h2>
-        <p className="mx-auto mt-2 max-w-xl text-lavender">
-          We analyze social capital on both sides - every person on your team, and your
-          prospect - then rank every possible path.
-        </p>
-
-        <div className="animate-fade-up mt-10">
-          <SocialMapGraphic />
-        </div>
-
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-brand px-4 py-2 text-sm font-medium text-brand">
-          <CheckIcon className="text-brand" />
-          Strongest connection, ranked automatically
-        </div>
-
-        <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
-          <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">LinkedIn tells you</p>
-            <p className="mt-3 text-sm text-ink">
-              Your top prospect is a 2nd-degree connection - and that's about it.
-            </p>
-          </div>
-          <div
-            className="animate-fade-up rounded-lg bg-tint-brand p-6"
-            style={{ animationDelay: "0.1s" }}
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Commonality tells you</p>
-            <p className="mt-3 text-sm font-medium text-ink">
-              A coworker went to the same school, another worked at the same past company - and
-              which of those shared bonds actually gets you the meeting.
-            </p>
-          </div>
-        </div>
-
-        <SectionCta label="See my warmest path to a prospect →" />
-      </section>
-
       {/* Workflow */}
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to warm intro</h2>
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to your next warm intro</h2>
 
         <WorkflowRow />
 
@@ -681,43 +638,71 @@ export function Marketing() {
         </div>
       </section>
 
-      {/* Testimonials */}
+      {/* How matching works */}
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+          How Commonality finds your way in
+        </h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          We analyze social capital on both sides - every person on your team, and your
+          prospect - then rank every possible path.
+        </p>
+
+        <div className="animate-fade-up mt-10">
+          <SocialMapGraphic />
+        </div>
+
+        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-brand px-4 py-2 text-sm font-medium text-brand">
+          <CheckIcon className="text-brand" />
+          Strongest connection, ranked automatically
+        </div>
+
+        <SectionCta label="See my warmest path to a prospect →" />
+      </section>
+
+      {/* Research fallback */}
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">No warm path? Your AI still finds an angle.</h2>
+        <p className="mx-auto mt-2 max-w-xl text-lavender">
+          Ask, and your AI pulls the prospect's recent LinkedIn posts and the target company's
+          recent activity - real, specific material for your opener, not a generic cold message.
+        </p>
+        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
+          <div className="animate-fade-up flex flex-col items-center rounded-lg border border-gray-200 p-6 text-center">
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tint-brand text-brand">
+              <Icon name="post" />
+            </div>
+            <p className="mt-3 text-sm font-medium text-ink">Their recent posts</p>
+            <p className="mt-1 text-sm text-lavender">
+              What the prospect has been posting about lately - a natural reason to reach out.
+            </p>
+          </div>
+          <div
+            className="animate-fade-up flex flex-col items-center rounded-lg border border-gray-200 p-6 text-center"
+            style={{ animationDelay: "0.1s" }}
+          >
+            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tint-brand text-brand">
+              <Icon name="building" />
+            </div>
+            <p className="mt-3 text-sm font-medium text-ink">Their company's activity</p>
+            <p className="mt-1 text-sm text-lavender">
+              What the target company's been talking about - context that makes your outreach land.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonial */}
       <section className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">
           Trusted by teams who needed a real way in
         </h2>
 
-        <div className="mt-10 space-y-6">
-          {caseStudies.map((c) => (
-            <div key={c.company} className="rounded-lg border border-gray-100 p-6 sm:p-8">
-              <div className="flex flex-wrap items-center gap-3">
-                <img src={c.logo} alt={c.company} className="h-7 w-auto object-contain" />
-                <span className="text-lg font-bold text-ink">{c.company}</span>
-                {c.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full bg-tint-accent px-3 py-1 text-xs font-medium text-accent"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-              <p className="mt-4 text-sm text-lavender">{c.story}</p>
-              <p className="mt-3 text-sm font-medium text-ink">{c.result}</p>
-              <blockquote className="mt-4 border-l-2 border-brand pl-4 text-sm italic text-ink">
-                &ldquo;{c.quote}&rdquo;
-                <footer className="mt-2 text-sm font-medium not-italic text-lavender">
-                  - {c.name}, {c.title}
-                </footer>
-              </blockquote>
-            </div>
-          ))}
-        </div>
-
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {shortQuotes.map((t) => (
+          {testimonials.map((t) => (
             <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
               {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
+              {t.photo && <img src={t.photo} alt={t.name} className="mb-3 h-6 w-6 rounded-full object-cover" />}
               <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
               <p className="mt-3 text-xs font-medium text-lavender">
                 {t.name} · {t.title}
@@ -815,12 +800,26 @@ export function Marketing() {
           </div>
         </div>
 
+        <p className="mt-8 text-center text-sm text-lavender">
+          Commonality is built and installed for you by{" "}
+          <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+            The Endurance Group
+          </a>
+          . Want more AI automations for your team?{" "}
+          <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+            Give us a call
+          </a>
+          .
+        </p>
       </section>
-
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
         <div className="mx-auto flex max-w-content flex-wrap items-center justify-center gap-2 px-6">
           <span>© Commonality - The Endurance Group</span>
+          <span>·</span>
+          <a href="https://theendurancegroup.com" className="hover:text-white">
+            theendurancegroup.com
+          </a>
           <span>·</span>
           <Link to="/privacy" className="hover:text-white">
             Privacy
