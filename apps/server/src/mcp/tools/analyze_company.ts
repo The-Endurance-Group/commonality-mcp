@@ -2,7 +2,7 @@ import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
 import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getCompanyPosts, searchCompanies, searchProfiles } from "../../services/apify.js";
 import { text } from "./_result.js";
-import { analyzeProspectUrl, summarizePath, type ProspectAnalysis } from "./_prospect.js";
+import { analyzeProspectUrl, summarizeBackground, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
 interface Args {
   company_url?: string;
@@ -302,7 +302,8 @@ export const analyze_company: ToolHandler<Args> = {
 
     const top = ranked[0];
     const headline = top?.best
-      ? `Your best way into this company is through ${top.analysis.enriched.name} (${top.analysis.url}) - ${summarizePath(top.best)}.`
+      ? `Your best way into this company is through ${top.analysis.enriched.name} (${top.analysis.url}) - ` +
+        `${summarizePath(top.best)}.${summarizeBackground(top.analysis.enriched)}`
       : "None of these candidates share a connection with your team yet.";
 
     // Recent company posts are opt-in only - ask the user, only fetch (call
