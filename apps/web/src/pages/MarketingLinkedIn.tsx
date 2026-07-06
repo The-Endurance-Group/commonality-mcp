@@ -469,6 +469,7 @@ const testimonials = [
       "I highly recommend The Endurance Group for their outstanding social capital campaign services. They are a reliable and trusted partner - responsive and quite proactive.",
     name: "Nikki Blacksmith",
     title: "CEO, Symeta Inc.",
+    logo: "/logos/symeta.png",
   },
   {
     quote:
