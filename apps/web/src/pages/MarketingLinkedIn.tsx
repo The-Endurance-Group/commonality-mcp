@@ -525,9 +525,8 @@ export function MarketingLinkedIn() {
             Access LinkedIn, right from your AI.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
-            Ask your AI to research a prospect or a company and get real answers - who you know
-            there, what they've posted lately, what's worth mentioning when you reach out. Built
-            by The Endurance Group, using our proprietary matching tech, Commonality.
+            Ask your AI to research a prospect or company and get real answers - who you know
+            there, and what to say when you reach out.
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
@@ -550,9 +549,6 @@ export function MarketingLinkedIn() {
               See how →
             </a>
           </div>
-          <p className="mt-3 text-sm text-white/70">
-            One proprietary edge: Commonality checks your team's own network first, before anything else.
-          </p>
         </div>
 
         <div className="mx-auto mt-12 max-w-md animate-float">
