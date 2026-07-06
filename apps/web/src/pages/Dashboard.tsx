@@ -431,7 +431,16 @@ const promptCategories: { title: string; prompts: string[] }[] = [
     prompts: [
       "What's the best way for me to connect with [prospect LinkedIn URL]?",
       "What's our best way into Acme Corp?",
+      "Who should I reach out to at Acme Inc?",
       "Find VPs of Sales at fintech companies in New York.",
+    ],
+  },
+  {
+    title: "Research a person or company",
+    prompts: [
+      "Tell me about [prospect LinkedIn URL] - where did they go to school, and where have they worked?",
+      "Show me [prospect]'s recent LinkedIn posts.",
+      "What's Acme Corp been posting about lately?",
     ],
   },
   {
