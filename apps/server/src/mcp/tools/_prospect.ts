@@ -42,6 +42,27 @@ export async function analyzeProspectUrl(
   return { url, enriched, prospect, results };
 }
 
+// The enrichment call already fetches school, past companies, location, and
+// bio - surface them instead of silently dropping them, so a follow-up like
+// "where did they go to school?" can be answered without a second lookup.
+// Keep it short; this is a summary, not the full profile dump.
+export function summarizeBackground(e: EnrichmentData): string {
+  const parts: string[] = [];
+  if (e.almaMater) {
+    const degree = e.degrees?.length ? e.degrees.join("/") : undefined;
+    const field = e.fieldsOfStudy?.length ? e.fieldsOfStudy.join("/") : undefined;
+    const study = [degree, field].filter(Boolean).join(" in ");
+    parts.push(
+      `Studied${study ? ` ${study}` : ""} at ${e.almaMater}${e.graduationYear ? ` ('${e.graduationYear.slice(-2)})` : ""}`,
+    );
+  }
+  if (e.pastCompanies?.length) parts.push(`Previously at ${e.pastCompanies.join(", ")}`);
+  if (e.currentLocation) parts.push(`Based in ${e.currentLocation}`);
+  if (e.connectionCount) parts.push(`${e.connectionCount} LinkedIn connections`);
+  if (e.bio) parts.push(e.bio);
+  return parts.length ? `\n${parts.join(" - ")}` : "";
+}
+
 // Every returned person's name should be paired with their LinkedIn URL so
 // it's clickable - summarizePath names a teammate (r.employee), so include
 // their linkedinUrl whenever we have it.

@@ -21,6 +21,8 @@ discoveryRouter.get("/oauth-authorization-server", (_req, res) => {
     code_challenge_methods_supported: ["S256"],
     token_endpoint_auth_methods_supported: ["none"],
     scopes_supported: ["openid", "email", "profile"],
+    service_documentation: base(),
+    logo_uri: `${base()}/icon.png`,
   });
 });
 
