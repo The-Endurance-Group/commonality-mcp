@@ -721,7 +721,11 @@ export function MarketingLinkedIn() {
       {/* Pricing */}
       <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
-        <p className="mt-2 text-center text-sm text-lavender">Free forever - no credit card, no trial to expire.</p>
+        <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
+          One subscription per company - your whole team shares it, no separate sign-ups. A
+          credit is used each time we look something up for you (a company search or a person
+          lookup); most conversations use just 1-2 credits.
+        </p>
 
         <div className="mt-10 grid gap-8 sm:grid-cols-3">
           <div className="relative rounded-lg border border-gray-200 p-6 transition hover:scale-105">
@@ -796,12 +800,7 @@ export function MarketingLinkedIn() {
           </div>
         </div>
 
-        <p className="mt-8 text-center text-xs text-lavender">
-          A credit is used each time we look something up for you - a company search or a person
-          lookup. Most conversations use just 1-2 credits. Credits are shared across your whole
-          team on one account - no need for each person to sign up separately.
-        </p>
-        <p className="mt-3 text-center text-sm text-lavender">
+        <p className="mt-8 text-center text-sm text-lavender">
           Commonality is built and installed for you by{" "}
           <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
             The Endurance Group
