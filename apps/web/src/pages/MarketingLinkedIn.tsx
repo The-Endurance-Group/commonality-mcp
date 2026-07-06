@@ -423,6 +423,7 @@ const testimonials = [
       "Working with The Endurance Group was absolutely amazing. They introduced a LinkedIn outreach solution that has been a fantastic addition to our prospecting strategy. TEG totally exceeded our expectations.",
     name: "Sevag Sarkissian",
     title: "VP Growth Marketing, Realty ONE Group",
+    logo: "/logos/realty-one-group.png",
   },
   {
     quote:
