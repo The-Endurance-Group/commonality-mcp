@@ -717,28 +717,18 @@ export function MarketingLinkedIn() {
         </p>
 
         <div className="mx-auto mt-10 max-w-md rounded-lg border-2 border-brand p-6 text-center transition hover:scale-105">
-          <div className="font-semibold text-ink">TEG Membership</div>
-          <div className="mt-2 text-3xl font-bold text-ink">Starting at $149/mo</div>
+          <div className="font-semibold text-ink">Free</div>
+          <div className="mt-2 text-3xl font-bold text-ink">$0</div>
           <ul className="mt-4 space-y-2 text-left text-sm text-lavender">
             <li className="flex items-center gap-2">
               <CheckIcon />
-              Commonality installed free as a new member
+              50 credits/mo, no credit card required
             </li>
             <li className="flex items-center gap-2">
               <CheckIcon />
-              Ongoing maintenance, fixes, and strategy calls included
-            </li>
-            <li className="flex items-center gap-2">
-              <CheckIcon />
-              Access to more TEG automations for your team
+              Full access - person lookups, company search, warm paths
             </li>
           </ul>
-          <p className="mt-3 text-xs text-lavender">
-            Learn more at{" "}
-            <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
-              theendurancegroup.com
-            </a>
-          </p>
           <SignedOut>
             <SignUpButton mode="modal">
               <button className="mt-6 w-full rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
@@ -747,7 +737,22 @@ export function MarketingLinkedIn() {
             </SignUpButton>
           </SignedOut>
           <p className="mt-4 text-xs text-lavender">
-            Includes 100 Commonality credits/month. Need more? We'll work out pricing together.
+            Need more credits? Upgrade any time from your dashboard.
+          </p>
+        </div>
+
+        <div className="mx-auto mt-8 max-w-md rounded-lg border border-gray-200 bg-tint-brand p-6 text-center">
+          <p className="text-sm font-semibold text-ink">You're also joining The Endurance Group</p>
+          <p className="mt-2 text-sm text-lavender">
+            Commonality is one of TEG's automations - normally $750 to build, free as a new member.
+            TEG Membership (starting at $149/mo) keeps your whole automation portfolio running and
+            opens the door to whatever TEG builds you next.
+          </p>
+          <p className="mt-3 text-xs text-lavender">
+            Learn more at{" "}
+            <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+              theendurancegroup.com
+            </a>
           </p>
         </div>
       </section>
