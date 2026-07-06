@@ -515,9 +515,8 @@ export function MarketingLinkedIn() {
       {/* Hero */}
       <section className="animate-gradient bg-gradient-to-br from-purple via-brand to-accent px-6 py-20 text-center">
         <div className="mx-auto max-w-2xl animate-fade-up">
-          <div className="mx-auto flex w-fit items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-white/90">
-            <img src="/logo.png" alt="Commonality" className="h-4 w-auto" />
-            An AI automation by The Endurance Group
+          <div className="mx-auto w-fit rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-white/90">
+            One of our most popular AI automations is now available for free. Try it today.
           </div>
           <p className="mt-6 text-sm font-semibold uppercase tracking-wide text-white/80">
             LinkedIn Research, Right From Your AI
