@@ -796,7 +796,11 @@ export function MarketingLinkedIn() {
           </div>
         </div>
 
-        <p className="mt-8 text-center text-sm text-lavender">
+        <p className="mt-8 text-center text-xs text-lavender">
+          A credit is used each time we look something up for you - a company search or a person
+          lookup. Most conversations use just 1-2 credits.
+        </p>
+        <p className="mt-3 text-center text-sm text-lavender">
           Commonality is built and installed for you by{" "}
           <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
             The Endurance Group
@@ -806,10 +810,6 @@ export function MarketingLinkedIn() {
             Give us a call
           </a>
           .
-        </p>
-        <p className="mt-3 text-center text-xs text-lavender">
-          A credit is used each time we look something up for you - a company search or a person
-          lookup. Most conversations use just 1-2 credits.
         </p>
       </section>
 
