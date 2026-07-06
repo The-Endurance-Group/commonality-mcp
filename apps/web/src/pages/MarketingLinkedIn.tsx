@@ -798,7 +798,8 @@ export function MarketingLinkedIn() {
 
         <p className="mt-8 text-center text-xs text-lavender">
           A credit is used each time we look something up for you - a company search or a person
-          lookup. Most conversations use just 1-2 credits.
+          lookup. Most conversations use just 1-2 credits. Credits are shared across your whole
+          team on one account - no need for each person to sign up separately.
         </p>
         <p className="mt-3 text-center text-sm text-lavender">
           Commonality is built and installed for you by{" "}
