@@ -48,9 +48,17 @@ export async function analyzeProspectUrl(
 // Keep it short; this is a summary, not the full profile dump.
 export function summarizeBackground(e: EnrichmentData): string {
   const parts: string[] = [];
-  if (e.almaMater) parts.push(`Studied at ${e.almaMater}${e.graduationYear ? ` ('${e.graduationYear.slice(-2)})` : ""}`);
+  if (e.almaMater) {
+    const degree = e.degrees?.length ? e.degrees.join("/") : undefined;
+    const field = e.fieldsOfStudy?.length ? e.fieldsOfStudy.join("/") : undefined;
+    const study = [degree, field].filter(Boolean).join(" in ");
+    parts.push(
+      `Studied${study ? ` ${study}` : ""} at ${e.almaMater}${e.graduationYear ? ` ('${e.graduationYear.slice(-2)})` : ""}`,
+    );
+  }
   if (e.pastCompanies?.length) parts.push(`Previously at ${e.pastCompanies.join(", ")}`);
   if (e.currentLocation) parts.push(`Based in ${e.currentLocation}`);
+  if (e.connectionCount) parts.push(`${e.connectionCount} LinkedIn connections`);
   if (e.bio) parts.push(e.bio);
   return parts.length ? `\n${parts.join(" - ")}` : "";
 }
