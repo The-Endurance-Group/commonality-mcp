@@ -256,7 +256,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         </button>
       </div>
       <p className="mt-2 text-sm text-lavender">
-        Having trouble connecting?{" "}
+        Having trouble connecting? Or have an AI other than Claude?{" "}
         <a
           href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
           target="_blank"
