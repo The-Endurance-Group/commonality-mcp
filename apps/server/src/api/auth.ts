@@ -4,7 +4,6 @@ import { config } from "../config.js";
 import { logger } from "../logger.js";
 import { signAccessToken, type SignableClaims } from "../oauth/jwt.js";
 import { createWorkspace, resolveWorkspaceForEmail, WorkspaceResolutionError } from "../oauth/workspace.js";
-import { getClerkUserEmail } from "../services/clerkBackend.js";
 
 function withSuperadmin(claims: SignableClaims): SignableClaims {
   const isSuperadmin = config.superadminEmails.includes(claims.email.toLowerCase());
@@ -46,8 +45,8 @@ async function clerkEmailFromRequest(req: Request): Promise<string> {
   const header = req.header("authorization") ?? "";
   const [scheme, token] = header.split(" ");
   if (scheme?.toLowerCase() !== "bearer" || !token) throw new Error("missing Clerk token");
-  const { sub } = await verifyClerkSessionToken(token);
-  return getClerkUserEmail(sub);
+  const { email } = await verifyClerkSessionToken(token);
+  return email;
 }
 
 // POST /api/auth/token - exchange a Clerk session for a Commonality JWT.
