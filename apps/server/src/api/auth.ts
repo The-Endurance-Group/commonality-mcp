@@ -15,6 +15,32 @@ function withSuperadmin(claims: SignableClaims): SignableClaims {
 // workspace-scoped Commonality JWT (the same token the MCP endpoint accepts).
 export const authRouter: RouterType = Router();
 
+class TimeoutError extends Error {}
+
+// Bounds an entire chain of external calls (Clerk JWKS fetch, Clerk Backend
+// API, Supabase) to a hard wall-clock limit, regardless of which individual
+// call is slow. Observed in production: /api/auth/token hanging 50s+ even
+// after adding a per-call timeout to just one of these calls - a single
+// overall deadline is more robust than chasing every external call's own
+// timeout behavior individually.
+function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => reject(new TimeoutError(`timed out after ${ms}ms`)), ms);
+    promise.then(
+      (v) => {
+        clearTimeout(timer);
+        resolve(v);
+      },
+      (e) => {
+        clearTimeout(timer);
+        reject(e);
+      },
+    );
+  });
+}
+
+const SESSION_EXCHANGE_TIMEOUT_MS = 12000;
+
 async function clerkEmailFromRequest(req: Request): Promise<string> {
   const header = req.header("authorization") ?? "";
   const [scheme, token] = header.split(" ");
@@ -28,13 +54,16 @@ async function clerkEmailFromRequest(req: Request): Promise<string> {
 authRouter.post("/token", async (req, res) => {
   let email: string;
   try {
-    email = await clerkEmailFromRequest(req);
-  } catch {
-    res.status(401).json({ error: "invalid_clerk_session" });
+    email = await withTimeout(clerkEmailFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS);
+  } catch (err) {
+    res.status(err instanceof TimeoutError ? 504 : 401).json({ error: "invalid_clerk_session" });
     return;
   }
   try {
-    const { claims, joinedExistingCompany } = await resolveWorkspaceForEmail(email);
+    const { claims, joinedExistingCompany } = await withTimeout(
+      resolveWorkspaceForEmail(email),
+      SESSION_EXCHANGE_TIMEOUT_MS,
+    );
     const { token, expiresIn } = signAccessToken(withSuperadmin(claims));
     res.json({
       access_token: token,
@@ -65,9 +94,9 @@ function domainFromEmail(email: string): string | undefined {
 authRouter.post("/onboarding", async (req, res) => {
   let email: string;
   try {
-    email = await clerkEmailFromRequest(req);
-  } catch {
-    res.status(401).json({ error: "invalid_clerk_session" });
+    email = await withTimeout(clerkEmailFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS);
+  } catch (err) {
+    res.status(err instanceof TimeoutError ? 504 : 401).json({ error: "invalid_clerk_session" });
     return;
   }
   const { companyName } = (req.body ?? {}) as { companyName?: string };
@@ -76,7 +105,10 @@ authRouter.post("/onboarding", async (req, res) => {
     return;
   }
   try {
-    const claims = await createWorkspace(email, companyName.trim(), domainFromEmail(email));
+    const claims = await withTimeout(
+      createWorkspace(email, companyName.trim(), domainFromEmail(email)),
+      SESSION_EXCHANGE_TIMEOUT_MS,
+    );
     const { token, expiresIn } = signAccessToken(withSuperadmin(claims));
     res.status(201).json({ access_token: token, expires_in: expiresIn, token_type: "Bearer" });
   } catch (err) {

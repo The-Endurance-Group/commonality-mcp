@@ -481,7 +481,7 @@ const testimonials = [
 export function Marketing() {
   // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
-  const { isLoaded: clerkLoaded, isSignedIn } = useAuth();
+  const { isSignedIn } = useAuth();
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
@@ -498,13 +498,6 @@ export function Marketing() {
         </button>
       </div>
     );
-  }
-
-  // Clerk knows the user is signed in, but the Commonality session exchange
-  // (useSessionBootstrap) hasn't finished yet - show a lightweight loading
-  // state rather than flashing the full marketing page before redirecting.
-  if (!ready && clerkLoaded && isSignedIn) {
-    return <div className="p-10 text-center text-lavender">Loading…</div>;
   }
 
   return (
