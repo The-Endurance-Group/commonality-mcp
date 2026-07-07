@@ -16,6 +16,24 @@ export const mcpRouter: RouterType = Router();
 const PROTOCOL_VERSION = "2024-11-05";
 const SERVER_INFO = { name: "commonality", version: "0.1.0" };
 
+// Surfaced to the model at connection time (MCP initialize.instructions) so
+// it reaches for these tools proactively - whenever the conversation is
+// about LinkedIn, prospecting, or finding a way in - not only when the user
+// names a tool or types something that happens to match a tool description
+// word-for-word.
+const SERVER_INSTRUCTIONS =
+  "Commonality finds warm paths through the user's team's LinkedIn network and researches " +
+  "prospects/companies for outreach. Reach for it proactively - don't wait for the user to name " +
+  "a tool - whenever the conversation involves: a LinkedIn profile or company URL; a prospect or " +
+  "company name plus language like \"reach out\", \"connect\", \"warm intro\", \"way in\", or " +
+  "\"who do we know at\"; researching someone before a call/meeting; or finding people at a " +
+  "company by title/role. Use analyze_prospect for a specific person's LinkedIn URL, " +
+  "analyze_company to find a way into a company (by name or URL, optionally scoped to a role), " +
+  "and search_prospects for open-ended people search by title/location/company/school. Recent " +
+  "LinkedIn posts (for a person or company) are opt-in only - ask the user first, never fetch " +
+  "them automatically. Never state credit cost or remaining balance unless the user explicitly " +
+  "asks - that's what get_usage is for.";
+
 interface RpcRequest {
   jsonrpc: "2.0";
   id?: string | number | null;
@@ -110,7 +128,14 @@ mcpRouter.post("/", requireAuth, async (req, res) => {
       // negotiation model.
       const requestedVersion = params?.protocolVersion;
       const protocolVersion = typeof requestedVersion === "string" ? requestedVersion : PROTOCOL_VERSION;
-      res.json(rpcResult(id, { protocolVersion, capabilities: { tools: {} }, serverInfo: SERVER_INFO }));
+      res.json(
+        rpcResult(id, {
+          protocolVersion,
+          capabilities: { tools: {} },
+          serverInfo: SERVER_INFO,
+          instructions: SERVER_INSTRUCTIONS,
+        }),
+      );
       return;
     }
     case "notifications/initialized":
