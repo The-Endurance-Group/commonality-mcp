@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import { config } from "../config.js";
 import { logger } from "../logger.js";
 import { buildClerkAuthorizeUrl, exchangeClerkCode, getClerkUser } from "./clerk.js";
-import { signAccessToken, type SignableClaims } from "./jwt.js";
+import { signAccessToken, signRefreshToken, verifyRefreshToken, type SignableClaims } from "./jwt.js";
 import { resolveWorkspaceForEmail, WorkspaceResolutionError } from "./workspace.js";
 
 // Commonality acts as an OAuth 2.1 authorization server that delegates user
@@ -70,7 +70,7 @@ oauthRouter.post("/register", (req, res) => {
     client_id: `mcp-${randomToken().slice(0, 24)}`,
     client_id_issued_at: Math.floor(Date.now() / 1000),
     token_endpoint_auth_method: "none",
-    grant_types: ["authorization_code"],
+    grant_types: ["authorization_code", "refresh_token"],
     response_types: ["code"],
     redirect_uris: body.redirect_uris ?? [],
     client_name: body.client_name,
@@ -151,7 +151,31 @@ oauthRouter.get("/callback", async (req, res) => {
 
 // --- Token endpoint ---------------------------------------------------------
 oauthRouter.post("/token", (req, res) => {
-  const { grant_type, code, redirect_uri, code_verifier } = (req.body ?? {}) as Record<string, string | undefined>;
+  const { grant_type, code, redirect_uri, code_verifier, refresh_token } =
+    (req.body ?? {}) as Record<string, string | undefined>;
+
+  // Refresh token grant — silent re-auth, no user interaction needed.
+  if (grant_type === "refresh_token") {
+    if (!refresh_token) {
+      res.status(400).json({ error: "invalid_request", error_description: "refresh_token required" });
+      return;
+    }
+    let claims: SignableClaims;
+    try {
+      claims = verifyRefreshToken(refresh_token);
+    } catch {
+      res.status(400).json({ error: "invalid_grant", error_description: "refresh token invalid or expired" });
+      return;
+    }
+    const { token, expiresIn } = signAccessToken(claims);
+    res.json({
+      access_token: token,
+      token_type: "Bearer",
+      expires_in: expiresIn,
+      refresh_token: signRefreshToken(claims), // rotate: issue a fresh 30-day token
+    });
+    return;
+  }
 
   if (grant_type !== "authorization_code" || !code) {
     res.status(400).json({ error: "unsupported_grant_type" });
@@ -175,5 +199,10 @@ oauthRouter.post("/token", (req, res) => {
   }
 
   const { token, expiresIn } = signAccessToken(issued.claims);
-  res.json({ access_token: token, token_type: "Bearer", expires_in: expiresIn });
+  res.json({
+    access_token: token,
+    token_type: "Bearer",
+    expires_in: expiresIn,
+    refresh_token: signRefreshToken(issued.claims),
+  });
 });

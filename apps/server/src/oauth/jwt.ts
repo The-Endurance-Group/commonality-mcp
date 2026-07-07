@@ -20,7 +20,8 @@ export const jwtClaimsSchema = z.object({
 export type AuthUser = z.infer<typeof jwtClaimsSchema>;
 export type SignableClaims = Omit<AuthUser, never>;
 
-const TOKEN_TTL_SECONDS = 60 * 60; // 1 hour; refresh via re-auth.
+const TOKEN_TTL_SECONDS = 60 * 60;          // 1 hour access token
+const REFRESH_TTL_SECONDS = 30 * 24 * 60 * 60; // 30 days refresh token
 
 /** Sign a 1-hour Commonality access token. */
 export function signAccessToken(claims: SignableClaims): {
@@ -33,6 +34,25 @@ export function signAccessToken(claims: SignableClaims): {
     issuer: config.publicBaseUrl,
   });
   return { token, expiresIn: TOKEN_TTL_SECONDS };
+}
+
+/** Sign a 30-day refresh token embedding the same claims. */
+export function signRefreshToken(claims: SignableClaims): string {
+  return jwt.sign(
+    { purpose: "refresh_token", claims },
+    config.jwtSecret,
+    { algorithm: "HS256", expiresIn: REFRESH_TTL_SECONDS, issuer: config.publicBaseUrl },
+  );
+}
+
+/** Verify a refresh token and return the embedded claims. Throws on failure. */
+export function verifyRefreshToken(token: string): SignableClaims {
+  const decoded = jwt.verify(token, config.jwtSecret, {
+    algorithms: ["HS256"],
+    issuer: config.publicBaseUrl,
+  }) as { purpose?: string; claims?: unknown };
+  if (decoded.purpose !== "refresh_token") throw new Error("wrong token purpose");
+  return jwtClaimsSchema.parse(decoded.claims);
 }
 
 /** Verify a Commonality access token and return validated claims. Throws on failure. */
