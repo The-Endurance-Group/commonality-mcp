@@ -1,6 +1,7 @@
 import { Router, type Router as RouterType, type Request } from "express";
 import { verifyClerkSessionToken } from "../auth/clerkSession.js";
 import { config } from "../config.js";
+import { logger } from "../logger.js";
 import { signAccessToken, type SignableClaims } from "../oauth/jwt.js";
 import { createWorkspace, resolveWorkspaceForEmail, WorkspaceResolutionError } from "../oauth/workspace.js";
 import { getClerkUserEmail } from "../services/clerkBackend.js";
@@ -56,6 +57,7 @@ authRouter.post("/token", async (req, res) => {
   try {
     email = await withTimeout(clerkEmailFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS);
   } catch (err) {
+    logger.error({ err }, "clerk session verification failed or timed out");
     res.status(err instanceof TimeoutError ? 504 : 401).json({ error: "invalid_clerk_session" });
     return;
   }
@@ -76,6 +78,7 @@ authRouter.post("/token", async (req, res) => {
       res.json({ needsOnboarding: true, email });
       return;
     }
+    logger.error({ err, email }, "resolveWorkspaceForEmail failed or timed out");
     res.status(500).json({ error: "exchange_failed" });
   }
 });
@@ -96,6 +99,7 @@ authRouter.post("/onboarding", async (req, res) => {
   try {
     email = await withTimeout(clerkEmailFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS);
   } catch (err) {
+    logger.error({ err }, "clerk session verification failed or timed out");
     res.status(err instanceof TimeoutError ? 504 : 401).json({ error: "invalid_clerk_session" });
     return;
   }
@@ -116,6 +120,7 @@ authRouter.post("/onboarding", async (req, res) => {
       res.status(409).json({ error: err.message });
       return;
     }
+    logger.error({ err, email }, "createWorkspace failed or timed out");
     res.status(500).json({ error: "onboarding_failed" });
   }
 });
