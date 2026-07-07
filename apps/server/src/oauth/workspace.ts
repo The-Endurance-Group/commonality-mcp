@@ -1,4 +1,6 @@
 import { db } from "../db/client.js";
+import { logger } from "../logger.js";
+import { sendNewAccountNotification } from "../services/resend.js";
 import type { SignableClaims } from "./jwt.js";
 
 // Workspace resolution: given an authenticated email, figure out which company
@@ -134,6 +136,12 @@ export async function createWorkspace(
     throw new WorkspaceResolutionError(`Could not create workspace: ${error?.message ?? "unknown"}`);
   }
   const user = await createUser(company.id, email, "admin");
+
+  // Best-effort - a notification failure must never fail the signup itself.
+  sendNewAccountNotification(email, companyName, domain?.toLowerCase().trim() || null).catch((err) =>
+    logger.error({ err, email, companyName }, "new-account notification failed"),
+  );
+
   return toClaims(user, company, email);
 }
 

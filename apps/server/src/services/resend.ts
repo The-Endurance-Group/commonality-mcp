@@ -26,6 +26,24 @@ async function sendEmail(to: string, subject: string, text: string): Promise<voi
   }
 }
 
+// New workspace signup - not a teammate joining an existing one. Notifies
+// config.newAccountNotifyEmail (defaults to csullivan@theendurancegroup.com).
+// Best-effort: called fire-and-forget from createWorkspace(), a failure here
+// must never block or fail the signup itself.
+export async function sendNewAccountNotification(
+  signupEmail: string,
+  companyName: string,
+  domain: string | null,
+): Promise<void> {
+  const subject = `New Commonality signup: ${companyName}`;
+  const text = `A new company workspace was just created on Commonality.
+
+Company: ${companyName}
+Domain: ${domain ?? "(none)"}
+Signed up with: ${signupEmail}`;
+  await sendEmail(config.newAccountNotifyEmail, subject, text);
+}
+
 export async function sendInviteEmail(
   email: string,
   companyName: string,

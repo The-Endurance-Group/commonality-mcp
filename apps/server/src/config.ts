@@ -44,6 +44,12 @@ export const config = {
     .map((s) => s.trim())
     .filter(Boolean),
 
+  // Where to send a heads-up whenever a brand-new company/workspace is
+  // created (not a new user joining an existing one). See
+  // sendNewAccountNotification() in services/resend.ts. Defaults to Conor's
+  // address since he's the one who wanted these.
+  newAccountNotifyEmail: optional("NEW_ACCOUNT_NOTIFY_EMAIL", "csullivan@theendurancegroup.com"),
+
   // Clerk (OAuth IdP). Publishable + issuer are non-secret; the OAuth-application
   // client id/secret are what we use as a relying party delegating sign-in to Clerk.
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY ?? "",
