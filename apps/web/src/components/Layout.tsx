@@ -4,14 +4,16 @@ import { NavLink } from "react-router-dom";
 import { useAuthStore } from "../lib/store";
 
 const tabs = [
-  { to: "/dashboard", label: "Dashboard", adminOnly: false },
-  { to: "/invites", label: "Invites", adminOnly: true },
-  { to: "/billing", label: "Billing", adminOnly: true },
+  { to: "/dashboard", label: "Dashboard", adminOnly: false, superadminOnly: false },
+  { to: "/invites", label: "Invites", adminOnly: true, superadminOnly: false },
+  { to: "/billing", label: "Billing", adminOnly: true, superadminOnly: false },
+  { to: "/superadmin", label: "All accounts", adminOnly: false, superadminOnly: true },
 ];
 
 export function Layout({ children }: { children: ReactNode }) {
   const isAdmin = useAuthStore((s) => s.claims?.role === "admin");
-  const visibleTabs = tabs.filter((t) => !t.adminOnly || isAdmin);
+  const isSuperadmin = useAuthStore((s) => s.claims?.is_superadmin ?? false);
+  const visibleTabs = tabs.filter((t) => (!t.adminOnly || isAdmin) && (!t.superadminOnly || isSuperadmin));
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (

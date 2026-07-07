@@ -56,6 +56,26 @@ return cached data. Otherwise call Cassidy, store the result, increment
 - At limit → return a friendly upgrade message as a tool result, do NOT throw. `mcp/server.ts` also does a cheap up-front block if a company is already over the limit before running any tool.
 - **Never state credit cost, "this will use N credits," or remaining balance in a tool response, unless the user explicitly asked about it in that turn.** Exact used/limit/remaining is only ever shown via the `get_usage` tool or the dashboard. The one standing exception is `usageThresholdNotice()` in `mcp/server.ts` - a deliberate, separate system that fires once, centrally, the first time usage crosses 50%/75%/90%/100% of the plan limit (a heads-up before hitting a hard wall), not a per-call cost disclosure.
 
+## Superadmin
+
+A cross-company console, separate from the per-company `admin` role. Anyone
+signed in with an email in `config.superadminEmails` (env `SUPERADMIN_EMAILS`,
+comma-separated, defaults to `csullivan@theendurancegroup.com`) gets an
+`is_superadmin: true` JWT claim regardless of which company they belong to
+(set in `apps/server/src/api/auth.ts`'s `withSuperadmin()`, checked on both
+token-exchange and onboarding token-mint). Unlocks:
+- `/superadmin` page (`apps/web/src/pages/SuperAdmin.tsx`) - every company,
+  team size, this month's credit usage, and an upgrade/downgrade button per row.
+- `GET/POST /api/superadmin/*` (`apps/server/src/api/superadmin.ts`) - uses
+  the service-role `db()` client directly to intentionally bypass normal
+  company_id tenant scoping; that's the point of this router, not a bug.
+
+Plan changes from this console (`POST /api/superadmin/companies/:id/plan`)
+directly overwrite `companies.plan` - a support/comp override that does
+**not** touch Stripe. If a company has a real paid Stripe subscription, this
+can drift the `plan` column out of sync with what they're actually being
+billed - a deliberate tradeoff (confirmed with the user), not an oversight.
+
 ## Deploy
 
 Railway, Dockerfile multi-stage build, auto-deploy on push to `main`.

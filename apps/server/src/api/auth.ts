@@ -1,8 +1,14 @@
 import { Router, type Router as RouterType, type Request } from "express";
 import { verifyClerkSessionToken } from "../auth/clerkSession.js";
-import { signAccessToken } from "../oauth/jwt.js";
+import { config } from "../config.js";
+import { signAccessToken, type SignableClaims } from "../oauth/jwt.js";
 import { createWorkspace, resolveWorkspaceForEmail, WorkspaceResolutionError } from "../oauth/workspace.js";
 import { getClerkUserEmail } from "../services/clerkBackend.js";
+
+function withSuperadmin(claims: SignableClaims): SignableClaims {
+  const isSuperadmin = config.superadminEmails.includes(claims.email.toLowerCase());
+  return isSuperadmin ? { ...claims, is_superadmin: true } : claims;
+}
 
 // Session exchange for the first-party React app. The app authenticates the
 // human with Clerk; these endpoints turn a verified Clerk session into a
@@ -29,7 +35,7 @@ authRouter.post("/token", async (req, res) => {
   }
   try {
     const { claims, joinedExistingCompany } = await resolveWorkspaceForEmail(email);
-    const { token, expiresIn } = signAccessToken(claims);
+    const { token, expiresIn } = signAccessToken(withSuperadmin(claims));
     res.json({
       access_token: token,
       expires_in: expiresIn,
@@ -71,7 +77,7 @@ authRouter.post("/onboarding", async (req, res) => {
   }
   try {
     const claims = await createWorkspace(email, companyName.trim(), domainFromEmail(email));
-    const { token, expiresIn } = signAccessToken(claims);
+    const { token, expiresIn } = signAccessToken(withSuperadmin(claims));
     res.status(201).json({ access_token: token, expires_in: expiresIn, token_type: "Bearer" });
   } catch (err) {
     if (err instanceof WorkspaceResolutionError) {

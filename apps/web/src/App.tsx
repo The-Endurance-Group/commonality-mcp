@@ -8,6 +8,7 @@ import { Invites } from "./pages/Invites";
 import { Marketing } from "./pages/Marketing";
 import { Onboarding } from "./pages/Onboarding";
 import { Privacy } from "./pages/Privacy";
+import { SuperAdmin } from "./pages/SuperAdmin";
 import { Terms } from "./pages/Terms";
 
 export default function App() {
@@ -52,6 +53,16 @@ export default function App() {
           <Protected admin>
             <Layout>
               <Billing />
+            </Layout>
+          </Protected>
+        }
+      />
+      <Route
+        path="/superadmin"
+        element={
+          <Protected superadmin>
+            <Layout>
+              <SuperAdmin />
             </Layout>
           </Protected>
         }

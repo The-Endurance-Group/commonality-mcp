@@ -11,7 +11,7 @@ import { db } from "../db/client.js";
 // re-analyzing the same URL for the same company afterward is free forever.
 // Free = 50/calendar month, Pro = 200/calendar month.
 
-const PLAN_LIMITS = { free: 50, pro: 200 } as const;
+export const PLAN_LIMITS = { free: 50, pro: 200 } as const;
 
 /** Current month as "YYYY-MM" (UTC). */
 export function currentMonth(): string {

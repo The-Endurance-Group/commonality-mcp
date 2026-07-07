@@ -5,6 +5,7 @@ export interface Claims {
   plan: "free" | "pro";
   email: string;
   company_id: string;
+  is_superadmin?: boolean;
 }
 
 function decode(token: string): Claims | null {

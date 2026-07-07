@@ -12,6 +12,9 @@ export const jwtClaimsSchema = z.object({
   role: z.enum(["admin", "member"]),
   plan: z.enum(["free", "pro"]),
   email: z.string().email(),
+  // Cross-company superadmin, orthogonal to which company this token's
+  // company_id/role point at - see config.superadminEmails.
+  is_superadmin: z.boolean().optional(),
 });
 
 export type AuthUser = z.infer<typeof jwtClaimsSchema>;

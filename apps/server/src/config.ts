@@ -50,6 +50,14 @@ export const config = {
   // address since he's the one who wanted these.
   newAccountNotifyEmail: optional("NEW_ACCOUNT_NOTIFY_EMAIL", "csullivan@theendurancegroup.com"),
 
+  // Emails that get a superadmin claim on their token regardless of which
+  // company they belong to - unlocks the cross-company /api/superadmin
+  // routes and the /superadmin page. See is_superadmin in oauth/jwt.ts.
+  superadminEmails: optional("SUPERADMIN_EMAILS", "csullivan@theendurancegroup.com")
+    .split(",")
+    .map((s) => s.trim().toLowerCase())
+    .filter(Boolean),
+
   // Clerk (OAuth IdP). Publishable + issuer are non-secret; the OAuth-application
   // client id/secret are what we use as a relying party delegating sign-in to Clerk.
   clerkPublishableKey: process.env.CLERK_PUBLISHABLE_KEY ?? "",

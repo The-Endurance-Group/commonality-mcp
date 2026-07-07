@@ -4,6 +4,7 @@ import { billingRouter } from "./billing.js";
 import { companiesRouter } from "./companies.js";
 import { employeesRouter } from "./employees.js";
 import { invitesRouter } from "./invites.js";
+import { superadminRouter } from "./superadmin.js";
 import { usageRouter } from "./usage.js";
 import { usersRouter } from "./users.js";
 
@@ -20,6 +21,7 @@ apiRouter.use("/employees", employeesRouter);
 apiRouter.use("/invites", invitesRouter);
 apiRouter.use("/billing", billingRouter);
 apiRouter.use("/users", usersRouter);
+apiRouter.use("/superadmin", superadminRouter);
 
 apiRouter.all("*", (_req, res) => {
   res.status(404).json({ error: "not_found" });

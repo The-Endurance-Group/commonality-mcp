@@ -7,10 +7,11 @@ interface Props {
   children: ReactNode;
   admin?: boolean;
   onboarding?: boolean;
+  superadmin?: boolean;
 }
 
 // Gate a route on a signed-in user with a resolved Commonality session.
-export function Protected({ children, admin = false, onboarding = false }: Props) {
+export function Protected({ children, admin = false, onboarding = false, superadmin = false }: Props) {
   const { ready, needsOnboarding, claims } = useAuthStore();
 
   return (
@@ -23,6 +24,8 @@ export function Protected({ children, admin = false, onboarding = false }: Props
           <div className="p-10 text-center text-lavender">Loading…</div>
         ) : needsOnboarding && !onboarding ? (
           <Navigate to="/onboarding" replace />
+        ) : superadmin && !claims?.is_superadmin ? (
+          <Navigate to="/dashboard" replace />
         ) : admin && claims?.role !== "admin" ? (
           <div className="p-10 text-center text-lavender">
             This page is for workspace admins. Ask your admin for access.
