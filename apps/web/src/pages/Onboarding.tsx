@@ -2,6 +2,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { AppFooter } from "../components/AppFooter";
 import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
@@ -240,6 +241,7 @@ export function Onboarding() {
           <ConnectorStep mcpUrl={mcpUrl} onDone={() => navigate("/dashboard")} />
         )}
       </div>
+      <AppFooter />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { UserButton } from "@clerk/clerk-react";
 import { type ReactNode, useState } from "react";
 import { NavLink } from "react-router-dom";
+import { AppFooter } from "./AppFooter";
 import { useAuthStore } from "../lib/store";
 
 const tabs = [
@@ -68,6 +69,7 @@ export function Layout({ children }: { children: ReactNode }) {
         )}
       </header>
       <main className="mx-auto max-w-content px-6 py-8">{children}</main>
+      <AppFooter />
     </div>
   );
 }
