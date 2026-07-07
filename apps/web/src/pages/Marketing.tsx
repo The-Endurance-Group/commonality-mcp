@@ -480,16 +480,32 @@ const testimonials = [
 
 export function Marketing() {
   // Redirect signed-in users straight to their workspace.
-  const { ready, token, needsOnboarding, joinNotice } = useAuthStore();
+  const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
   const { isLoaded: clerkLoaded, isSignedIn } = useAuth();
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
 
+  // Session exchange failed for a reason other than "no workspace" (a
+  // timeout, a 401, a 500) - show a retry option rather than silently
+  // falling through to the full marketing page or navigating to onboarding.
+  if (ready && authError && isSignedIn) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4 text-center">
+        <p className="text-lavender">Couldn't verify your session. Please try again.</p>
+        <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white" onClick={() => window.location.reload()}>
+          Retry
+        </button>
+      </div>
+    );
+  }
+
   // Clerk knows the user is signed in, but the Commonality session exchange
-  // (useSessionBootstrap) hasn't finished yet - render nothing rather than
-  // flashing the full marketing page before immediately redirecting away.
-  if (!ready && clerkLoaded && isSignedIn) return null;
+  // (useSessionBootstrap) hasn't finished yet - show a lightweight loading
+  // state rather than flashing the full marketing page before redirecting.
+  if (!ready && clerkLoaded && isSignedIn) {
+    return <div className="p-10 text-center text-lavender">Loading…</div>;
+  }
 
   return (
     <div className="min-h-screen overflow-x-hidden">

@@ -15,9 +15,15 @@ interface ClerkUserResponse {
   email_addresses: ClerkEmailAddress[];
 }
 
+// Without a timeout, a slow/hanging Clerk API response stalls the entire
+// session exchange indefinitely (observed in production: requests taking up
+// to 59s). Fail fast instead so the client gets a prompt error to retry on.
+const CLERK_API_TIMEOUT_MS = 8000;
+
 export async function getClerkUserEmail(userId: string): Promise<string> {
   const res = await fetch(`${CLERK_API}/users/${userId}`, {
     headers: { Authorization: `Bearer ${config.clerkSecretKey}` },
+    signal: AbortSignal.timeout(CLERK_API_TIMEOUT_MS),
   });
   if (!res.ok) throw new Error(`Clerk backend user lookup failed: ${res.status}`);
   const user = (await res.json()) as ClerkUserResponse;

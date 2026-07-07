@@ -8,6 +8,7 @@ export function useSessionBootstrap(): void {
   const { isSignedIn, getToken } = useAuth();
   const setToken = useAuthStore((s) => s.setToken);
   const setNeedsOnboarding = useAuthStore((s) => s.setNeedsOnboarding);
+  const setAuthError = useAuthStore((s) => s.setAuthError);
   const reset = useAuthStore((s) => s.reset);
 
   useEffect(() => {
@@ -30,14 +31,19 @@ export function useSessionBootstrap(): void {
         };
         if (cancelled) return;
         if (data.access_token) setToken(data.access_token, data.joined_existing_company);
-        else setNeedsOnboarding();
+        // Only the server explicitly saying "no workspace for this email"
+        // means onboarding - any other failure (a timeout, a 401, a 500) is
+        // transient and must never be treated the same way, or an existing
+        // user with a slow/failed request gets misrouted to /onboarding.
+        else if (data.needsOnboarding) setNeedsOnboarding();
+        else setAuthError();
       } catch {
-        if (!cancelled) setNeedsOnboarding();
+        if (!cancelled) setAuthError();
       }
     }
     void run();
     return () => {
       cancelled = true;
     };
-  }, [isSignedIn, getToken, setToken, setNeedsOnboarding, reset]);
+  }, [isSignedIn, getToken, setToken, setNeedsOnboarding, setAuthError, reset]);
 }

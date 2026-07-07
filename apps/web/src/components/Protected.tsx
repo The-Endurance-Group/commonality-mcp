@@ -12,7 +12,7 @@ interface Props {
 
 // Gate a route on a signed-in user with a resolved Commonality session.
 export function Protected({ children, admin = false, onboarding = false, superadmin = false }: Props) {
-  const { ready, needsOnboarding, claims } = useAuthStore();
+  const { ready, needsOnboarding, authError, claims } = useAuthStore();
 
   return (
     <>
@@ -22,6 +22,13 @@ export function Protected({ children, admin = false, onboarding = false, superad
       <SignedIn>
         {!ready ? (
           <div className="p-10 text-center text-lavender">Loading…</div>
+        ) : authError ? (
+          <div className="flex flex-col items-center gap-4 p-10 text-center text-lavender">
+            <p>Couldn't verify your session. Please try again.</p>
+            <button className="btn-primary" onClick={() => window.location.reload()}>
+              Retry
+            </button>
+          </div>
         ) : needsOnboarding && !onboarding ? (
           <Navigate to="/onboarding" replace />
         ) : superadmin && !claims?.is_superadmin ? (

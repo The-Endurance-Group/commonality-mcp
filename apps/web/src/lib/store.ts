@@ -30,10 +30,15 @@ interface AuthState {
   token: string | null;
   claims: Claims | null;
   needsOnboarding: boolean;
-  ready: boolean; // session exchange has completed (success or onboarding)
+  ready: boolean; // session exchange has completed (success, onboarding, or error)
+  // Session exchange failed for a reason OTHER than "you have no workspace"
+  // (a timeout, a 401, a 500, etc.) - distinct from needsOnboarding so a
+  // transient failure never misroutes an existing user to /onboarding.
+  authError: boolean;
   joinNotice: JoinNotice | null; // shown once, right after auto-joining an existing workspace
   setToken: (token: string, joinNotice?: JoinNotice) => void;
   setNeedsOnboarding: () => void;
+  setAuthError: () => void;
   clearJoinNotice: () => void;
   reset: () => void;
 }
@@ -43,10 +48,12 @@ export const useAuthStore = create<AuthState>((set) => ({
   claims: null,
   needsOnboarding: false,
   ready: false,
+  authError: false,
   joinNotice: null,
   setToken: (token, joinNotice) =>
-    set({ token, claims: decode(token), needsOnboarding: false, ready: true, joinNotice: joinNotice ?? null }),
-  setNeedsOnboarding: () => set({ token: null, claims: null, needsOnboarding: true, ready: true }),
+    set({ token, claims: decode(token), needsOnboarding: false, ready: true, authError: false, joinNotice: joinNotice ?? null }),
+  setNeedsOnboarding: () => set({ token: null, claims: null, needsOnboarding: true, ready: true, authError: false }),
+  setAuthError: () => set({ token: null, claims: null, needsOnboarding: false, ready: true, authError: true }),
   clearJoinNotice: () => set({ joinNotice: null }),
-  reset: () => set({ token: null, claims: null, needsOnboarding: false, ready: false, joinNotice: null }),
+  reset: () => set({ token: null, claims: null, needsOnboarding: false, ready: false, authError: false, joinNotice: null }),
 }));
