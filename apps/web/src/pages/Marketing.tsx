@@ -630,7 +630,22 @@ export function Marketing() {
 
       {/* Workflow */}
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">From setup to your next warm intro</h2>
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">See it in action</h2>
+        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-lavender/40 shadow-lg">
+          <div className="relative w-full" style={{ paddingTop: "83.33%" }}>
+            <iframe
+              className="absolute inset-0 h-full w-full"
+              src="https://app.screencastify.com/watch/PjjQMWmp1RKXrGVIPF5B/embed"
+              title="Commonality product walkthrough"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
+
+        <h2 className="mt-16 text-2xl font-bold text-ink sm:text-3xl">From setup to your next warm intro</h2>
 
         <WorkflowRow />
 
@@ -650,23 +665,6 @@ export function Marketing() {
               Open your workspace
             </Link>
           </SignedIn>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">See it in action</h2>
-        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-lavender/40 shadow-lg">
-          <div className="relative w-full" style={{ paddingTop: "83.33%" }}>
-            <iframe
-              className="absolute inset-0 h-full w-full"
-              src="https://app.screencastify.com/watch/PjjQMWmp1RKXrGVIPF5B/embed"
-              title="Commonality product walkthrough"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
-              allowFullScreen
-            />
-          </div>
         </div>
       </section>
 
