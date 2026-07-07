@@ -1,4 +1,9 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+
+// ConnectorDemo's natural, unscaled size (three fixed-width sidebar columns
+// plus the caption line below).
+const NATURAL_WIDTH = 604;
+const NATURAL_HEIGHT = 676;
 
 // Looping animated demo of adding the Commonality custom MCP connector in
 // Claude, ending with it using the connector to find a warm intro. This
@@ -564,5 +569,35 @@ export function ConnectorDemo() {
       // eslint-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{ __html: DEMO_HTML }}
     />
+  );
+}
+
+// Scales ConnectorDemo down to fit whatever width its container actually has
+// (e.g. a phone screen narrower than the demo's fixed 604px layout), never
+// scaling up past its natural size on wide containers. Use this instead of
+// the bare component in any spot that doesn't already do its own scaling
+// (Marketing.tsx's WorkflowRow scales it to match a sibling's height instead
+// - don't wrap it in this too, or the two scale calculations would compound).
+export function ResponsiveConnectorDemo() {
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+
+  useEffect(() => {
+    const el = wrapperRef.current;
+    if (!el) return;
+    const ro = new ResizeObserver((entries) => {
+      const w = entries[0]?.contentRect.width;
+      if (w && w > 0) setScale(Math.min(1, w / NATURAL_WIDTH));
+    });
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+
+  return (
+    <div ref={wrapperRef} style={{ height: NATURAL_HEIGHT * scale }} className="overflow-hidden">
+      <div style={{ width: NATURAL_WIDTH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
+        <ConnectorDemo />
+      </div>
+    </div>
   );
 }

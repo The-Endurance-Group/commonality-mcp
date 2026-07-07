@@ -2,7 +2,7 @@ import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ConnectorDemo } from "../components/ConnectorDemo";
+import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
@@ -499,7 +499,7 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
 
       <div className="mt-6 border-t border-gray-100 pt-6">
         <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-        <ConnectorDemo />
+        <ResponsiveConnectorDemo />
         <p className="mt-3 text-sm text-lavender">
           Having trouble connecting it to your AI?{" "}
           <a

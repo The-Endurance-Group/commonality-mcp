@@ -2,7 +2,7 @@ import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ConnectorDemo } from "../components/ConnectorDemo";
+import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
@@ -270,7 +270,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
 
       <div className="mt-5">
         <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-        <ConnectorDemo />
+        <ResponsiveConnectorDemo />
       </div>
 
       <div className="mt-5 border-t border-gray-100 pt-5">
