@@ -9,7 +9,7 @@ import { useAuthStore } from "../lib/store";
 // Commonality's team-network matching as the standout feature.
 
 const DEMO_NATURAL_WIDTH = 604;
-const DEMO_NATURAL_HEIGHT = 676;
+const DEMO_NATURAL_HEIGHT = 716;
 
 function WorkflowRow() {
   const stepsRef = useRef<HTMLDivElement>(null);

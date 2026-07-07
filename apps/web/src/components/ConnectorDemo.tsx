@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from "react";
 
-// ConnectorDemo's natural, unscaled size (three fixed-width sidebar columns
-// plus the caption line below).
+// ConnectorDemo's natural, unscaled size (three fixed-width sidebar columns,
+// the caption line, and the pause/restart control row below).
 const NATURAL_WIDTH = 604;
-const NATURAL_HEIGHT = 676;
+const NATURAL_HEIGHT = 716;
 
 // Looping animated demo of adding the Commonality custom MCP connector in
 // Claude, ending with it using the connector to find a warm intro. This
@@ -215,13 +215,49 @@ const DEMO_HTML = `
 <div data-el="caption" style="margin-top:10px; font-size:12px; color:var(--text-secondary); min-height:16px;"></div>
 `;
 
+// Thrown to unwind the current pass through the steps early when the user
+// clicks Restart, without ending the animation entirely - the outer while
+// loop catches this per-iteration and just loops again (which resets all UI
+// state at the top, same as a natural loop-around).
+class RestartSignal extends Error {}
+
 export function ConnectorDemo() {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [paused, setPausedState] = useState(false);
+  // Buttons live outside the effect (which only runs once), so control
+  // functions are exposed through a ref the buttons' onClick reads from.
+  const controlsRef = useRef<{ togglePause: () => void; restart: () => void } | null>(null);
 
   useEffect(() => {
     const root = containerRef.current;
     if (!root) return;
     let stopped = false;
+    let isPaused = false;
+    let pauseWaiters: (() => void)[] = [];
+    let restartRequested = false;
+
+    function waitForUnpause(): Promise<void> {
+      return new Promise((resolve) => {
+        if (!isPaused) return resolve();
+        pauseWaiters.push(resolve);
+      });
+    }
+
+    controlsRef.current = {
+      togglePause: () => {
+        isPaused = !isPaused;
+        setPausedState(isPaused);
+        if (!isPaused) {
+          const waiters = pauseWaiters;
+          pauseWaiters = [];
+          waiters.forEach((w) => w());
+        }
+      },
+      restart: () => {
+        restartRequested = true;
+        if (isPaused) controlsRef.current?.togglePause();
+      },
+    };
 
     const el = <T extends HTMLElement = HTMLElement>(name: string): T =>
       root.querySelector(`[data-el="${name}"]`) as T;
@@ -285,18 +321,27 @@ export function ConnectorDemo() {
     // function unwinds immediately at the next await instead of continuing
     // to mutate the DOM after unmount (matters under StrictMode's dev-only
     // double effect invocation, where an old instance's pending timers can
-    // otherwise race a freshly-mounted one).
+    // otherwise race a freshly-mounted one). Also rejects (with RestartSignal)
+    // once a restart is requested, and holds up progression (without losing
+    // its place) while paused.
     function wait(ms: number) {
-      return new Promise<void>((resolve, reject) =>
-        setTimeout(() => (stopped ? reject(new Error("stopped")) : resolve()), ms),
-      );
+      return new Promise<void>((resolve, reject) => {
+        setTimeout(async () => {
+          if (stopped) return reject(new Error("stopped"));
+          if (restartRequested) return reject(new RestartSignal());
+          await waitForUnpause();
+          if (stopped) return reject(new Error("stopped"));
+          if (restartRequested) return reject(new RestartSignal());
+          resolve();
+        }, ms);
+      });
     }
     function typeInto(target: HTMLElement, text: string, speed: number) {
       target.textContent = "";
       let i = 0;
       return new Promise<void>((resolve) => {
         function step() {
-          if (stopped) return resolve();
+          if (stopped || restartRequested) return resolve();
           if (i < text.length) {
             target.textContent += text.charAt(i);
             i++;
@@ -316,7 +361,7 @@ export function ConnectorDemo() {
       let i = 0;
       return new Promise<void>((resolve) => {
         function step() {
-          if (stopped) return resolve();
+          if (stopped || restartRequested) return resolve();
           if (i < text.length) {
             div.textContent += text.charAt(i);
             i++;
@@ -338,8 +383,9 @@ export function ConnectorDemo() {
     }
 
     async function playLoop() {
-      try {
-        while (!stopped) {
+      while (!stopped) {
+        try {
+        restartRequested = false;
         caption.textContent = "";
         chatsIcon.style.background = "transparent";
         briefcase.style.background = "transparent";
@@ -550,9 +596,12 @@ export function ConnectorDemo() {
 
         caption.textContent = "Commonality found a warm intro path";
         await wait(2200);
+        } catch (e) {
+          // RestartSignal: loop again immediately (resets all UI state at
+          // the top of the next iteration). Anything else (stopped mid-flight
+          // - unmount, or a StrictMode dev double-invoke): stop for good.
+          if (!(e instanceof RestartSignal)) return;
         }
-      } catch {
-        // stopped mid-flight (unmount, or a StrictMode dev double-invoke) - nothing to clean up.
       }
     }
 
@@ -563,12 +612,29 @@ export function ConnectorDemo() {
   }, []);
 
   return (
-    <div
-      ref={containerRef}
-      className="connector-demo"
-      // eslint-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{ __html: DEMO_HTML }}
-    />
+    <div className="connector-demo">
+      <div
+        ref={containerRef}
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{ __html: DEMO_HTML }}
+      />
+      <div className="mt-2 flex justify-center gap-2">
+        <button
+          type="button"
+          className="rounded-md border border-gray-200 px-3 py-1 text-xs font-medium text-ink hover:bg-gray-50"
+          onClick={() => controlsRef.current?.togglePause()}
+        >
+          {paused ? "Play" : "Pause"}
+        </button>
+        <button
+          type="button"
+          className="rounded-md border border-gray-200 px-3 py-1 text-xs font-medium text-ink hover:bg-gray-50"
+          onClick={() => controlsRef.current?.restart()}
+        >
+          Restart
+        </button>
+      </div>
+    </div>
   );
 }
 
