@@ -244,7 +244,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
       subtitle="Add this URL as a custom connector in your AI, then ask it to find a warm path."
     >
       <div className="flex items-center gap-2">
-        <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
+        <code className="min-w-0 flex-1 truncate rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
         <button
           className="btn-secondary"
           onClick={() => {

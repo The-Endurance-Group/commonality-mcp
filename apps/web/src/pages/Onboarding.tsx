@@ -478,7 +478,7 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
         <li>Paste this URL:</li>
       </ol>
       <div className="mt-2 flex items-center gap-2">
-        <code className="flex-1 rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
+        <code className="min-w-0 flex-1 truncate rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
         <button
           className="btn-secondary"
           onClick={() => {
