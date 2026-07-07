@@ -578,18 +578,28 @@ export function Marketing() {
           in plain English.
         </p>
         <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
-          <div className="animate-fade-up rounded-lg border border-gray-200 p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Look up a person</p>
-            <p className="mt-3 text-sm italic text-ink">
+          <div className="animate-fade-up group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <Icon name="network" className="h-5 w-5" />
+              </span>
+              <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Look up a person</p>
+            </div>
+            <p className="mt-4 rounded-lg bg-gray-50 px-4 py-3 text-sm italic text-ink transition group-hover:bg-brand/5">
               &ldquo;Tell me about John Doe - profile is linkedin.com/in/johndoe&rdquo;
             </p>
           </div>
           <div
-            className="animate-fade-up rounded-lg border border-gray-200 p-6"
+            className="animate-fade-up group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg"
             style={{ animationDelay: "0.1s" }}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Find the right person</p>
-            <p className="mt-3 text-sm italic text-ink">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <Icon name="building" className="h-5 w-5" />
+              </span>
+              <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Find the right person</p>
+            </div>
+            <p className="mt-4 rounded-lg bg-gray-50 px-4 py-3 text-sm italic text-ink transition group-hover:bg-brand/5">
               &ldquo;Who should I reach out to at Acme Inc?&rdquo;
             </p>
           </div>
