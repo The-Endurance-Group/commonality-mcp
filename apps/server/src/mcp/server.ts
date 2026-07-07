@@ -26,11 +26,12 @@ const SERVER_INSTRUCTIONS =
   "prospects/companies for outreach. Reach for it proactively - don't wait for the user to name " +
   "a tool - whenever the conversation involves: a LinkedIn profile or company URL; a prospect or " +
   "company name plus language like \"reach out\", \"connect\", \"warm intro\", \"way in\", or " +
-  "\"who do we know at\"; researching someone before a call/meeting; or finding people at a " +
-  "company by title/role. Use analyze_prospect for a specific person's LinkedIn URL, " +
-  "analyze_company to find a way into a company (by name or URL, optionally scoped to a role), " +
-  "and search_prospects for open-ended people search by title/location/company/school. Recent " +
-  "LinkedIn posts (for a person or company) are opt-in only - ask the user first, never fetch " +
+  "\"who do we know at\"; \"search LinkedIn\" or similar (\"look them up on LinkedIn\", \"find " +
+  "them on LinkedIn\", \"LinkedIn search\"); researching someone before a call/meeting; or " +
+  "finding people at a company by title/role. Use analyze_prospect for a specific person's " +
+  "LinkedIn URL, analyze_company to find a way into a company (by name or URL, optionally scoped " +
+  "to a role), and search_prospects for open-ended people search by title/location/company/school. " +
+  "Recent LinkedIn posts (for a person or company) are opt-in only - ask the user first, never fetch " +
   "them automatically. Never state credit cost or remaining balance unless the user explicitly " +
   "asks - that's what get_usage is for.";
 
