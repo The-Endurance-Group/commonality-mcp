@@ -1,4 +1,4 @@
-import { SignedIn, SignedOut, SignInButton, SignUpButton } from "@clerk/clerk-react";
+import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk/clerk-react";
 import { useEffect, useRef, useState } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ConnectorDemo } from "../components/ConnectorDemo";
@@ -481,9 +481,15 @@ const testimonials = [
 export function Marketing() {
   // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, joinNotice } = useAuthStore();
+  const { isLoaded: clerkLoaded, isSignedIn } = useAuth();
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
+
+  // Clerk knows the user is signed in, but the Commonality session exchange
+  // (useSessionBootstrap) hasn't finished yet - render nothing rather than
+  // flashing the full marketing page before immediately redirecting away.
+  if (!ready && clerkLoaded && isSignedIn) return null;
 
   return (
     <div className="min-h-screen overflow-x-hidden">
