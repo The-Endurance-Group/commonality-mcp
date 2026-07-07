@@ -653,6 +653,23 @@ export function Marketing() {
         </div>
       </section>
 
+      <section className="mx-auto max-w-content px-6 py-16 text-center">
+        <h2 className="text-2xl font-bold text-ink sm:text-3xl">See it in action</h2>
+        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-lavender/40 shadow-lg">
+          <div className="relative w-full" style={{ paddingTop: "83.33%" }}>
+            <iframe
+              className="absolute inset-0 h-full w-full"
+              src="https://app.screencastify.com/watch/PjjQMWmp1RKXrGVIPF5B/embed"
+              title="Commonality product walkthrough"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
+              allowFullScreen
+            />
+          </div>
+        </div>
+      </section>
+
       {/* How matching works */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">
