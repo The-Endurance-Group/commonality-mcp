@@ -36,7 +36,8 @@ export const search_prospects: ToolHandler<SearchArgs> = {
     } catch {
       return text("Search failed. Try again.", true);
     }
-    await chargeCredit(ctx);
+    const targetBits = [args.query, args.titles?.join("/"), args.companies?.join("/")].filter(Boolean);
+    await chargeCredit(ctx, "search_prospects", { target: targetBits.join(" - ") || undefined });
     if (!profiles.length) return text("No prospects matched those filters.");
 
     const lines = profiles.map(

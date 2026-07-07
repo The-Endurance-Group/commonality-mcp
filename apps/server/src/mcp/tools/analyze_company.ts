@@ -146,7 +146,7 @@ export const analyze_company: ToolHandler<Args> = {
       } catch {
         return text("Couldn't look up that company right now. Please try again.", true);
       }
-      await chargeCredit(ctx);
+      await chargeCredit(ctx, "search_company_by_name", { target: args.company_name });
       if (!companies.length) return text(`No company found matching "${args.company_name}".`, true);
 
       const lines = companies.map((c, i) => `${i + 1}. ${c.name}${c.location ? ` - ${c.location}` : ""}\n   ${c.linkedinUrl}`);
@@ -180,7 +180,7 @@ export const analyze_company: ToolHandler<Args> = {
         return text("Couldn't fetch this company's recent posts right now. Please try again.", true);
       }
       if (!posts.length) return text("No recent public posts found for this company.");
-      await chargeCredit(ctx);
+      await chargeCredit(ctx, "analyze_company_posts", { target: args.company_url });
       const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
       return text(`Recent company activity:\n${postLines.join("\n")}`);
     }
@@ -211,7 +211,7 @@ export const analyze_company: ToolHandler<Args> = {
       } catch {
         return text("Couldn't search that company's people right now. Please try again.", true);
       }
-      await chargeCredit(ctx);
+      await chargeCredit(ctx, "search_company_roles", { target: `${args.company_url} (${roleLabel})` });
 
       if (!candidates.length) {
         if (!args.role_retry) {
@@ -285,7 +285,7 @@ export const analyze_company: ToolHandler<Args> = {
       } catch {
         continue; // skip a bad URL rather than failing the whole batch (and never charged for it)
       }
-      if (!alreadyUnlocked) await chargeCredit(ctx, url);
+      if (!alreadyUnlocked) await chargeCredit(ctx, "analyze_company_candidate", { dedupeKey: url, target: url });
       outcomes.push({ analysis, charged: !alreadyUnlocked });
     }
 

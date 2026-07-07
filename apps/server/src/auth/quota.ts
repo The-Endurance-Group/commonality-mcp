@@ -75,24 +75,37 @@ export async function recordProspectUnlock(companyId: string, url: string): Prom
     );
 }
 
+/** Record an audit-log row for one actual charge (Billing page usage log). */
+async function recordCreditEvent(companyId: string, userId: string, action: string, target?: string): Promise<void> {
+  await db()
+    .from("credit_events")
+    .insert({ company_id: companyId, user_id: userId, action, target: target ?? null });
+}
+
 /**
  * Charge 1 credit for one result-producing action - a search (Apify), or a
  * person analysis (Cassidy or a shared-cache hit; a company pays for its own
  * first look at a URL either way). Call this ONLY after the underlying call
  * has already succeeded - a failed call must never cost a credit. Call
  * checkQuota() beforehand to fail fast (skip the call entirely) when clearly
- * over limit. Pass dedupeKey (a prospect URL) for calls that should stay
- * free on repeat, same as "re-analyzing an unlocked prospect is free" -
- * already unlocked is always free, even if the company is currently over its
- * limit, since nothing new is being charged. Omit dedupeKey for calls that
- * should always cost (e.g. a fresh people-search). Known race window
- * (check-then-increment isn't one atomic statement) matches the pre-existing
- * risk tolerance of this codebase.
+ * over limit. `action` is a short machine-readable label (e.g.
+ * "analyze_prospect") shown on the Billing page's usage log; `target` is an
+ * optional human-readable detail (a URL, company name, etc.) shown alongside
+ * it. Pass dedupeKey (a prospect URL) for calls that should stay free on
+ * repeat, same as "re-analyzing an unlocked prospect is free" - already
+ * unlocked is always free, even if the company is currently over its limit,
+ * since nothing new is being charged (and nothing is logged - only actual
+ * charges are audited). Omit dedupeKey for calls that should always cost
+ * (e.g. a fresh people-search). Known race window (check-then-increment
+ * isn't one atomic statement) matches the pre-existing risk tolerance of
+ * this codebase.
  */
 export async function chargeCredit(
-  ctx: Pick<ToolContext, "company_id" | "plan">,
-  dedupeKey?: string | null,
+  ctx: Pick<ToolContext, "company_id" | "plan" | "user_id">,
+  action: string,
+  opts?: { dedupeKey?: string | null; target?: string },
 ): Promise<QuotaStatus> {
+  const dedupeKey = opts?.dedupeKey;
   if (dedupeKey && (await isProspectUnlocked(ctx.company_id, dedupeKey))) {
     const status = await checkQuota(ctx);
     return { ...status, allowed: true };
@@ -101,6 +114,7 @@ export async function chargeCredit(
   if (!status.allowed) return status;
   const used = await incrementUsage(ctx.company_id);
   if (dedupeKey) await recordProspectUnlock(ctx.company_id, dedupeKey);
+  await recordCreditEvent(ctx.company_id, ctx.user_id, action, opts?.target);
   return { allowed: true, used, limit: status.limit, remaining: Math.max(0, status.limit - used) };
 }
 

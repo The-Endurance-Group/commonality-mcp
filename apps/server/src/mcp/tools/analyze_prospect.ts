@@ -35,7 +35,7 @@ export const analyze_prospect: ToolHandler<Args> = {
     } catch {
       return text("Couldn't analyze that prospect right now. Please try again.", true);
     }
-    await chargeCredit(ctx, args.url);
+    await chargeCredit(ctx, "analyze_prospect", { dedupeKey: args.url, target: args.url });
 
     const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${args.url}`;
     const background = summarizeBackground(enriched);
@@ -53,7 +53,7 @@ export const analyze_prospect: ToolHandler<Args> = {
         try {
           const posts = await getProfilePosts(args.url, count);
           if (posts.length) {
-            await chargeCredit(ctx);
+            await chargeCredit(ctx, "analyze_prospect_posts", { target: args.url });
             const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
             activityNote = `\n\nRecent posts:\n${postLines.join("\n")}`;
           }
