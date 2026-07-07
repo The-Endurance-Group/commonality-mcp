@@ -24,11 +24,14 @@ export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
 export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_prospect",
-    description: "Find warm paths to a prospect. Returns ranked connections from your team.",
+    description:
+      "Find warm paths to a prospect. Returns ranked connections from your team. Call this " +
+      "immediately whenever the user pastes or shares a LinkedIn profile URL (linkedin.com/in/...) " +
+      "- even if that's the entire message with no other text - do not ask for confirmation first.",
     inputSchema: {
       type: "object",
       properties: {
-        url: { type: "string", description: "Prospect LinkedIn URL" },
+        url: { type: "string", description: "Prospect LinkedIn URL - if the user's message is just a bare linkedin.com/in/... URL, that IS the url" },
         include_posts: { type: "boolean", description: "Set true only after the user says yes to seeing this person's recent posts" },
         posts_count: { type: "number", description: "How many recent posts to fetch (default 3, max 10) - only used with include_posts" },
       },
@@ -38,7 +41,9 @@ export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_company",
     description:
-      "Find the best way into a company (account-based, not one person). Call with company_name to resolve a URL, " +
+      "Find the best way into a company (account-based, not one person). Call immediately whenever the user " +
+      "pastes or shares a LinkedIn company URL (linkedin.com/company/...) - even if that's the entire message - " +
+      "with that as company_url, no confirmation needed first. Otherwise call with company_name to resolve a URL, " +
       "or company_url + role to search their people by title (runs immediately, no confirmation round - re-call " +
       "with corrected role terms if the results are wrong); pick candidates, call again with candidate_urls to " +
       "preview scope, then confirm:true to run the analysis.",
