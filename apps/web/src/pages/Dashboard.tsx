@@ -223,20 +223,19 @@ function CollapsibleCard({
   );
 }
 
-function defaultInviteMessage(appUrl: string, mcpUrl: string): string {
+function defaultInviteMessage(appUrl: string): string {
   return (
     `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
     `our team's shared schools, past employers, and connections:\n` +
     `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. Add Commonality as a custom connector in your AI, using this URL: ${mcpUrl}\n` +
-    `3. Sign in with your email when prompted, then ask it to find a warm path to a prospect.`
+    `2. Follow the instructions in your dashboard to connect it to your AI.`
   );
 }
 
 function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
   const [copiedUrl, setCopiedUrl] = useState(false);
   const [copiedInvite, setCopiedInvite] = useState(false);
-  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage(appUrl, mcpUrl));
+  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage(appUrl));
 
   return (
     <CollapsibleCard
