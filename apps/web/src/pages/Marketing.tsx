@@ -645,11 +645,10 @@ export function Marketing() {
           <div className="relative w-full" style={{ paddingTop: "83.33%" }}>
             <iframe
               className="absolute inset-0 h-full w-full"
-              src="https://app.screencastify.com/watch/PjjQMWmp1RKXrGVIPF5B/embed"
+              src="https://drive.google.com/file/d/1Tku-Cdkj5z3DXRs9PmeBMBZkUbE5iVCd/preview"
               title="Commonality product walkthrough"
               frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-              referrerPolicy="strict-origin-when-cross-origin"
+              allow="autoplay"
               allowFullScreen
             />
           </div>
