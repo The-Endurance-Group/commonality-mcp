@@ -642,13 +642,14 @@ export function Marketing() {
       <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">See it in action</h2>
         <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-lavender/40 shadow-lg">
-          <div className="relative w-full" style={{ paddingTop: "83.33%" }}>
+          <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
             <iframe
               className="absolute inset-0 h-full w-full"
-              src="https://drive.google.com/file/d/1Tku-Cdkj5z3DXRs9PmeBMBZkUbE5iVCd/preview"
+              src="https://www.youtube.com/embed/kjiCFnTgtWQ"
               title="Commonality product walkthrough"
               frameBorder="0"
-              allow="autoplay"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+              referrerPolicy="strict-origin-when-cross-origin"
               allowFullScreen
             />
           </div>
