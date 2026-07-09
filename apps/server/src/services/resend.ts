@@ -44,6 +44,28 @@ Signed up with: ${signupEmail}`;
   await sendEmail(config.newAccountNotifyEmail, subject, text);
 }
 
+const CONOR_CALENDAR_URL = "https://meetings.hubspot.com/conor-sullivan/commonality";
+
+// Welcome email to whoever just created a new workspace (the signup itself,
+// not a teammate joining an existing one). Best-effort, fire-and-forget from
+// createWorkspace() - a failure here must never block or fail the signup.
+export async function sendWelcomeEmail(signupEmail: string): Promise<void> {
+  const subject = "Thanks for Signing Up for Commonality- Need Help Setting it Up?";
+  const text = `Hi There!
+
+Thanks for signing up for Commonality. My name is Conor Sullivan and I am one of its creators.
+
+Please let me know if you need assistance signing up or using it within your AI. I'd be happy to help.
+
+Here's my calendar: ${CONOR_CALENDAR_URL}
+
+Or, if you prefer, let me know some times that work for you.
+
+Best,
+Conor`;
+  await sendEmail(signupEmail, subject, text);
+}
+
 export async function sendInviteEmail(
   email: string,
   companyName: string,
