@@ -15,11 +15,11 @@ const COMPANY_POSTS_ACTOR = "harvestapi/linkedin-company-posts";
 // It does NOT bound how long the SDK spends trying to submit/start the run - that can hang indefinitely.
 // withTimeout() wraps the entire call with a hard wall-clock limit.
 const SEARCH_WAIT_SECS = 8;
-const EMPLOYEES_WAIT_SECS = 55;
+const EMPLOYEES_WAIT_SECS = 110;    // raised from 55s - large companies can take 60-90s to scrape
 const PROFILE_SEARCH_WAIT_SECS = 55;
 const POSTS_WAIT_SECS = 55;
-const SEARCH_TIMEOUT_MS = 9_000;   // abort company search after 9 s (frontend aborts at 12 s)
-const EMPLOYEES_TIMEOUT_MS = 65_000;
+const SEARCH_TIMEOUT_MS = 9_000;    // abort company search after 9 s (frontend aborts at 12 s)
+const EMPLOYEES_TIMEOUT_MS = 120_000;
 const PROFILE_SEARCH_TIMEOUT_MS = 65_000;
 const POSTS_TIMEOUT_MS = 65_000;
 

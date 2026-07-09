@@ -83,13 +83,19 @@ export function Onboarding() {
     }, 300);
     try {
       const urls = pastedUrls.split(/\s+/).map((u) => u.trim()).filter(Boolean);
-      const result = await apiFetch<{ imported: number; remaining: number; limit: number; trimmedByLimit: boolean }>(
-        "/api/employees/import",
-        {
-          method: "POST",
-          body: JSON.stringify(companyUrl ? { companyLinkedinUrl: companyUrl } : { urls }),
-        },
-      );
+      const body = JSON.stringify(companyUrl ? { companyLinkedinUrl: companyUrl } : { urls });
+      let result: { imported: number; remaining: number; limit: number; trimmedByLimit: boolean } | null = null;
+      let lastErr: Error | null = null;
+      for (let attempt = 0; attempt < 3; attempt++) {
+        try {
+          result = await apiFetch("/api/employees/import", { method: "POST", body });
+          break;
+        } catch (e) {
+          lastErr = e instanceof Error ? e : new Error("Import failed");
+          if (attempt < 2) setImportProgress(4); // reset bar for retry
+        }
+      }
+      if (!result) throw lastErr ?? new Error("Import failed");
       setImportProgress(100);
       if (result.trimmedByLimit) {
         setNotice(
