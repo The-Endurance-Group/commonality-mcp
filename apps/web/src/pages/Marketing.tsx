@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk/clerk-react";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { ConnectorDemo } from "../components/ConnectorDemo";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
@@ -407,7 +407,7 @@ function SocialMapGraphic() {
   );
 }
 
-const setupSteps: { label: string; icon: string; caption?: string }[] = [
+const setupSteps: { label: string; icon: string; caption?: ReactNode }[] = [
   {
     label: "Tell us your company",
     icon: "building",
@@ -420,7 +420,24 @@ const setupSteps: { label: string; icon: string; caption?: string }[] = [
       "Edit freely - remove people who've left, add contractors or alumni. This is who the AI " +
       "searches, not who's using it - users are unlimited.",
   },
-  { label: "Connect to your AI", icon: "link" },
+  {
+    label: "Connect to your AI",
+    icon: "link",
+    caption: (
+      <>
+        Need a hand?{" "}
+        <a
+          href="https://meetings.hubspot.com/conor-sullivan/commonality"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-brand hover:underline"
+        >
+          We can help you onboard
+        </a>
+        .
+      </>
+    ),
+  },
 ];
 
 const askSteps = [
