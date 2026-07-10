@@ -760,11 +760,18 @@ export function Marketing() {
       <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
-          One subscription per company - your whole team shares it, no separate sign-ups.
+          Anyone can use it - for free. Everyone at your company can install the connector and start
+          asking questions. No per-seat cost, no separate sign-ups. You all share one monthly credit
+          pool - need something different? Reach out and we can make it happen.
         </p>
         <p className="mx-auto mt-1 max-w-lg text-center text-sm text-lavender">
-          A credit is used each time we look something up for you (a company search or a person
-          lookup); most conversations use just 1-2 credits.
+          &ldquo;Team members&rdquo; below is a different number - it's the roster the AI searches
+          for warm paths, not a limit on who's allowed to ask.
+        </p>
+        <p className="mx-auto mt-1 max-w-lg text-center text-sm text-lavender">
+          A credit is used only for a LinkedIn lookup (a company search, a person lookup, or
+          pulling someone's posts); most conversations use just 1-2 credits. Drafting the actual
+          outreach message is free - that's just you talking to your AI.
         </p>
 
         <div className="mt-10 grid gap-8 sm:grid-cols-3">
@@ -775,9 +782,12 @@ export function Marketing() {
             <div className="font-semibold text-ink">Free</div>
             <div className="mt-2 text-3xl font-bold text-ink">$0</div>
             <ul className="mt-4 space-y-2 text-sm text-lavender">
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                25 team members
+              <li>
+                <span className="flex items-center gap-2">
+                  <CheckIcon />
+                  25 team members
+                </span>
+                <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
@@ -800,9 +810,12 @@ export function Marketing() {
             <div className="font-semibold text-ink">Pro</div>
             <div className="mt-2 text-3xl font-bold text-ink">$49/mo</div>
             <ul className="mt-4 space-y-2 text-sm text-lavender">
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                150 team members
+              <li>
+                <span className="flex items-center gap-2">
+                  <CheckIcon />
+                  150 team members
+                </span>
+                <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
@@ -822,9 +835,12 @@ export function Marketing() {
             <div className="font-semibold text-ink">Enterprise</div>
             <div className="mt-2 text-3xl font-bold text-ink">Custom</div>
             <ul className="mt-4 space-y-2 text-sm text-lavender">
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                150+ team members
+              <li>
+                <span className="flex items-center gap-2">
+                  <CheckIcon />
+                  150+ team members
+                </span>
+                <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
               </li>
               <li className="flex items-center gap-2">
                 <CheckIcon />
