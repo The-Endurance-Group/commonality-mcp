@@ -585,6 +585,9 @@ export function Marketing() {
           <img src="/logos/teg.webp" alt="The Endurance Group" className="h-8 w-auto" />
         </a>
         <div className="flex items-center gap-4 text-sm">
+          <a href="#how-it-works" className="hidden font-medium text-lavender hover:text-ink sm:inline">
+            How it works
+          </a>
           <a href="#pricing" className="hidden font-medium text-lavender hover:text-ink sm:inline">
             Pricing
           </a>
