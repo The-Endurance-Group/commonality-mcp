@@ -445,7 +445,11 @@ const askSteps = [
   { label: "Get a warm path - or a real angle in", icon: "mail" },
 ];
 
-const faqs: { q: string; a: string }[] = [
+const faqs: { q: string; a: ReactNode }[] = [
+  {
+    q: "How are we defining \"team,\" in this case - is it pulling from your own colleague connections, or any and all of your network?",
+    a: "\"Team\" is a roster you control, not automatically your personal connections. We pull current employees from your company's LinkedIn page to start, then you can add or remove anyone - clients, contractors, alumni, people outside your company entirely. It's whoever you want the AI searching for warm paths, separate from who's allowed to use Commonality (that's unlimited).",
+  },
   {
     q: "Is our LinkedIn and company data secure?",
     a: "Yes - your team roster and prospect data are scoped to your company only, and we never expose them to other customers. See our Privacy page for details on exactly what's collected and how it's used.",
@@ -463,12 +467,29 @@ const faqs: { q: string; a: string }[] = [
     a: "No, it's optional. Adding first-degree connections helps the AI find more warm paths, but nobody has to share their network to use Commonality.",
   },
   {
+    q: "Can I sign up with a personal email instead of my work email?",
+    a: "Yes, any email works to create your own account. Just know that teammates auto-join your workspace by matching your company's email domain - with a personal domain (Gmail, etc.) they'd need a direct invite instead.",
+  },
+  {
     q: "What if we need more than 150 team members or credits?",
     a: "That's what Enterprise is for - custom limits built around your organization. Contact us and we'll set it up.",
   },
   {
-    q: "Does this work with Microsoft Copilot?",
-    a: "Yes, through Copilot Studio. Standard Copilot licenses (without Studio) can't connect to outside tools yet - Claude and ChatGPT work today without any extra setup.",
+    q: "Does this work with Claude, ChatGPT, and Microsoft Copilot?",
+    a: (
+      <>
+        Yes to all three. Need a hand connecting any of them?{" "}
+        <a
+          href="https://meetings.hubspot.com/conor-sullivan/commonality"
+          target="_blank"
+          rel="noopener noreferrer"
+          className="font-medium text-brand hover:underline"
+        >
+          Reach out and we'll help you onboard
+        </a>
+        .
+      </>
+    ),
   },
 ];
 
