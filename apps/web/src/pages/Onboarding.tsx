@@ -2,7 +2,6 @@ import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { AppFooter } from "../components/AppFooter";
 import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
@@ -247,7 +246,20 @@ export function Onboarding() {
           <ConnectorStep mcpUrl={mcpUrl} onDone={() => navigate("/dashboard")} />
         )}
       </div>
-      <AppFooter />
+      <footer className="border-t border-gray-100 py-6 text-center text-sm text-lavender">
+        <p>
+          Having trouble?{" "}
+          <a
+            href="https://meetings.hubspot.com/conor-sullivan/commonality"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-medium text-brand hover:underline"
+          >
+            Schedule a time for us to help you onboard
+          </a>
+          .
+        </p>
+      </footer>
     </div>
   );
 }
