@@ -760,18 +760,8 @@ export function Marketing() {
       <section id="pricing" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
         <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
-          Anyone can use it - for free. Everyone at your company can install the connector and start
-          asking questions. No per-seat cost, no separate sign-ups. You all share one monthly credit
-          pool - need something different? Reach out and we can make it happen.
-        </p>
-        <p className="mx-auto mt-1 max-w-lg text-center text-sm text-lavender">
-          &ldquo;Team members&rdquo; below is a different number - it's the roster the AI searches
-          for warm paths, not a limit on who's allowed to ask.
-        </p>
-        <p className="mx-auto mt-1 max-w-lg text-center text-sm text-lavender">
-          A credit is used only for a LinkedIn lookup (a company search, a person lookup, or
-          pulling someone's posts); most conversations use just 1-2 credits. Drafting the actual
-          outreach message is free - that's just you talking to your AI.
+          One subscription per company. Everyone can use it for free - you all share one monthly
+          credit pool, spent only on LinkedIn lookups (drafting the outreach itself is free).
         </p>
 
         <div className="mt-10 grid gap-8 sm:grid-cols-3">
