@@ -445,6 +445,33 @@ const askSteps = [
   { label: "Get a warm path - or a real angle in", icon: "mail" },
 ];
 
+const faqs: { q: string; a: string }[] = [
+  {
+    q: "Is our LinkedIn and company data secure?",
+    a: "Yes - your team roster and prospect data are scoped to your company only, and we never expose them to other customers. See our Privacy page for details on exactly what's collected and how it's used.",
+  },
+  {
+    q: "Can I cancel anytime?",
+    a: "Yes, there's no contract. Downgrade to Free or cancel from the Billing page whenever you like.",
+  },
+  {
+    q: "What happens if we go over our monthly credits?",
+    a: "We'll let you know as you approach your limit. Once you hit it, lookups pause until next month or until you upgrade - nothing is charged automatically.",
+  },
+  {
+    q: "Do teammates have to upload their LinkedIn connections?",
+    a: "No, it's optional. Adding first-degree connections helps the AI find more warm paths, but nobody has to share their network to use Commonality.",
+  },
+  {
+    q: "What if we need more than 150 team members or credits?",
+    a: "That's what Enterprise is for - custom limits built around your organization. Contact us and we'll set it up.",
+  },
+  {
+    q: "Does this work with Microsoft Copilot?",
+    a: "Yes, through Copilot Studio. Standard Copilot licenses (without Studio) can't connect to outside tools yet - Claude and ChatGPT work today without any extra setup.",
+  },
+];
+
 const testimonials = [
   {
     quote:
@@ -539,6 +566,9 @@ export function Marketing() {
         <div className="flex items-center gap-4 text-sm">
           <a href="#pricing" className="hidden font-medium text-lavender hover:text-ink sm:inline">
             Pricing
+          </a>
+          <a href="#faq" className="hidden font-medium text-lavender hover:text-ink sm:inline">
+            FAQ
           </a>
           <SignedOut>
             <SignInButton mode="modal">
@@ -887,6 +917,22 @@ export function Marketing() {
           </a>
           .
         </p>
+      </section>
+
+      {/* FAQ */}
+      <section id="faq" className="mx-auto max-w-content px-6 py-16">
+        <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Frequently asked questions</h2>
+        <div className="mx-auto mt-8 max-w-2xl divide-y divide-gray-200">
+          {faqs.map((f) => (
+            <details key={f.q} className="group py-4">
+              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
+                {f.q}
+                <span className="shrink-0 text-lavender transition group-open:rotate-45">+</span>
+              </summary>
+              <p className="mt-2 text-sm text-lavender">{f.a}</p>
+            </details>
+          ))}
+        </div>
       </section>
 
       <footer className="bg-footer py-10 text-center text-sm text-white/60">
