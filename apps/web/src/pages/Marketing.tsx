@@ -46,7 +46,10 @@ function WorkflowRow() {
                 <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
                   <Icon name={s.icon} className="" />
                 </div>
-                <p className="text-sm font-medium text-ink">{s.label}</p>
+                <div>
+                  <p className="text-sm font-medium text-ink">{s.label}</p>
+                  {s.caption && <p className="mt-0.5 text-xs text-lavender">{s.caption}</p>}
+                </div>
               </div>
             ))}
           </div>
@@ -404,9 +407,13 @@ function SocialMapGraphic() {
   );
 }
 
-const setupSteps = [
+const setupSteps: { label: string; icon: string; caption?: string }[] = [
   { label: "Tell us your company", icon: "building" },
-  { label: "We find your team - you confirm", icon: "users" },
+  {
+    label: "We find your team - you confirm",
+    icon: "users",
+    caption: "\"Team\" = who the AI searches for commonalities with, not who's using it. Users are unlimited.",
+  },
   { label: "Connect to your AI", icon: "link" },
 ];
 
