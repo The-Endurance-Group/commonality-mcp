@@ -95,9 +95,10 @@ export async function importRoster(
   let available: { name: string; linkedin_url: string }[] = [];
 
   if (input.companyLinkedinUrl) {
-    // Fetch up to the highest tier's cap so we can tell whether the company
-    // actually has more people than this plan's remaining slots allow.
-    const fetchLimit = Math.min(input.limit ?? TEAM_LIMITS.pro, TEAM_LIMITS.pro);
+    // Free plan: only pull what they can actually store (≤25). Pro: pull up to
+    // the plan cap so we can detect whether the company has more than fits.
+    const planFetchCap = plan === "free" ? status.remaining : TEAM_LIMITS.pro;
+    const fetchLimit = Math.min(input.limit ?? planFetchCap, planFetchCap);
     const emps = await apifyCompanyEmployees(input.companyLinkedinUrl, fetchLimit);
     available = emps.map((e) => ({ name: e.name, linkedin_url: e.linkedinUrl }));
   } else if (input.urls?.length) {
