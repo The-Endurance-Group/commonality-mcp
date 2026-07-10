@@ -408,11 +408,17 @@ function SocialMapGraphic() {
 }
 
 const setupSteps: { label: string; icon: string; caption?: string }[] = [
-  { label: "Tell us your company", icon: "building" },
+  {
+    label: "Tell us your company",
+    icon: "building",
+    caption: "Share your company's LinkedIn page and we pull in current employees automatically.",
+  },
   {
     label: "We find your team - you confirm",
     icon: "users",
-    caption: "\"Team\" = who the AI searches for commonalities with, not who's using it. Users are unlimited.",
+    caption:
+      "Edit freely - remove people who've left, add contractors or alumni. This is who the AI " +
+      "searches, not who's using it - users are unlimited.",
   },
   { label: "Connect to your AI", icon: "link" },
 ];
