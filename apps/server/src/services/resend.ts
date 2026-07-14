@@ -44,6 +44,23 @@ Signed up with: ${signupEmail}`;
   await sendEmail(config.newAccountNotifyEmail, subject, text);
 }
 
+// Alerts config.newAccountNotifyEmail when a HubSpot contact upsert failed for
+// a new signup, so it doesn't just silently vanish into the logs. Best-effort:
+// a failure sending THIS alert must never throw back into the caller.
+export async function sendHubspotFailureAlert(
+  signupEmail: string,
+  companyName: string,
+  errorMessage: string,
+): Promise<void> {
+  const subject = `Commonality: HubSpot contact failed for ${companyName}`;
+  const text = `A new Commonality signup didn't make it into HubSpot - check the integration.
+
+Company: ${companyName}
+Signed up with: ${signupEmail}
+Error: ${errorMessage}`;
+  await sendEmail(config.newAccountNotifyEmail, subject, text);
+}
+
 const CONOR_CALENDAR_URL = "https://meetings.hubspot.com/conor-sullivan/commonality";
 
 // Welcome email to whoever just created a new workspace (the signup itself,
