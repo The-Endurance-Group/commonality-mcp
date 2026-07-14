@@ -1,4 +1,5 @@
 import { db } from "../db/client.js";
+import { upsertHubspotContact } from "../services/hubspot.js";
 import { logger } from "../logger.js";
 import { sendNewAccountNotification, sendWelcomeEmail } from "../services/resend.js";
 import type { SignableClaims } from "./jwt.js";
@@ -143,6 +144,9 @@ export async function createWorkspace(
   );
   sendWelcomeEmail(email).catch((err) =>
     logger.error({ err, email }, "welcome email failed"),
+  );
+  upsertHubspotContact(email, companyName).catch((err) =>
+    logger.error({ err, email, companyName }, "hubspot contact upsert failed"),
   );
 
   return toClaims(user, company, email);
