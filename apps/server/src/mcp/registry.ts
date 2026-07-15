@@ -29,9 +29,12 @@ export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_prospect",
     description:
-      "Find warm paths to a prospect. Returns ranked connections from your team. Call this " +
-      "immediately whenever the user pastes or shares a LinkedIn profile URL (linkedin.com/in/...) " +
-      "- even if that's the entire message with no other text - do not ask for confirmation first.",
+      "Find warm paths to a prospect. Returns ranked connections from your team. If the user pastes or " +
+      "shares a bare LinkedIn profile URL (linkedin.com/in/...) with no other context - even if that's the " +
+      "entire message - don't call any tool yet: ask what they want first (their best way in/warm path - " +
+      "use this tool; just background on the person - use get_linkedin_profile; recent posts - use " +
+      "get_linkedin_posts). Skip asking and call this immediately only when they've already said what they " +
+      "want (e.g. \"who do we know at\", \"my way in\", \"warm path\", \"how do I reach them\").",
     inputSchema: {
       type: "object",
       properties: {
@@ -133,8 +136,8 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "get_linkedin_profile",
     description:
       "Get a person's LinkedIn background (school, past companies, location, bio) without running a team " +
-      "warm-path match. Use this only when the user wants just the profile info itself - use analyze_prospect " +
-      "instead when they want to know their best way in.",
+      "warm-path match. Use this once the user says they just want background/info on the person (not their " +
+      "best way in) - including after you asked a bare pasted profile URL what they wanted and they picked this.",
     inputSchema: {
       type: "object",
       properties: { url: { type: "string", description: "The person's LinkedIn profile URL" } },
@@ -145,7 +148,9 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "get_linkedin_posts",
     description:
       "Get someone's (or some company's) recent LinkedIn posts directly, without a warm-path lookup first. " +
-      "Still opt-in only - ask the user before calling this, same as the posts option on analyze_prospect/analyze_company.",
+      "Call this right away when the user explicitly asks for someone's posts/recent activity. If instead " +
+      "they only pasted a bare profile/company URL with no context, ask what they want first (see " +
+      "analyze_prospect) rather than assuming posts.",
     inputSchema: {
       type: "object",
       properties: {
