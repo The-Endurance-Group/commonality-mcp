@@ -7,6 +7,8 @@ import { upload_connections } from "./tools/upload_connections.js";
 import { social_capital_dashboard } from "./tools/social_capital_dashboard.js";
 import { invite_member } from "./tools/invite_member.js";
 import { get_usage } from "./tools/get_usage.js";
+import { scrape_linkedin_profile } from "./tools/scrape_linkedin_profile.js";
+import { scrape_linkedin_posts } from "./tools/scrape_linkedin_posts.js";
 
 // Tool dispatch table. Handlers run the logic; defs are what tools/list returns.
 export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
@@ -18,6 +20,8 @@ export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
   social_capital_dashboard,
   invite_member,
   get_usage,
+  scrape_linkedin_profile,
+  scrape_linkedin_posts,
 };
 
 // Descriptions stay SHORT - every word costs tokens on every Claude message.
@@ -124,5 +128,31 @@ export const TOOL_DEFS: McpToolDef[] = [
     name: "get_usage",
     description: "Show your current credit usage and plan.",
     inputSchema: { type: "object", properties: {} },
+  },
+  {
+    name: "scrape_linkedin_profile",
+    description:
+      "Get a person's LinkedIn background (school, past companies, location, bio) without running a team " +
+      "warm-path match. Use this only when the user wants just the profile info itself - use analyze_prospect " +
+      "instead when they want to know their best way in.",
+    inputSchema: {
+      type: "object",
+      properties: { url: { type: "string", description: "The person's LinkedIn profile URL" } },
+      required: ["url"],
+    },
+  },
+  {
+    name: "scrape_linkedin_posts",
+    description:
+      "Get someone's (or some company's) recent LinkedIn posts directly, without a warm-path lookup first. " +
+      "Still opt-in only - ask the user before calling this, same as the posts option on analyze_prospect/analyze_company.",
+    inputSchema: {
+      type: "object",
+      properties: {
+        url: { type: "string", description: "A LinkedIn profile (linkedin.com/in/...) or company (linkedin.com/company/...) URL" },
+        posts_count: { type: "number", description: "How many recent posts to fetch (default 3, max 10)" },
+      },
+      required: ["url"],
+    },
   },
 ];

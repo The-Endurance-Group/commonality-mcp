@@ -27,6 +27,8 @@ const ACTION_LABELS: Record<string, string> = {
   search_company_roles: "Searched a company's people by role",
   analyze_company_candidate: "Analyzed a company candidate",
   search_prospects: "Searched prospects",
+  scrape_linkedin_profile: "Scraped a LinkedIn profile",
+  scrape_linkedin_posts: "Scraped LinkedIn posts",
 };
 
 export function Billing() {
