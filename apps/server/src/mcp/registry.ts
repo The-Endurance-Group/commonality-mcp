@@ -48,12 +48,15 @@ export const TOOL_DEFS: McpToolDef[] = [
   {
     name: "analyze_company",
     description:
-      "Find the best way into a company (account-based, not one person). Call immediately whenever the user " +
-      "pastes or shares a LinkedIn company URL (linkedin.com/company/...) - even if that's the entire message - " +
-      "with that as company_url, no confirmation needed first. Otherwise call with company_name to resolve a URL, " +
-      "or company_url + role to search their people by title (runs immediately, no confirmation round - re-call " +
-      "with corrected role terms if the results are wrong); pick candidates, call again with candidate_urls to " +
-      "preview scope, then confirm:true to run the analysis.",
+      "Find the best way into a company (account-based, not one person). If the user pastes or shares a bare " +
+      "LinkedIn company URL (linkedin.com/company/...) with no other context - even if that's the entire " +
+      "message - don't call any tool yet: ask what they want first (their best way into the company - use " +
+      "this tool with company_url; that company's recent posts - use get_linkedin_posts). Skip asking and " +
+      "call this immediately with company_url only when they've already said what they want (e.g. \"way in\", " +
+      "\"who do we know at\", or naming a role/department to search). Otherwise call with company_name to " +
+      "resolve a URL, or company_url + role to search their people by title (runs immediately, no confirmation " +
+      "round - re-call with corrected role terms if the results are wrong); pick candidates, call again with " +
+      "candidate_urls to preview scope, then confirm:true to run the analysis.",
     inputSchema: {
       type: "object",
       properties: {
