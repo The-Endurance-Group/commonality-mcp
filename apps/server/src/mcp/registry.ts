@@ -7,8 +7,8 @@ import { upload_connections } from "./tools/upload_connections.js";
 import { social_capital_dashboard } from "./tools/social_capital_dashboard.js";
 import { invite_member } from "./tools/invite_member.js";
 import { get_usage } from "./tools/get_usage.js";
-import { scrape_linkedin_profile } from "./tools/scrape_linkedin_profile.js";
-import { scrape_linkedin_posts } from "./tools/scrape_linkedin_posts.js";
+import { get_linkedin_profile } from "./tools/get_linkedin_profile.js";
+import { get_linkedin_posts } from "./tools/get_linkedin_posts.js";
 
 // Tool dispatch table. Handlers run the logic; defs are what tools/list returns.
 export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
@@ -20,8 +20,8 @@ export const HANDLERS: Record<ToolName, ToolHandler<any>> = {
   social_capital_dashboard,
   invite_member,
   get_usage,
-  scrape_linkedin_profile,
-  scrape_linkedin_posts,
+  get_linkedin_profile,
+  get_linkedin_posts,
 };
 
 // Descriptions stay SHORT - every word costs tokens on every Claude message.
@@ -130,7 +130,7 @@ export const TOOL_DEFS: McpToolDef[] = [
     inputSchema: { type: "object", properties: {} },
   },
   {
-    name: "scrape_linkedin_profile",
+    name: "get_linkedin_profile",
     description:
       "Get a person's LinkedIn background (school, past companies, location, bio) without running a team " +
       "warm-path match. Use this only when the user wants just the profile info itself - use analyze_prospect " +
@@ -142,7 +142,7 @@ export const TOOL_DEFS: McpToolDef[] = [
     },
   },
   {
-    name: "scrape_linkedin_posts",
+    name: "get_linkedin_posts",
     description:
       "Get someone's (or some company's) recent LinkedIn posts directly, without a warm-path lookup first. " +
       "Still opt-in only - ask the user before calling this, same as the posts option on analyze_prospect/analyze_company.",

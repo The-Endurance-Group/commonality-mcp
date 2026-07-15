@@ -12,8 +12,8 @@ interface Args {
 // already do internally - useful when the user just wants someone's (or some
 // company's) recent posts without a warm-path lookup first. Always costs 1
 // credit, same as the posts step in those tools - posts change over time, so
-// unlike a profile scrape this is never free on repeat.
-export const scrape_linkedin_posts: ToolHandler<Args> = {
+// unlike a profile fetch this is never free on repeat.
+export const get_linkedin_posts: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
     if (!args.url) return text("Please provide the LinkedIn profile or company URL.", true);
 
@@ -29,7 +29,7 @@ export const scrape_linkedin_posts: ToolHandler<Args> = {
     } catch {
       return text("Couldn't fetch recent posts right now. Please try again.", true);
     }
-    await chargeCredit(ctx, "scrape_linkedin_posts", { target: args.url });
+    await chargeCredit(ctx, "get_linkedin_posts", { target: args.url });
 
     if (!posts.length) return text(`No recent posts found for ${args.url}.`);
 

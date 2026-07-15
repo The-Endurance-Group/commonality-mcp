@@ -48,8 +48,8 @@ export const TOOL_NAMES = [
   "social_capital_dashboard",
   "invite_member",
   "get_usage",
-  "scrape_linkedin_profile",
-  "scrape_linkedin_posts",
+  "get_linkedin_profile",
+  "get_linkedin_posts",
 ] as const;
 
 export type ToolName = (typeof TOOL_NAMES)[number];

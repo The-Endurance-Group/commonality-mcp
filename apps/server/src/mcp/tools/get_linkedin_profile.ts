@@ -11,9 +11,9 @@ interface Args {
 // Standalone version of the enrichment step analyze_prospect already does
 // internally - useful when the user just wants a person's LinkedIn
 // background without running the team warm-path match. Same 1-credit-per-
-// (company, URL) billing and cache as analyze_prospect - re-scraping an
+// (company, URL) billing and cache as analyze_prospect - re-fetching an
 // already-unlocked URL (via either tool) is free.
-export const scrape_linkedin_profile: ToolHandler<Args> = {
+export const get_linkedin_profile: ToolHandler<Args> = {
   async run(args: Args, ctx: ToolContext) {
     if (!args.url) return text("Please provide the LinkedIn profile URL.", true);
 
@@ -27,9 +27,9 @@ export const scrape_linkedin_profile: ToolHandler<Args> = {
     try {
       enriched = await getEnrichedProfile(args.url);
     } catch {
-      return text("Couldn't scrape that profile right now. Please try again.", true);
+      return text("Couldn't get that profile right now. Please try again.", true);
     }
-    await chargeCredit(ctx, "scrape_linkedin_profile", { dedupeKey: args.url, target: args.url });
+    await chargeCredit(ctx, "get_linkedin_profile", { dedupeKey: args.url, target: args.url });
 
     const header = `${enriched.name}${enriched.title ? `, ${enriched.title}` : ""}${enriched.company ? ` at ${enriched.company}` : ""}\n${args.url}`;
     return text(`${header}${summarizeBackground(enriched)}`);
