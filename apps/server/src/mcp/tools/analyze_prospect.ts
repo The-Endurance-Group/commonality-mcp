@@ -54,7 +54,9 @@ export const analyze_prospect: ToolHandler<Args> = {
           const posts = await getProfilePosts(args.url, count);
           if (posts.length) {
             await chargeCredit(ctx, "analyze_prospect_posts", { target: args.url });
-            const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
+            const postLines = posts.map(
+              (p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}${p.url ? `\n   ${p.url}` : ""}`,
+            );
             activityNote = `\n\nRecent posts:\n${postLines.join("\n")}`;
           }
         } catch {

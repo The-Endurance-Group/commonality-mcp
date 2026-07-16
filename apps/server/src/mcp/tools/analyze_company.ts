@@ -181,7 +181,9 @@ export const analyze_company: ToolHandler<Args> = {
       }
       if (!posts.length) return text("No recent public posts found for this company.");
       await chargeCredit(ctx, "analyze_company_posts", { target: args.company_url });
-      const postLines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
+      const postLines = posts.map(
+        (p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}${p.url ? `\n   ${p.url}` : ""}`,
+      );
       return text(`Recent company activity:\n${postLines.join("\n")}`);
     }
 

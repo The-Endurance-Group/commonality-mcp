@@ -33,7 +33,9 @@ export const get_linkedin_posts: ToolHandler<Args> = {
 
     if (!posts.length) return text(`No recent posts found for ${args.url}.`);
 
-    const lines = posts.map((p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}`);
+    const lines = posts.map(
+      (p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}${p.url ? `\n   ${p.url}` : ""}`,
+    );
     return text(`Recent posts for ${args.url}:\n${lines.join("\n")}`);
   },
 };
