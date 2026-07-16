@@ -72,7 +72,7 @@ export function Dashboard() {
         </p>
       )}
 
-      <ConnectorCard mcpUrl={mcpUrl} appUrl={appUrl} />
+      <ConnectorCard mcpUrl={mcpUrl} />
 
       <ExamplePromptsCard isAdmin={isAdmin} />
 
@@ -227,24 +227,26 @@ function CollapsibleCard({
 
 function ClaudeLogo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <rect width="32" height="32" rx="8" fill="#CC785C" />
-      {/* Simplified Anthropic A shape */}
-      <path d="M11.5 22.5L16 12L20.5 22.5" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
-      <path d="M13 19h6" stroke="white" strokeWidth="2.4" strokeLinecap="round" />
+    // Anthropic "A" lettermark — Bootstrap Icons path, 16×16 coordinate space
+    <svg width="32" height="32" viewBox="0 0 16 16" aria-hidden="true">
+      <rect width="16" height="16" rx="3" fill="#CC785C" />
+      <path
+        d="M9.218 2h2.402L16 12.987h-2.402zM4.379 2h2.512l4.38 10.987H8.82l-.895-2.308h-4.58l-.896 2.307H0L4.38 2.001zm2.755 6.64L5.635 4.777 4.137 8.64z"
+        fill="white"
+      />
     </svg>
   );
 }
 
 function ChatGPTLogo() {
   return (
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+    // OpenAI bloom logo — Simple Icons path, 24×24 coordinate space, padded 4px inside 32×32 box
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="8" fill="#1A1A1A" />
-      {/* Simplified OpenAI bloom */}
       <path
-        d="M16 7.5C13.5 7.5 11.4 9.1 10.9 11.4C9.1 11.7 7.8 13.2 7.8 15C7.8 15.8 8.1 16.6 8.6 17.2C7.7 18 7.2 19.1 7.2 20.3C7.2 22.5 8.9 24.3 11 24.5C11.6 25.8 12.9 26.7 14.4 26.7C15.2 26.7 15.9 26.4 16.4 26C16.9 26.4 17.6 26.7 18.4 26.7C19.9 26.7 21.2 25.8 21.8 24.5C23.9 24.3 25.6 22.5 25.6 20.3C25.6 19.1 25.1 18 24.2 17.2C24.7 16.6 25 15.8 25 15C25 13.2 23.7 11.7 21.9 11.4C21.4 9.1 19.5 7.5 16 7.5Z"
+        transform="translate(4,4)"
+        d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"
         fill="white"
-        opacity="0.88"
       />
     </svg>
   );
@@ -309,7 +311,7 @@ const AI_PROVIDERS: AIProvider[] = [
     name: "Gemini",
     requirement: "Requires Google AI Ultra ($100+/mo), a personal Google account, and is currently US-only.",
     description: "Connect through Gemini Spark. Note the subscription and geographic requirements before getting started.",
-    guideUrl: "https://support.google.com/gemini/answer/17209137",
+    guideUrl: "https://docs.cloud.google.com/gemini/enterprise/docs/connectors/custom-mcp-server/set-up-custom-mcp-server",
     color: "#4285F4",
     Logo: GeminiLogo,
   },
@@ -392,19 +394,8 @@ function AIProviderItem({ provider, open, onToggle }: { provider: AIProvider; op
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-function defaultInviteMessage(appUrl: string): string {
-  return (
-    `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
-    `our team's shared schools, past employers, and connections:\n` +
-    `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. Follow the instructions in your dashboard to connect it to your AI.`
-  );
-}
-
-function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
+function ConnectorCard({ mcpUrl }: { mcpUrl: string }) {
   const [copiedUrl, setCopiedUrl] = useState(false);
-  const [copiedInvite, setCopiedInvite] = useState(false);
-  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage(appUrl));
 
   return (
     <CollapsibleCard
@@ -438,28 +429,6 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
       </p>
 
       <AIProvidersSection />
-
-      <div className="mt-5 border-t border-gray-100 pt-5">
-        <h3 className="text-sm font-semibold text-ink">Invite a teammate</h3>
-        <p className="mt-1 text-sm text-lavender">
-          Edit the message below if you'd like, then copy it for a teammate.
-        </p>
-        <textarea
-          className="input mt-3 h-28 font-mono text-xs"
-          value={inviteMessage}
-          onChange={(e) => setInviteMessage(e.target.value)}
-        />
-        <button
-          className="btn-secondary mt-3"
-          onClick={() => {
-            navigator.clipboard.writeText(inviteMessage);
-            setCopiedInvite(true);
-            setTimeout(() => setCopiedInvite(false), 2000);
-          }}
-        >
-          {copiedInvite ? "Copied!" : "Copy invite message"}
-        </button>
-      </div>
     </CollapsibleCard>
   );
 }
