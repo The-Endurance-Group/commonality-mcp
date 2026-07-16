@@ -5,7 +5,7 @@ import { config } from "../config.js";
 import { logger } from "../logger.js";
 import { buildClerkAuthorizeUrl, exchangeClerkCode, getClerkUser } from "./clerk.js";
 import { signAccessToken, signRefreshToken, verifyRefreshToken, type SignableClaims } from "./jwt.js";
-import { resolveWorkspaceForEmail, WorkspaceResolutionError } from "./workspace.js";
+import { refreshClaimsForUser, resolveWorkspaceForEmail, WorkspaceResolutionError } from "./workspace.js";
 
 // Commonality acts as an OAuth 2.1 authorization server that delegates user
 // authentication to Clerk, then issues its own workspace-scoped access token.
@@ -150,7 +150,7 @@ oauthRouter.get("/callback", async (req, res) => {
 });
 
 // --- Token endpoint ---------------------------------------------------------
-oauthRouter.post("/token", (req, res) => {
+oauthRouter.post("/token", async (req, res) => {
   const { grant_type, code, redirect_uri, code_verifier, refresh_token } =
     (req.body ?? {}) as Record<string, string | undefined>;
 
@@ -162,7 +162,11 @@ oauthRouter.post("/token", (req, res) => {
     }
     let claims: SignableClaims;
     try {
-      claims = verifyRefreshToken(refresh_token);
+      const tokenClaims = verifyRefreshToken(refresh_token);
+      // Re-derive from the DB's current state - not the claims embedded in the
+      // refresh token - so a plan/role change since the last full login takes
+      // effect on this refresh instead of persisting for the token's 30-day life.
+      claims = await refreshClaimsForUser(tokenClaims.user_id);
     } catch {
       res.status(400).json({ error: "invalid_grant", error_description: "refresh token invalid or expired" });
       return;

@@ -155,6 +155,23 @@ export async function createWorkspace(
   return toClaims(user, company, email);
 }
 
+/**
+ * Re-derive claims for a user from the database's current state - used on
+ * refresh-token grants so a plan/role change (e.g. a superadmin upgrade)
+ * takes effect on the next silent refresh instead of staying stuck with
+ * whatever was true back when the refresh token was first issued.
+ */
+export async function refreshClaimsForUser(userId: string): Promise<SignableClaims> {
+  const { data: user, error } = await db()
+    .from("users")
+    .select("id, company_id, role, email")
+    .eq("id", userId)
+    .single<UserRow & { email: string }>();
+  if (error || !user) throw new WorkspaceResolutionError("User not found.");
+  const company = await getCompany(user.company_id);
+  return toClaims(user, company, user.email);
+}
+
 async function getCompany(companyId: string): Promise<CompanyRow> {
   const { data, error } = await db()
     .from("companies")
