@@ -486,40 +486,18 @@ const MQ_PROVIDERS = [
 ];
 
 function AIMarquee() {
-  // 4 repetitions so the track is always wider than any viewport
-  const row = [...MQ_PROVIDERS, ...MQ_PROVIDERS, ...MQ_PROVIDERS, ...MQ_PROVIDERS];
   return (
-    <section className="overflow-hidden border-b border-gray-100 bg-white py-8">
-      <style>{`
-        @keyframes mq-fwd { from { transform: translateX(0) } to { transform: translateX(-50%) } }
-        @keyframes mq-rev { from { transform: translateX(-50%) } to { transform: translateX(0) } }
-      `}</style>
+    <section className="border-b border-gray-100 bg-white py-8">
       <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
         Works with your favorite AI
       </p>
-      <div className="relative">
-        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-20 bg-gradient-to-r from-white to-transparent" />
-        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-20 bg-gradient-to-l from-white to-transparent" />
-        <div className="mb-2.5 overflow-hidden">
-          <div style={{ display: "flex", width: "max-content", animation: "mq-fwd 24s linear infinite" }}>
-            {row.map((p, i) => (
-              <div key={i} className="mx-2.5 flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
-                <p.Logo />
-                <span className="whitespace-nowrap text-sm font-semibold text-ink">{p.name}</span>
-              </div>
-            ))}
+      <div className="mx-auto flex max-w-xl justify-center gap-3 flex-wrap">
+        {MQ_PROVIDERS.map((p) => (
+          <div key={p.name} className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
+            <p.Logo />
+            <span className="whitespace-nowrap text-sm font-semibold text-ink">{p.name}</span>
           </div>
-        </div>
-        <div className="overflow-hidden">
-          <div style={{ display: "flex", width: "max-content", animation: "mq-rev 30s linear infinite" }}>
-            {row.map((p, i) => (
-              <div key={i} className="mx-2.5 flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
-                <p.Logo />
-                <span className="whitespace-nowrap text-sm font-semibold text-ink">{p.name}</span>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
       </div>
     </section>
   );
