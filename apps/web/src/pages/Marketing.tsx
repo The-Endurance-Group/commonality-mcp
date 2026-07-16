@@ -177,14 +177,14 @@ function TypingDotsRow() {
 
 const chatExamples = [
   {
-    q: "Tell me about John Doe - profile is linkedin.com/in/johndoe",
-    title: "Profile lookup",
-    detail: "Background, role, and how you're connected to John",
+    q: "Find me the LinkedIn for the CEO of Acme Inc.",
+    title: "Executive lookup",
+    detail: "Found Acme's CEO profile - ready to research or reach out",
   },
   {
-    q: "Who should I reach out to at Acme Inc?",
-    title: "Account-based path",
-    detail: "Sam K. has the strongest combined connection across Acme's leadership",
+    q: "Find me directors of finance in the USA who went to Boston College",
+    title: "People search",
+    detail: "3 directors of finance in the US who went to Boston College",
   },
   {
     q: "Research Jane Doe, VP Sales at Acme, before I reach out",
