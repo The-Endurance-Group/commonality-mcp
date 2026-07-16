@@ -2,7 +2,7 @@ import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
+
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
@@ -223,6 +223,175 @@ function CollapsibleCard({
   );
 }
 
+// ── AI provider logos ─────────────────────────────────────────────────────────
+
+function ClaudeLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#CC785C" />
+      {/* Simplified Anthropic A shape */}
+      <path d="M11.5 22.5L16 12L20.5 22.5" stroke="white" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+      <path d="M13 19h6" stroke="white" strokeWidth="2.4" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+function ChatGPTLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#1A1A1A" />
+      {/* Simplified OpenAI bloom */}
+      <path
+        d="M16 7.5C13.5 7.5 11.4 9.1 10.9 11.4C9.1 11.7 7.8 13.2 7.8 15C7.8 15.8 8.1 16.6 8.6 17.2C7.7 18 7.2 19.1 7.2 20.3C7.2 22.5 8.9 24.3 11 24.5C11.6 25.8 12.9 26.7 14.4 26.7C15.2 26.7 15.9 26.4 16.4 26C16.9 26.4 17.6 26.7 18.4 26.7C19.9 26.7 21.2 25.8 21.8 24.5C23.9 24.3 25.6 22.5 25.6 20.3C25.6 19.1 25.1 18 24.2 17.2C24.7 16.6 25 15.8 25 15C25 13.2 23.7 11.7 21.9 11.4C21.4 9.1 19.5 7.5 16 7.5Z"
+        fill="white"
+        opacity="0.88"
+      />
+    </svg>
+  );
+}
+
+function GeminiLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#4285F4" />
+      {/* Gemini 4-pointed star */}
+      <path d="M16 6C16 6 18.2 13.8 24 16C18.2 18.2 16 26 16 26C16 26 13.8 18.2 8 16C13.8 13.8 16 6 16 6Z" fill="white" />
+    </svg>
+  );
+}
+
+function CopilotLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#F0F0F0" />
+      {/* Microsoft 4-color grid */}
+      <rect x="8" y="8" width="7" height="7" rx="1" fill="#F25022" />
+      <rect x="17" y="8" width="7" height="7" rx="1" fill="#7FBA00" />
+      <rect x="8" y="17" width="7" height="7" rx="1" fill="#00A4EF" />
+      <rect x="17" y="17" width="7" height="7" rx="1" fill="#FFB900" />
+    </svg>
+  );
+}
+
+// ── AI providers accordion ────────────────────────────────────────────────────
+
+interface AIProvider {
+  id: string;
+  name: string;
+  requirement: string;
+  description: string;
+  guideUrl: string;
+  color: string;
+  Logo: () => ReactNode;
+}
+
+const AI_PROVIDERS: AIProvider[] = [
+  {
+    id: "claude",
+    name: "Claude",
+    requirement: "Works on every plan — Free, Pro, Max, Team, and Enterprise.",
+    description: "The easiest way to get started. Follow Anthropic's official guide to add Commonality as a custom connector.",
+    guideUrl: "https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp",
+    color: "#CC785C",
+    Logo: ClaudeLogo,
+  },
+  {
+    id: "chatgpt",
+    name: "ChatGPT",
+    requirement: "Plus/Pro for read-only access; Business, Enterprise, or Edu (admin-enabled) for full actions.",
+    description: "Connect via Developer Mode. Your account tier determines what level of access you get.",
+    guideUrl: "https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt",
+    color: "#10A37F",
+    Logo: ChatGPTLogo,
+  },
+  {
+    id: "gemini",
+    name: "Gemini",
+    requirement: "Requires Google AI Ultra ($100+/mo), a personal Google account, and is currently US-only.",
+    description: "Connect through Gemini Spark. Note the subscription and geographic requirements before getting started.",
+    guideUrl: "https://support.google.com/gemini/answer/17209137",
+    color: "#4285F4",
+    Logo: GeminiLogo,
+  },
+  {
+    id: "copilot",
+    name: "Microsoft Copilot Studio",
+    requirement: "Separate from Microsoft 365 Copilot — requires its own Copilot Studio license.",
+    description: "Connect your Copilot Studio agent to Commonality's MCP server using Microsoft's official guide.",
+    guideUrl: "https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent",
+    color: "#0078D4",
+    Logo: CopilotLogo,
+  },
+];
+
+function AIProvidersSection() {
+  const [openId, setOpenId] = useState<string | null>(null);
+  return (
+    <div className="mt-5">
+      <p className="mb-3 text-sm font-medium text-ink">Connect to your favorite AI:</p>
+      <div className="space-y-2">
+        {AI_PROVIDERS.map((provider) => (
+          <AIProviderItem
+            key={provider.id}
+            provider={provider}
+            open={openId === provider.id}
+            onToggle={() => setOpenId((id) => (id === provider.id ? null : provider.id))}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AIProviderItem({ provider, open, onToggle }: { provider: AIProvider; open: boolean; onToggle: () => void }) {
+  const [btnHovered, setBtnHovered] = useState(false);
+  return (
+    <div className="overflow-hidden rounded-lg border border-gray-100">
+      <button
+        className="flex w-full items-center justify-between bg-white px-4 py-3 text-left transition-colors hover:bg-gray-50"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-3">
+          <provider.Logo />
+          <span className="text-sm font-semibold text-ink">{provider.name}</span>
+        </div>
+        <span
+          className={`text-base text-lavender transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        >
+          ▾
+        </span>
+      </button>
+      <div className={`overflow-hidden transition-all duration-200 ${open ? "max-h-60" : "max-h-0"}`}>
+        <div className="border-t border-gray-100 px-4 pb-4 pt-3">
+          <p className="mb-1 text-xs font-semibold" style={{ color: provider.color }}>
+            {provider.requirement}
+          </p>
+          <p className="mb-3 text-sm text-lavender">{provider.description}</p>
+          <a
+            href={provider.guideUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              backgroundColor: provider.color,
+              boxShadow: btnHovered ? "none" : "3px 3px 0 0 rgba(0,0,0,0.15)",
+              transform: btnHovered ? "translate(3px, 3px)" : "translate(0, 0)",
+            }}
+            onMouseEnter={() => setBtnHovered(true)}
+            onMouseLeave={() => setBtnHovered(false)}
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all duration-150"
+          >
+            View connection guide →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
 function defaultInviteMessage(appUrl: string): string {
   return (
     `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
@@ -268,10 +437,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         .
       </p>
 
-      <div className="mt-5">
-        <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-        <ResponsiveConnectorDemo />
-      </div>
+      <AIProvidersSection />
 
       <div className="mt-5 border-t border-gray-100 pt-5">
         <h3 className="text-sm font-semibold text-ink">Invite a teammate</h3>
