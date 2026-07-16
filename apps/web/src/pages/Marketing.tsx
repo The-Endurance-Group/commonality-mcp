@@ -486,18 +486,25 @@ const MQ_PROVIDERS = [
 ];
 
 function AIMarquee() {
+  // Duplicate once — animation runs to -50% which lands on an identical frame, seamless loop
+  const track = [...MQ_PROVIDERS, ...MQ_PROVIDERS];
   return (
     <section className="border-b border-gray-100 bg-white py-8">
+      <style>{`@keyframes mq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
       <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
         Works with your favorite AI
       </p>
-      <div className="mx-auto flex max-w-xl justify-center gap-3 flex-wrap">
-        {MQ_PROVIDERS.map((p) => (
-          <div key={p.name} className="flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
-            <p.Logo />
-            <span className="whitespace-nowrap text-sm font-semibold text-ink">{p.name}</span>
-          </div>
-        ))}
+      <div className="relative mx-auto max-w-xl overflow-hidden">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
+        <div style={{ display: "flex", width: "max-content", animation: "mq-loop 9s linear infinite" }}>
+          {track.map((p, i) => (
+            <div key={i} className="mx-2.5 flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
+              <p.Logo />
+              <span className="whitespace-nowrap text-sm font-semibold text-ink">{p.name}</span>
+            </div>
+          ))}
+        </div>
       </div>
     </section>
   );
