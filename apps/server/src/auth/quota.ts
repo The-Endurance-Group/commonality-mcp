@@ -1,7 +1,7 @@
 import type { ToolContext } from "@commonality/shared";
 import { db } from "../db/client.js";
 import { logger } from "../logger.js";
-import { markCreditUsed } from "../services/hubspot.js";
+import { logHubspotEmailEngagement, markCreditUsed } from "../services/hubspot.js";
 import { sendFirstCreditUsedEmail } from "../services/resend.js";
 
 // Credits: 1 credit = 1 result-producing action, charged at the point of use
@@ -141,18 +141,33 @@ export async function chargeCredit(
   if (dedupeKey) await recordProspectUnlock(ctx.company_id, dedupeKey);
   await recordCreditEvent(ctx.company_id, ctx.user_id, action, opts?.target);
   if (isFirstEverCharge) {
-    getCompanyAdminEmail(ctx.company_id)
-      .then((adminEmail) => {
-        if (!adminEmail) return;
-        markCreditUsed(adminEmail).catch((err) =>
-          logger.error({ err, companyId: ctx.company_id }, "hubspot credit-used update failed"),
-        );
-        // Always to the admin, even if a teammate triggered this charge.
-        sendFirstCreditUsedEmail(adminEmail).catch((err) =>
-          logger.error({ err, email: adminEmail }, "first-credit-used email failed"),
-        );
-      })
-      .catch((err) => logger.error({ err, companyId: ctx.company_id }, "admin lookup failed for first-credit event"));
+    (async () => {
+      const adminEmail = await getCompanyAdminEmail(ctx.company_id);
+      if (!adminEmail) return;
+
+      let contactId: string | undefined;
+      try {
+        contactId = await markCreditUsed(adminEmail);
+      } catch (err) {
+        logger.error({ err, companyId: ctx.company_id }, "hubspot credit-used update failed");
+      }
+
+      // Always to the admin, even if a teammate triggered this charge.
+      let sent: { subject: string; text: string } | undefined;
+      try {
+        sent = await sendFirstCreditUsedEmail(adminEmail);
+      } catch (err) {
+        logger.error({ err, email: adminEmail }, "first-credit-used email failed");
+      }
+
+      if (contactId && sent) {
+        try {
+          await logHubspotEmailEngagement(contactId, adminEmail, sent.subject, sent.text);
+        } catch (err) {
+          logger.error({ err, email: adminEmail, contactId }, "hubspot email-engagement logging failed");
+        }
+      }
+    })().catch((err) => logger.error({ err, companyId: ctx.company_id }, "first-credit-event handling failed"));
   }
   return { allowed: true, used, limit: status.limit, remaining: Math.max(0, status.limit - used) };
 }

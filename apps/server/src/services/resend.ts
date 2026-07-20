@@ -86,11 +86,12 @@ Conor`;
   return { subject, text };
 }
 
-// Sent to whoever actually triggered a company's first-ever credit charge -
+// Sent to the admin when their company uses its first-ever credit -
 // congratulating them on getting set up and using it. Best-effort,
 // fire-and-forget from chargeCredit() - a failure here must never block or
-// fail the credit charge itself.
-export async function sendFirstCreditUsedEmail(email: string): Promise<void> {
+// fail the credit charge itself. Returns the sent subject/text so the caller
+// can log it to HubSpot's contact timeline.
+export async function sendFirstCreditUsedEmail(email: string): Promise<{ subject: string; text: string }> {
   const subject = "Congrats on Using Commonality for the First Time!";
   const text = `Congrats on getting Commonality set up and using it for the first time!
 
@@ -101,6 +102,7 @@ Here's my calendar: ${CONOR_CALENDAR_URL}
 Best,
 Conor`;
   await sendEmail(email, subject, text);
+  return { subject, text };
 }
 
 export async function sendInviteEmail(

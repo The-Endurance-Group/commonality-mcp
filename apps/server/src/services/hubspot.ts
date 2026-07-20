@@ -117,13 +117,16 @@ export async function markAdditionalUserAdded(adminEmail: string, newUserEmail: 
 
 /**
  * Mark the admin's HubSpot contact as having used their first Commonality
- * credit, and log a matching note on the contact's timeline.
+ * credit, and log a matching note on the contact's timeline. Returns the
+ * contact's HubSpot record ID (so the caller can also log the congrats
+ * email sent for this event), or undefined if HUBSPOT_API_KEY isn't set.
  */
-export async function markCreditUsed(adminEmail: string): Promise<void> {
+export async function markCreditUsed(adminEmail: string): Promise<string | undefined> {
   const contactId = await setContactYesFlag(adminEmail, "commonality_credit_used");
   if (contactId) {
     await logHubspotNoteEngagement(contactId, adminEmail, "First Commonality credit used");
   }
+  return contactId;
 }
 
 /**
