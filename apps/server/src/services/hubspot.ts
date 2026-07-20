@@ -6,6 +6,10 @@ import { logger } from "../logger.js";
 
 const HUBSPOT_CONTACTS_UPSERT_URL = "https://api.hubapi.com/crm/v3/objects/contacts/batch/upsert";
 
+// Owner ID for csullivan@theendurancegroup.com in TEG's HubSpot - looked up
+// via the Owners API (contact ownership needs the numeric ID, not the email).
+const DEFAULT_OWNER_ID = "81355081";
+
 /**
  * Create or update a HubSpot contact for a brand-new Commonality signup.
  * Best-effort, fire-and-forget from createWorkspace() - a failure here must
@@ -36,6 +40,7 @@ export async function upsertHubspotContact(
             company: companyName,
             lifecyclestage: "lead",
             lead_source: "Commonality Sign Up",
+            hubspot_owner_id: DEFAULT_OWNER_ID,
           },
         },
       ],
