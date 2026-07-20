@@ -5,6 +5,23 @@ import { logger } from "../logger.js";
 
 const RESEND_API = "https://api.resend.com/emails";
 
+function escapeHtml(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// Plain-text emails don't guarantee a clickable link across every client -
+// build a simple HTML alternative alongside it so URLs are always real
+// <a href> tags, not just client-side auto-detected text.
+function textToHtml(text: string): string {
+  const escaped = escapeHtml(text);
+  const linked = escaped.replace(/(https?:\/\/\S+)/g, (url) => `<a href="${url}">${url}</a>`);
+  const paragraphs = linked
+    .split(/\n\n+/)
+    .map((p) => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .join("\n");
+  return paragraphs;
+}
+
 async function sendEmail(to: string, subject: string, text: string): Promise<void> {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
@@ -18,7 +35,7 @@ async function sendEmail(to: string, subject: string, text: string): Promise<voi
       Authorization: `Bearer ${apiKey}`,
       "Content-Type": "application/json",
     },
-    body: JSON.stringify({ from, to, subject, text }),
+    body: JSON.stringify({ from, to, subject, text, html: textToHtml(text) }),
   });
   if (!res.ok) {
     const body = await res.text();
