@@ -101,7 +101,7 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
     const company = await getCompany(invite.company_id);
     const joinedExistingCompany = await describeJoinedCompany(company.id);
     if (isFirstAdditionalUser) {
-      markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
+      markAdditionalUserAdded(joinedExistingCompany.adminEmail, email).catch((err) =>
         logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
       );
     }
@@ -121,7 +121,7 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
       const user = await createUser(company.id, email, "member");
       const joinedExistingCompany = await describeJoinedCompany(company.id);
       if (isFirstAdditionalUser) {
-        markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
+        markAdditionalUserAdded(joinedExistingCompany.adminEmail, email).catch((err) =>
           logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
         );
       }

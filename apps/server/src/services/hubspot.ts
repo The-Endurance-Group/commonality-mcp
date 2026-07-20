@@ -6,10 +6,12 @@ import { logger } from "../logger.js";
 
 const HUBSPOT_CONTACTS_UPSERT_URL = "https://api.hubapi.com/crm/v3/objects/contacts/batch/upsert";
 const HUBSPOT_EMAILS_URL = "https://api.hubapi.com/crm/v3/objects/emails";
+const HUBSPOT_NOTES_URL = "https://api.hubapi.com/crm/v3/objects/notes";
 
-// Default HubSpot association type ID for "Email to Contact" (HubSpot-defined,
-// not a custom one - same value across all portals).
+// Default HubSpot association type IDs (HubSpot-defined, not custom - same
+// values across all portals).
 const EMAIL_TO_CONTACT_ASSOCIATION_TYPE_ID = 198;
+const NOTE_TO_CONTACT_ASSOCIATION_TYPE_ID = 202;
 
 // Owner ID for csullivan@theendurancegroup.com in TEG's HubSpot - looked up
 // via the Owners API (contact ownership needs the numeric ID, not the email).
@@ -71,11 +73,12 @@ export async function upsertHubspotContact(
 /**
  * Set a single "Yes"-dropdown property on the admin's HubSpot contact by
  * email. Best-effort, fire-and-forget - updates the existing contact,
- * doesn't create a new one.
+ * doesn't create a new one. Returns the contact's HubSpot record ID (needed
+ * to also log a note engagement), or undefined if HUBSPOT_API_KEY isn't set.
  */
-async function setContactYesFlag(adminEmail: string, property: string): Promise<void> {
+async function setContactYesFlag(adminEmail: string, property: string): Promise<string | undefined> {
   const apiKey = requireApiKey(adminEmail);
-  if (!apiKey) return;
+  if (!apiKey) return undefined;
   const res = await fetch(HUBSPOT_CONTACTS_UPSERT_URL, {
     method: "POST",
     headers: {
@@ -96,19 +99,66 @@ async function setContactYesFlag(adminEmail: string, property: string): Promise<
     const body = await res.text();
     throw new Error(`HubSpot error ${res.status}: ${body}`);
   }
+  const data = (await res.json()) as { results?: { id: string }[] };
+  return data.results?.[0]?.id;
 }
 
 /**
  * Mark the admin's HubSpot contact as having brought on an additional
- * Commonality user (teammate accepted an invite or auto-joined by domain).
+ * Commonality user (teammate accepted an invite or auto-joined by domain),
+ * and log a matching note on the contact's timeline.
  */
-export async function markAdditionalUserAdded(adminEmail: string): Promise<void> {
-  await setContactYesFlag(adminEmail, "additional_commonality_user_added");
+export async function markAdditionalUserAdded(adminEmail: string, newUserEmail: string): Promise<void> {
+  const contactId = await setContactYesFlag(adminEmail, "additional_commonality_user_added");
+  if (contactId) {
+    await logHubspotNoteEngagement(contactId, adminEmail, `Additional Commonality user added: ${newUserEmail}`);
+  }
 }
 
-/** Mark the admin's HubSpot contact as having used their first Commonality credit. */
+/**
+ * Mark the admin's HubSpot contact as having used their first Commonality
+ * credit, and log a matching note on the contact's timeline.
+ */
 export async function markCreditUsed(adminEmail: string): Promise<void> {
-  await setContactYesFlag(adminEmail, "commonality_credit_used");
+  const contactId = await setContactYesFlag(adminEmail, "commonality_credit_used");
+  if (contactId) {
+    await logHubspotNoteEngagement(contactId, adminEmail, "First Commonality credit used");
+  }
+}
+
+/**
+ * Log a note onto a HubSpot contact's timeline. Best-effort, fire-and-forget.
+ */
+export async function logHubspotNoteEngagement(
+  contactId: string,
+  adminEmail: string,
+  noteBody: string,
+): Promise<void> {
+  const apiKey = requireApiKey(adminEmail);
+  if (!apiKey) return;
+  const res = await fetch(HUBSPOT_NOTES_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      properties: {
+        hs_timestamp: Date.now().toString(),
+        hs_note_body: noteBody,
+      },
+      associations: [
+        {
+          to: { id: contactId },
+          types: [{ associationCategory: "HUBSPOT_DEFINED", associationTypeId: NOTE_TO_CONTACT_ASSOCIATION_TYPE_ID }],
+        },
+      ],
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`HubSpot note-log error ${res.status}: ${body}`);
+  }
 }
 
 /**
