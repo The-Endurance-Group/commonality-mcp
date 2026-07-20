@@ -69,6 +69,37 @@ export async function upsertHubspotContact(
 }
 
 /**
+ * Mark the admin's HubSpot contact as having brought on an additional
+ * Commonality user (teammate accepted an invite or auto-joined by domain).
+ * Best-effort, fire-and-forget - updates the existing contact by email,
+ * doesn't create a new one for the teammate joining.
+ */
+export async function markAdditionalUserAdded(adminEmail: string): Promise<void> {
+  const apiKey = requireApiKey(adminEmail);
+  if (!apiKey) return;
+  const res = await fetch(HUBSPOT_CONTACTS_UPSERT_URL, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${apiKey}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      inputs: [
+        {
+          idProperty: "email",
+          id: adminEmail,
+          properties: { additional_commonality_user_added: "yes" },
+        },
+      ],
+    }),
+  });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`HubSpot error ${res.status}: ${body}`);
+  }
+}
+
+/**
  * Log a sent email onto a HubSpot contact's timeline as an "Email" engagement.
  * Resend-sent mail doesn't appear in HubSpot on its own - this makes it show
  * up the same way a HubSpot-sent email would. Best-effort, fire-and-forget.

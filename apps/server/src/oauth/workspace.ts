@@ -1,5 +1,5 @@
 import { db } from "../db/client.js";
-import { logHubspotEmailEngagement, upsertHubspotContact } from "../services/hubspot.js";
+import { logHubspotEmailEngagement, markAdditionalUserAdded, upsertHubspotContact } from "../services/hubspot.js";
 import { logger } from "../logger.js";
 import { sendHubspotFailureAlert, sendNewAccountNotification, sendWelcomeEmail } from "../services/resend.js";
 import type { SignableClaims } from "./jwt.js";
@@ -87,10 +87,11 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
     const user = await createUser(invite.company_id, email, "member");
     await supa.from("invites").update({ accepted: true }).eq("id", invite.id);
     const company = await getCompany(invite.company_id);
-    return {
-      claims: toClaims(user, company, email),
-      joinedExistingCompany: await describeJoinedCompany(company.id),
-    };
+    const joinedExistingCompany = await describeJoinedCompany(company.id);
+    markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
+      logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
+    );
+    return { claims: toClaims(user, company, email), joinedExistingCompany };
   }
 
   // 3. Email domain matches a company that allows domain auto-join.
@@ -103,10 +104,11 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
       .maybeSingle<CompanyRow>();
     if (company) {
       const user = await createUser(company.id, email, "member");
-      return {
-        claims: toClaims(user, company, email),
-        joinedExistingCompany: await describeJoinedCompany(company.id),
-      };
+      const joinedExistingCompany = await describeJoinedCompany(company.id);
+      markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
+        logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
+      );
+      return { claims: toClaims(user, company, email), joinedExistingCompany };
     }
   }
 
