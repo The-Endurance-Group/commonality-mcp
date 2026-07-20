@@ -573,11 +573,11 @@ export function Marketing() {
             LinkedIn Research, Right From Your AI
           </p>
           <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
-            Access LinkedIn, right from your AI.
+            Search LinkedIn, right from your AI.
           </h1>
           <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
             Ask Claude, ChatGPT, or whatever AI you use to research a prospect or company and get
-            real answers - who you know there, and what to say when you reach out.
+            real answers - who on your team is already connected to them, and what to say when you reach out.
           </p>
 
           <div className="mt-7 flex items-center justify-center gap-3">
