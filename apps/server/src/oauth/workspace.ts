@@ -1,5 +1,5 @@
 import { db } from "../db/client.js";
-import { upsertHubspotContact } from "../services/hubspot.js";
+import { logHubspotEmailEngagement, upsertHubspotContact } from "../services/hubspot.js";
 import { logger } from "../logger.js";
 import { sendHubspotFailureAlert, sendNewAccountNotification, sendWelcomeEmail } from "../services/resend.js";
 import type { SignableClaims } from "./jwt.js";
@@ -144,15 +144,30 @@ export async function createWorkspace(
   sendNewAccountNotification(email, companyName, domain?.toLowerCase().trim() || null).catch((err) =>
     logger.error({ err, email, companyName }, "new-account notification failed"),
   );
-  sendWelcomeEmail(email).catch((err) =>
-    logger.error({ err, email }, "welcome email failed"),
-  );
-  upsertHubspotContact(email, companyName, firstName, lastName).catch((err) => {
-    logger.error({ err, email, companyName }, "hubspot contact upsert failed");
-    sendHubspotFailureAlert(email, companyName, err instanceof Error ? err.message : String(err)).catch(
-      (alertErr) => logger.error({ err: alertErr, email, companyName }, "hubspot failure alert email failed"),
-    );
-  });
+  (async () => {
+    let contactId: string | undefined;
+    try {
+      contactId = await upsertHubspotContact(email, companyName, firstName, lastName);
+    } catch (err) {
+      logger.error({ err, email, companyName }, "hubspot contact upsert failed");
+      sendHubspotFailureAlert(email, companyName, err instanceof Error ? err.message : String(err)).catch(
+        (alertErr) => logger.error({ err: alertErr, email, companyName }, "hubspot failure alert email failed"),
+      );
+    }
+    let sent: { subject: string; text: string } | undefined;
+    try {
+      sent = await sendWelcomeEmail(email);
+    } catch (err) {
+      logger.error({ err, email }, "welcome email failed");
+    }
+    if (contactId && sent) {
+      try {
+        await logHubspotEmailEngagement(contactId, email, sent.subject, sent.text);
+      } catch (err) {
+        logger.error({ err, email, contactId }, "hubspot email-engagement logging failed");
+      }
+    }
+  })();
 
   return toClaims(user, company, email);
 }

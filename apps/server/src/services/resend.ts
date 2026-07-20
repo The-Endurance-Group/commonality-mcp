@@ -66,7 +66,9 @@ const CONOR_CALENDAR_URL = "https://meetings.hubspot.com/conor-sullivan/commonal
 // Welcome email to whoever just created a new workspace (the signup itself,
 // not a teammate joining an existing one). Best-effort, fire-and-forget from
 // createWorkspace() - a failure here must never block or fail the signup.
-export async function sendWelcomeEmail(signupEmail: string): Promise<void> {
+// Returns the sent subject/text so the caller can log it to HubSpot's
+// contact timeline (Resend-sent mail doesn't show up there on its own).
+export async function sendWelcomeEmail(signupEmail: string): Promise<{ subject: string; text: string }> {
   const subject = "Thanks for Signing Up for Commonality- Need Help Setting it Up?";
   const text = `Hi There!
 
@@ -81,6 +83,7 @@ Or, if you prefer, let me know some times that work for you.
 Best,
 Conor`;
   await sendEmail(signupEmail, subject, text);
+  return { subject, text };
 }
 
 export async function sendInviteEmail(
