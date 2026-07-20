@@ -142,11 +142,17 @@ export async function chargeCredit(
   await recordCreditEvent(ctx.company_id, ctx.user_id, action, opts?.target);
   if (isFirstEverCharge) {
     getCompanyAdminEmail(ctx.company_id)
-      .then((adminEmail) => (adminEmail ? markCreditUsed(adminEmail) : undefined))
-      .catch((err) => logger.error({ err, companyId: ctx.company_id }, "hubspot credit-used update failed"));
-    sendFirstCreditUsedEmail(ctx.email).catch((err) =>
-      logger.error({ err, email: ctx.email }, "first-credit-used email failed"),
-    );
+      .then((adminEmail) => {
+        if (!adminEmail) return;
+        markCreditUsed(adminEmail).catch((err) =>
+          logger.error({ err, companyId: ctx.company_id }, "hubspot credit-used update failed"),
+        );
+        // Always to the admin, even if a teammate triggered this charge.
+        sendFirstCreditUsedEmail(adminEmail).catch((err) =>
+          logger.error({ err, email: adminEmail }, "first-credit-used email failed"),
+        );
+      })
+      .catch((err) => logger.error({ err, companyId: ctx.company_id }, "admin lookup failed for first-credit event"));
   }
   return { allowed: true, used, limit: status.limit, remaining: Math.max(0, status.limit - used) };
 }
