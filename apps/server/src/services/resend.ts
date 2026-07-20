@@ -86,6 +86,23 @@ Conor`;
   return { subject, text };
 }
 
+// Sent to whoever actually triggered a company's first-ever credit charge -
+// congratulating them on getting set up and using it. Best-effort,
+// fire-and-forget from chargeCredit() - a failure here must never block or
+// fail the credit charge itself.
+export async function sendFirstCreditUsedEmail(email: string): Promise<void> {
+  const subject = "Congrats on Using Commonality for the First Time!";
+  const text = `Congrats on getting Commonality set up and using it for the first time!
+
+Let me know if you have any questions or would like to chat.
+
+Here's my calendar: ${CONOR_CALENDAR_URL}
+
+Best,
+Conor`;
+  await sendEmail(email, subject, text);
+}
+
 export async function sendInviteEmail(
   email: string,
   companyName: string,

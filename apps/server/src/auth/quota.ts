@@ -2,6 +2,7 @@ import type { ToolContext } from "@commonality/shared";
 import { db } from "../db/client.js";
 import { logger } from "../logger.js";
 import { markCreditUsed } from "../services/hubspot.js";
+import { sendFirstCreditUsedEmail } from "../services/resend.js";
 
 // Credits: 1 credit = 1 result-producing action, charged at the point of use
 // rather than once per tool call. Two kinds: (1) a search (Apify actor
@@ -124,7 +125,7 @@ async function getCompanyAdminEmail(companyId: string): Promise<string | undefin
  * this codebase.
  */
 export async function chargeCredit(
-  ctx: Pick<ToolContext, "company_id" | "plan" | "user_id">,
+  ctx: Pick<ToolContext, "company_id" | "plan" | "user_id" | "email">,
   action: string,
   opts?: { dedupeKey?: string | null; target?: string },
 ): Promise<QuotaStatus> {
@@ -143,6 +144,9 @@ export async function chargeCredit(
     getCompanyAdminEmail(ctx.company_id)
       .then((adminEmail) => (adminEmail ? markCreditUsed(adminEmail) : undefined))
       .catch((err) => logger.error({ err, companyId: ctx.company_id }, "hubspot credit-used update failed"));
+    sendFirstCreditUsedEmail(ctx.email).catch((err) =>
+      logger.error({ err, email: ctx.email }, "first-credit-used email failed"),
+    );
   }
   return { allowed: true, used, limit: status.limit, remaining: Math.max(0, status.limit - used) };
 }
