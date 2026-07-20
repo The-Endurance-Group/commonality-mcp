@@ -69,12 +69,11 @@ export async function upsertHubspotContact(
 }
 
 /**
- * Mark the admin's HubSpot contact as having brought on an additional
- * Commonality user (teammate accepted an invite or auto-joined by domain).
- * Best-effort, fire-and-forget - updates the existing contact by email,
- * doesn't create a new one for the teammate joining.
+ * Set a single "Yes"-dropdown property on the admin's HubSpot contact by
+ * email. Best-effort, fire-and-forget - updates the existing contact,
+ * doesn't create a new one.
  */
-export async function markAdditionalUserAdded(adminEmail: string): Promise<void> {
+async function setContactYesFlag(adminEmail: string, property: string): Promise<void> {
   const apiKey = requireApiKey(adminEmail);
   if (!apiKey) return;
   const res = await fetch(HUBSPOT_CONTACTS_UPSERT_URL, {
@@ -88,7 +87,7 @@ export async function markAdditionalUserAdded(adminEmail: string): Promise<void>
         {
           idProperty: "email",
           id: adminEmail,
-          properties: { additional_commonality_user_added: "Yes" },
+          properties: { [property]: "Yes" },
         },
       ],
     }),
@@ -97,6 +96,19 @@ export async function markAdditionalUserAdded(adminEmail: string): Promise<void>
     const body = await res.text();
     throw new Error(`HubSpot error ${res.status}: ${body}`);
   }
+}
+
+/**
+ * Mark the admin's HubSpot contact as having brought on an additional
+ * Commonality user (teammate accepted an invite or auto-joined by domain).
+ */
+export async function markAdditionalUserAdded(adminEmail: string): Promise<void> {
+  await setContactYesFlag(adminEmail, "additional_commonality_user_added");
+}
+
+/** Mark the admin's HubSpot contact as having used their first Commonality credit. */
+export async function markCreditUsed(adminEmail: string): Promise<void> {
+  await setContactYesFlag(adminEmail, "commonality_credit_used");
 }
 
 /**

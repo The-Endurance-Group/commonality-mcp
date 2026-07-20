@@ -1,5 +1,7 @@
 import type { ToolContext } from "@commonality/shared";
 import { db } from "../db/client.js";
+import { logger } from "../logger.js";
+import { markCreditUsed } from "../services/hubspot.js";
 
 // Credits: 1 credit = 1 result-producing action, charged at the point of use
 // rather than once per tool call. Two kinds: (1) a search (Apify actor
@@ -82,6 +84,27 @@ async function recordCreditEvent(companyId: string, userId: string, action: stri
     .insert({ company_id: companyId, user_id: userId, action, target: target ?? null });
 }
 
+/** Has this company ever actually been charged a credit before (any month)? */
+async function companyHasNeverBeenCharged(companyId: string): Promise<boolean> {
+  const { count } = await db()
+    .from("credit_events")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId);
+  return (count ?? 0) === 0;
+}
+
+async function getCompanyAdminEmail(companyId: string): Promise<string | undefined> {
+  const { data } = await db()
+    .from("users")
+    .select("email")
+    .eq("company_id", companyId)
+    .eq("role", "admin")
+    .order("created_at", { ascending: true })
+    .limit(1)
+    .maybeSingle<{ email: string }>();
+  return data?.email;
+}
+
 /**
  * Charge 1 credit for one result-producing action - a search (Apify), or a
  * person analysis (Cassidy or a shared-cache hit; a company pays for its own
@@ -112,9 +135,15 @@ export async function chargeCredit(
   }
   const status = await checkQuota(ctx);
   if (!status.allowed) return status;
+  const isFirstEverCharge = await companyHasNeverBeenCharged(ctx.company_id);
   const used = await incrementUsage(ctx.company_id);
   if (dedupeKey) await recordProspectUnlock(ctx.company_id, dedupeKey);
   await recordCreditEvent(ctx.company_id, ctx.user_id, action, opts?.target);
+  if (isFirstEverCharge) {
+    getCompanyAdminEmail(ctx.company_id)
+      .then((adminEmail) => (adminEmail ? markCreditUsed(adminEmail) : undefined))
+      .catch((err) => logger.error({ err, companyId: ctx.company_id }, "hubspot credit-used update failed"));
+  }
   return { allowed: true, used, limit: status.limit, remaining: Math.max(0, status.limit - used) };
 }
 
