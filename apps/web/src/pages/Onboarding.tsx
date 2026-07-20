@@ -6,16 +6,14 @@ import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
-type Stage = "workspace" | "import" | "review" | "enriching" | "connections" | "connector";
+type Stage = "workspace" | "import" | "review" | "enriching" | "connector";
 
-
-const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching", "connections", "connector"];
+const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching", "connector"];
 const STAGE_LABELS: Record<Stage, string> = {
   workspace: "Workspace",
   import: "Import",
   review: "Review",
   enriching: "Enrich",
-  connections: "Connections",
   connector: "Connect",
 };
 
@@ -135,7 +133,7 @@ export function Onboarding() {
         const s = await apiFetch<{ total: number; enriched: number }>("/api/employees/enrichment-status");
         if (!active) return;
         setProgress(s);
-        if (s.total > 0 && s.enriched >= s.total) setStage("connections");
+        if (s.total > 0 && s.enriched >= s.total) setStage("connector");
       } catch {
         /* keep polling */
       }
@@ -234,13 +232,11 @@ export function Onboarding() {
             <p className="mt-2 text-sm text-lavender">
               {progress.enriched} / {progress.total || "…"} teammates mapped
             </p>
-            <button className="btn-link mt-3" onClick={() => setStage("connections")}>
+            <button className="btn-link mt-3" onClick={() => setStage("connector")}>
               Skip ahead →
             </button>
           </Card>
         )}
-
-        {displayStage === "connections" && <ConnectionsStep onContinue={() => setStage("connector")} />}
 
         {displayStage === "connector" && (
           <ConnectorStep mcpUrl={mcpUrl} onDone={() => navigate("/dashboard")} />
@@ -370,121 +366,6 @@ function ReviewStep({
   );
 }
 
-interface RosterEmployee { id: string; name: string }
-
-function ConnectionsStep({ onContinue }: { onContinue: () => void }) {
-  const roster = useQuery({
-    queryKey: ["employees"],
-    queryFn: () => apiFetch<{ employees: RosterEmployee[] }>("/api/employees"),
-  });
-  const employees = roster.data?.employees ?? [];
-
-  const [employeeId, setEmployeeId] = useState("");
-  const [file, setFile] = useState<File | null>(null);
-  const [busy, setBusy] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [added, setAdded] = useState<{ name: string; saved: number }[]>([]);
-
-  async function addAnother(): Promise<boolean> {
-    if (!employeeId || !file) return false;
-    setBusy(true);
-    setError(null);
-    try {
-      const csv = await file.text();
-      const { saved } = await apiFetch<{ saved: number }>(`/api/employees/${employeeId}/connections`, {
-        method: "POST",
-        body: JSON.stringify({ csv }),
-      });
-      const empName = employees.find((e) => e.id === employeeId)?.name ?? "Teammate";
-      setAdded((a) => [...a, { name: empName, saved }]);
-      setEmployeeId("");
-      setFile(null);
-      return true;
-    } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save that file");
-      return false;
-    } finally {
-      setBusy(false);
-    }
-  }
-
-  async function finish() {
-    if (employeeId && file) {
-      const ok = await addAnother();
-      if (!ok) return; // stay on screen so the error is visible
-    }
-    onContinue();
-  }
-
-  return (
-    <Card
-      title="Add LinkedIn connections (optional)"
-      subtitle="This is the single strongest signal Commonality can use - a 1st-degree LinkedIn connection beats any other path in. Totally optional."
-    >
-      <div>
-        <p className="text-sm font-medium text-ink">How to export them from LinkedIn:</p>
-        <ol className="mt-2 list-decimal space-y-1.5 pl-5 text-sm text-lavender">
-          <li>On LinkedIn, click your profile photo → <span className="font-medium text-ink">Settings &amp; Privacy</span>.</li>
-          <li>Go to the <span className="font-medium text-ink">Data privacy</span> tab → <span className="font-medium text-ink">Get a copy of your data</span>.</li>
-          <li>Select <span className="font-medium text-ink">Connections</span>, then click <span className="font-medium text-ink">Request archive</span>.</li>
-          <li>LinkedIn emails you a download link (usually within a few minutes) - download it and unzip it.</li>
-          <li>Upload the <span className="font-medium text-ink">Connections.csv</span> file here, for yourself or any teammate.</li>
-        </ol>
-      </div>
-
-      {added.length > 0 && (
-        <div className="space-y-1.5">
-          {added.map((a, i) => (
-            <div key={i} className="flex items-center gap-2 rounded-md bg-tint-brand px-3 py-2 text-sm text-brand">
-              <span>✓</span>
-              <span className="font-medium">{a.name}</span>
-              <span className="text-lavender">- {a.saved} connections added</span>
-            </div>
-          ))}
-        </div>
-      )}
-
-      <Field label="Whose connections is this?">
-        <select className="input" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
-          <option value="">Select a teammate…</option>
-          {employees.map((e) => (
-            <option key={e.id} value={e.id}>{e.name}</option>
-          ))}
-        </select>
-      </Field>
-
-      <label className="block">
-        <span className="mb-1 block text-sm font-medium text-lavender">Connections.csv</span>
-        <input
-          type="file"
-          accept=".csv"
-          className="input"
-          onChange={(e) => setFile(e.target.files?.[0] ?? null)}
-        />
-      </label>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      <div className="rounded-lg bg-tint-accent p-4 text-sm text-ink">
-        Some people aren't comfortable sharing this, and that's completely okay - it's optional
-        and not required to use Commonality. You can always add it later if you or a teammate
-        changes your mind.
-      </div>
-
-      <div className="flex flex-wrap gap-3">
-        <button className="btn-secondary" disabled={busy || !employeeId || !file} onClick={addAnother}>
-          {busy ? "Saving…" : "+ Add another person"}
-        </button>
-        <button className="btn-primary" disabled={busy} onClick={finish}>
-          {busy ? "Saving…" : added.length > 0 ? "Continue" : "Upload & continue"}
-        </button>
-        <button className="btn-link" onClick={onContinue}>
-          Skip for now
-        </button>
-      </div>
-    </Card>
-  );
-}
 
 function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void }) {
   const [copied, setCopied] = useState(false);
