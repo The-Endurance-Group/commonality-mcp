@@ -35,6 +35,7 @@ export async function upsertHubspotContact(
             email: signupEmail,
             company: companyName,
             lifecyclestage: "lead",
+            lead_source: "Commonality Sign Up",
           },
         },
       ],
