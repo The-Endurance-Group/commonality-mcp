@@ -404,7 +404,7 @@ function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void 
         <p className="mt-3 text-sm text-lavender">
           Having trouble connecting it to your AI?{" "}
           <a
-            href="https://meetings.hubspot.com/conor-sullivan/follow-up-with-conor?uuid=d520bf93-7373-4ce8-b8a2-4ae02209364b"
+            href="https://meetings.hubspot.com/conor-sullivan/commonality"
             target="_blank"
             rel="noreferrer"
             className="font-medium text-brand hover:underline"
