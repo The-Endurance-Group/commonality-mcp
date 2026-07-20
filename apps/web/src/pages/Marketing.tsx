@@ -1,90 +1,11 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk/clerk-react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
-import { ConnectorDemo } from "../components/ConnectorDemo";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
 // The site's main marketing page - "access LinkedIn via your AI," with
 // Commonality's team-network matching as the standout feature.
-
-const DEMO_NATURAL_WIDTH = 604;
-const DEMO_NATURAL_HEIGHT = 716;
-
-function WorkflowRow() {
-  const stepsRef = useRef<HTMLDivElement>(null);
-  const [demoHeight, setDemoHeight] = useState(460);
-
-  useEffect(() => {
-    const el = stepsRef.current;
-    if (!el) return;
-    const ro = new ResizeObserver((entries) => {
-      const h = entries[0]?.contentRect.height;
-      if (h && h > 0) setDemoHeight(h);
-    });
-    ro.observe(el);
-    return () => ro.disconnect();
-  }, []);
-
-  const scale = demoHeight / DEMO_NATURAL_HEIGHT;
-
-  return (
-    <div className="mt-4 flex flex-col items-center gap-8 lg:flex-row lg:items-start lg:justify-center">
-      <div ref={stepsRef} className="flex w-full max-w-xs flex-col gap-6 text-left lg:max-w-[240px]">
-        <div>
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">Set up once</p>
-          <div className="flex flex-col gap-3">
-            {setupSteps.map((s, i) => (
-              <div
-                key={s.label}
-                className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
-                  {i + 1}
-                </span>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-                  <Icon name={s.icon} className="" />
-                </div>
-                <div>
-                  <p className="text-sm font-medium text-ink">{s.label}</p>
-                  {s.caption && <p className="mt-0.5 text-xs text-lavender">{s.caption}</p>}
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div>
-          <p className="mb-3 text-sm font-semibold uppercase tracking-wide text-lavender">Then ask anytime</p>
-          <div className="flex flex-col gap-3">
-            {askSteps.map((s, i) => (
-              <div
-                key={s.label}
-                className="animate-fade-up flex items-center gap-3 rounded-lg border border-gray-100 bg-white px-4 py-3"
-                style={{ animationDelay: `${i * 0.08}s` }}
-              >
-                <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-ink text-[10px] font-semibold text-white">
-                  {setupSteps.length + i + 1}
-                </span>
-                <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-tint-brand text-brand">
-                  <Icon name={s.icon} className="" />
-                </div>
-                <p className="text-sm font-medium text-ink">{s.label}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <div style={{ height: demoHeight, width: DEMO_NATURAL_WIDTH * scale }} className="overflow-hidden rounded-lg">
-        <div style={{ width: DEMO_NATURAL_WIDTH, transform: `scale(${scale})`, transformOrigin: "top left" }}>
-          <ConnectorDemo />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function SectionCta({ label }: { label: string }) {
   return (
@@ -407,44 +328,6 @@ function SocialMapGraphic() {
   );
 }
 
-const setupSteps: { label: string; icon: string; caption?: ReactNode }[] = [
-  {
-    label: "Tell us your company",
-    icon: "building",
-    caption: "Share your company's LinkedIn page and we pull in current employees automatically.",
-  },
-  {
-    label: "We find your team - you confirm",
-    icon: "users",
-    caption:
-      "Edit freely - remove people who've left, add contractors or alumni. This is who the AI " +
-      "searches, not who's using it - users are unlimited.",
-  },
-  {
-    label: "Connect to your AI",
-    icon: "link",
-    caption: (
-      <>
-        Need a hand?{" "}
-        <a
-          href="https://meetings.hubspot.com/conor-sullivan/commonality"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-brand hover:underline"
-        >
-          We can help you onboard
-        </a>
-        .
-      </>
-    ),
-  },
-];
-
-const askSteps = [
-  { label: "Ask about a person or company", icon: "message" },
-  { label: "Get a warm path - or a real angle in", icon: "mail" },
-];
-
 const faqs: { q: string; a: ReactNode }[] = [
   {
     q: "How are we defining \"team,\" in this case - is it pulling from your own colleague connections, or any and all of your network?",
@@ -556,6 +439,77 @@ const testimonials = [
   },
 ];
 
+function MqClaudeLogo() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 16 16" aria-hidden="true">
+      <rect width="16" height="16" rx="3" fill="#CC785C" />
+      <path d="M9.218 2h2.402L16 12.987h-2.402zM4.379 2h2.512l4.38 10.987H8.82l-.895-2.308h-4.58l-.896 2.307H0L4.38 2.001zm2.755 6.64L5.635 4.777 4.137 8.64z" fill="white" />
+    </svg>
+  );
+}
+
+function MqChatGPTLogo() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="6" fill="#1A1A1A" />
+      <path transform="translate(4,4)" d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z" fill="white" />
+    </svg>
+  );
+}
+
+function MqGeminiLogo() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="6" fill="#4285F4" />
+      <path d="M16 6C16 6 18.2 13.8 24 16C18.2 18.2 16 26 16 26C16 26 13.8 18.2 8 16C13.8 13.8 16 6 16 6Z" fill="white" />
+    </svg>
+  );
+}
+
+function MqCopilotLogo() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="6" fill="#F0F0F0" />
+      <rect x="8" y="8" width="7" height="7" rx="1" fill="#F25022" />
+      <rect x="17" y="8" width="7" height="7" rx="1" fill="#7FBA00" />
+      <rect x="8" y="17" width="7" height="7" rx="1" fill="#00A4EF" />
+      <rect x="17" y="17" width="7" height="7" rx="1" fill="#FFB900" />
+    </svg>
+  );
+}
+
+const MQ_PROVIDERS = [
+  { name: "Claude", Logo: MqClaudeLogo },
+  { name: "ChatGPT", Logo: MqChatGPTLogo },
+  { name: "Gemini", Logo: MqGeminiLogo },
+  { name: "Copilot Studio", Logo: MqCopilotLogo },
+];
+
+function AIMarquee() {
+  // Duplicate once — animation runs to -50% which lands on an identical frame, seamless loop
+  const track = [...MQ_PROVIDERS, ...MQ_PROVIDERS];
+  return (
+    <section className="border-b border-gray-100 bg-white py-8">
+      <style>{`@keyframes mq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+      <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
+        Works with your favorite AI
+      </p>
+      <div className="relative mx-auto max-w-xl overflow-hidden">
+        <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
+        <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
+        <div style={{ display: "flex", width: "max-content", animation: "mq-loop 9s linear infinite" }}>
+          {track.map((p, i) => (
+            <div key={i} className="mx-2.5 flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
+              <p.Logo />
+              <span className="whitespace-nowrap text-sm font-semibold text-ink">{p.name}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 export function Marketing() {
   // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
@@ -654,6 +608,8 @@ export function Marketing() {
         </div>
       </section>
 
+      <AIMarquee />
+
       {/* Just ask */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">Just ask - no LinkedIn tab required.</h2>
@@ -739,27 +695,6 @@ export function Marketing() {
           </div>
         </div>
 
-        <h2 className="mt-16 text-2xl font-bold text-ink sm:text-3xl">From setup to your next warm intro</h2>
-
-        <WorkflowRow />
-
-        <div className="mt-10">
-          <SignedOut>
-            <SignUpButton mode="modal">
-              <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark">
-                Try it free →
-              </button>
-            </SignUpButton>
-          </SignedOut>
-          <SignedIn>
-            <Link
-              to="/dashboard"
-              className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark"
-            >
-              Open your workspace
-            </Link>
-          </SignedIn>
-        </div>
       </section>
 
       {/* How matching works */}

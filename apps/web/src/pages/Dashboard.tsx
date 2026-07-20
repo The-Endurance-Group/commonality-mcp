@@ -2,7 +2,7 @@ import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
+
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
@@ -72,7 +72,7 @@ export function Dashboard() {
         </p>
       )}
 
-      <ConnectorCard mcpUrl={mcpUrl} appUrl={appUrl} />
+      <ConnectorCard mcpUrl={mcpUrl} />
 
       <ExamplePromptsCard isAdmin={isAdmin} />
 
@@ -223,19 +223,179 @@ function CollapsibleCard({
   );
 }
 
-function defaultInviteMessage(appUrl: string): string {
+// ── AI provider logos ─────────────────────────────────────────────────────────
+
+function ClaudeLogo() {
   return (
-    `Join us on Commonality - it finds the warmest way in to any prospect or company by mapping ` +
-    `our team's shared schools, past employers, and connections:\n` +
-    `1. Sign up at ${appUrl} with your work email.\n` +
-    `2. Follow the instructions in your dashboard to connect it to your AI.`
+    // Anthropic "A" lettermark — Bootstrap Icons path, 16×16 coordinate space
+    <svg width="32" height="32" viewBox="0 0 16 16" aria-hidden="true">
+      <rect width="16" height="16" rx="3" fill="#CC785C" />
+      <path
+        d="M9.218 2h2.402L16 12.987h-2.402zM4.379 2h2.512l4.38 10.987H8.82l-.895-2.308h-4.58l-.896 2.307H0L4.38 2.001zm2.755 6.64L5.635 4.777 4.137 8.64z"
+        fill="white"
+      />
+    </svg>
   );
 }
 
-function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
+function ChatGPTLogo() {
+  return (
+    // OpenAI bloom logo — Simple Icons path, 24×24 coordinate space, padded 4px inside 32×32 box
+    <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#1A1A1A" />
+      <path
+        transform="translate(4,4)"
+        d="M22.2819 9.8211a5.9847 5.9847 0 0 0-.5157-4.9108 6.0462 6.0462 0 0 0-6.5098-2.9A6.0651 6.0651 0 0 0 4.9807 4.1818a5.9847 5.9847 0 0 0-3.9977 2.9 6.0462 6.0462 0 0 0 .7427 7.0966 5.98 5.98 0 0 0 .511 4.9107 6.051 6.051 0 0 0 6.5146 2.9001A5.9847 5.9847 0 0 0 13.2599 24a6.0557 6.0557 0 0 0 5.7718-4.2058 5.9894 5.9894 0 0 0 3.9977-2.9001 6.0557 6.0557 0 0 0-.7475-7.0729zm-9.022 12.6081a4.4755 4.4755 0 0 1-2.8764-1.0408l.1419-.0804 4.7783-2.7582a.7948.7948 0 0 0 .3927-.6813v-6.7369l2.02 1.1686a.071.071 0 0 1 .038.052v5.5826a4.504 4.504 0 0 1-4.4945 4.4944zm-9.6607-4.1254a4.4708 4.4708 0 0 1-.5346-3.0137l.142.0852 4.783 2.7582a.7712.7712 0 0 0 .7806 0l5.8428-3.3685v2.3324a.0804.0804 0 0 1-.0332.0615L9.74 19.9502a4.4992 4.4992 0 0 1-6.1408-1.6464zM2.3408 7.8956a4.485 4.485 0 0 1 2.3655-1.9728V11.6a.7664.7664 0 0 0 .3879.6765l5.8144 3.3543-2.0201 1.1685a.0757.0757 0 0 1-.071 0l-4.8303-2.7865A4.504 4.504 0 0 1 2.3408 7.872zm16.5963 3.8558L13.1038 8.364 15.1192 7.2a.0757.0757 0 0 1 .071 0l4.8303 2.7913a4.4944 4.4944 0 0 1-.6765 8.1042v-5.6772a.79.79 0 0 0-.407-.667zm2.0107-3.0231l-.142-.0852-4.7735-2.7818a.7759.7759 0 0 0-.7854 0L9.409 9.2297V6.8974a.0662.0662 0 0 1 .0284-.0615l4.8303-2.7866a4.4992 4.4992 0 0 1 6.6802 4.66zM8.3065 12.863l-2.02-1.1638a.0804.0804 0 0 1-.038-.0567V6.0742a4.4992 4.4992 0 0 1 7.3757-3.4537l-.142.0805L8.704 5.459a.7948.7948 0 0 0-.3927.6813zm1.0976-2.3654l2.602-1.4998 2.6069 1.4998v2.9994l-2.5974 1.4997-2.6067-1.4997Z"
+        fill="white"
+      />
+    </svg>
+  );
+}
+
+function GeminiLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#4285F4" />
+      {/* Gemini 4-pointed star */}
+      <path d="M16 6C16 6 18.2 13.8 24 16C18.2 18.2 16 26 16 26C16 26 13.8 18.2 8 16C13.8 13.8 16 6 16 6Z" fill="white" />
+    </svg>
+  );
+}
+
+function CopilotLogo() {
+  return (
+    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+      <rect width="32" height="32" rx="8" fill="#F0F0F0" />
+      {/* Microsoft 4-color grid */}
+      <rect x="8" y="8" width="7" height="7" rx="1" fill="#F25022" />
+      <rect x="17" y="8" width="7" height="7" rx="1" fill="#7FBA00" />
+      <rect x="8" y="17" width="7" height="7" rx="1" fill="#00A4EF" />
+      <rect x="17" y="17" width="7" height="7" rx="1" fill="#FFB900" />
+    </svg>
+  );
+}
+
+// ── AI providers accordion ────────────────────────────────────────────────────
+
+interface AIProvider {
+  id: string;
+  name: string;
+  requirement: string;
+  description: string;
+  guideUrl: string;
+  color: string;
+  Logo: () => ReactNode;
+}
+
+const AI_PROVIDERS: AIProvider[] = [
+  {
+    id: "claude",
+    name: "Claude",
+    requirement: "Works on every plan — Free, Pro, Max, Team, and Enterprise.",
+    description: "The easiest way to get started. Follow Anthropic's official guide to add Commonality as a custom connector.",
+    guideUrl: "https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp",
+    color: "#CC785C",
+    Logo: ClaudeLogo,
+  },
+  {
+    id: "chatgpt",
+    name: "ChatGPT",
+    requirement: "Plus/Pro for read-only access; Business, Enterprise, or Edu (admin-enabled) for full actions.",
+    description: "Connect via Developer Mode. Your account tier determines what level of access you get.",
+    guideUrl: "https://help.openai.com/en/articles/12584461-developer-mode-and-mcp-apps-in-chatgpt",
+    color: "#10A37F",
+    Logo: ChatGPTLogo,
+  },
+  {
+    id: "gemini",
+    name: "Gemini",
+    requirement: "Requires Google AI Ultra ($100+/mo), a personal Google account, and is currently US-only.",
+    description: "Connect through Gemini Spark. Note the subscription and geographic requirements before getting started.",
+    guideUrl: "https://docs.cloud.google.com/gemini/enterprise/docs/connectors/custom-mcp-server/set-up-custom-mcp-server",
+    color: "#4285F4",
+    Logo: GeminiLogo,
+  },
+  {
+    id: "copilot",
+    name: "Microsoft Copilot Studio",
+    requirement: "Separate from Microsoft 365 Copilot — requires its own Copilot Studio license.",
+    description: "Connect your Copilot Studio agent to Commonality's MCP server using Microsoft's official guide.",
+    guideUrl: "https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent",
+    color: "#0078D4",
+    Logo: CopilotLogo,
+  },
+];
+
+function AIProvidersSection() {
+  const [openId, setOpenId] = useState<string | null>(null);
+  return (
+    <div className="mt-5">
+      <p className="mb-3 text-sm font-medium text-ink">Connect to your favorite AI:</p>
+      <div className="space-y-2">
+        {AI_PROVIDERS.map((provider) => (
+          <AIProviderItem
+            key={provider.id}
+            provider={provider}
+            open={openId === provider.id}
+            onToggle={() => setOpenId((id) => (id === provider.id ? null : provider.id))}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function AIProviderItem({ provider, open, onToggle }: { provider: AIProvider; open: boolean; onToggle: () => void }) {
+  const [btnHovered, setBtnHovered] = useState(false);
+  return (
+    <div className="overflow-hidden rounded-lg border border-gray-100">
+      <button
+        className="flex w-full items-center justify-between bg-white px-4 py-3 text-left transition-colors hover:bg-gray-50"
+        onClick={onToggle}
+        aria-expanded={open}
+      >
+        <div className="flex items-center gap-3">
+          <provider.Logo />
+          <span className="text-sm font-semibold text-ink">{provider.name}</span>
+        </div>
+        <span
+          className={`text-base text-lavender transition-transform duration-200 ${open ? "rotate-180" : ""}`}
+          aria-hidden
+        >
+          ▾
+        </span>
+      </button>
+      <div className={`overflow-hidden transition-all duration-200 ${open ? "max-h-60" : "max-h-0"}`}>
+        <div className="border-t border-gray-100 px-4 pb-4 pt-3">
+          <p className="mb-1 text-xs font-semibold" style={{ color: provider.color }}>
+            {provider.requirement}
+          </p>
+          <p className="mb-3 text-sm text-lavender">{provider.description}</p>
+          <a
+            href={provider.guideUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{
+              backgroundColor: provider.color,
+              boxShadow: btnHovered ? "none" : "3px 3px 0 0 rgba(0,0,0,0.15)",
+              transform: btnHovered ? "translate(3px, 3px)" : "translate(0, 0)",
+            }}
+            onMouseEnter={() => setBtnHovered(true)}
+            onMouseLeave={() => setBtnHovered(false)}
+            className="inline-flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-semibold text-white transition-all duration-150"
+          >
+            View connection guide →
+          </a>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ConnectorCard({ mcpUrl }: { mcpUrl: string }) {
   const [copiedUrl, setCopiedUrl] = useState(false);
-  const [copiedInvite, setCopiedInvite] = useState(false);
-  const [inviteMessage, setInviteMessage] = useState(() => defaultInviteMessage(appUrl));
 
   return (
     <CollapsibleCard
@@ -256,7 +416,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         </button>
       </div>
       <p className="mt-2 text-sm text-lavender">
-        Having trouble connecting? Or have an AI other than Claude?{" "}
+        Having trouble connecting?{" "}
         <a
           href="https://meetings.hubspot.com/conor-sullivan/commonality"
           target="_blank"
@@ -268,32 +428,7 @@ function ConnectorCard({ mcpUrl, appUrl }: { mcpUrl: string; appUrl: string }) {
         .
       </p>
 
-      <div className="mt-5">
-        <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-        <ResponsiveConnectorDemo />
-      </div>
-
-      <div className="mt-5 border-t border-gray-100 pt-5">
-        <h3 className="text-sm font-semibold text-ink">Invite a teammate</h3>
-        <p className="mt-1 text-sm text-lavender">
-          Edit the message below if you'd like, then copy it for a teammate.
-        </p>
-        <textarea
-          className="input mt-3 h-28 font-mono text-xs"
-          value={inviteMessage}
-          onChange={(e) => setInviteMessage(e.target.value)}
-        />
-        <button
-          className="btn-secondary mt-3"
-          onClick={() => {
-            navigator.clipboard.writeText(inviteMessage);
-            setCopiedInvite(true);
-            setTimeout(() => setCopiedInvite(false), 2000);
-          }}
-        >
-          {copiedInvite ? "Copied!" : "Copy invite message"}
-        </button>
-      </div>
+      <AIProvidersSection />
     </CollapsibleCard>
   );
 }
