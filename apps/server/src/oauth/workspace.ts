@@ -58,6 +58,17 @@ async function describeJoinedCompany(companyId: string): Promise<JoinedExistingC
   return { companyName: company?.name ?? "your company", adminEmail: admin?.email ?? "your admin" };
 }
 
+// True only when the company currently has just its admin (no one else has
+// joined yet) - used so the HubSpot "additional user added" flag fires once,
+// on the first teammate to join, not on every subsequent one.
+async function companyHasExactlyOneUser(companyId: string): Promise<boolean> {
+  const { count } = await db()
+    .from("users")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId);
+  return (count ?? 0) === 1;
+}
+
 export async function resolveWorkspaceForEmail(rawEmail: string): Promise<WorkspaceResolution> {
   const supa = db();
   const email = rawEmail.toLowerCase().trim();
@@ -84,13 +95,16 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
     .order("created_at", { ascending: false })
     .maybeSingle<{ id: string; company_id: string }>();
   if (invite) {
+    const isFirstAdditionalUser = await companyHasExactlyOneUser(invite.company_id);
     const user = await createUser(invite.company_id, email, "member");
     await supa.from("invites").update({ accepted: true }).eq("id", invite.id);
     const company = await getCompany(invite.company_id);
     const joinedExistingCompany = await describeJoinedCompany(company.id);
-    markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
-      logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
-    );
+    if (isFirstAdditionalUser) {
+      markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
+        logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
+      );
+    }
     return { claims: toClaims(user, company, email), joinedExistingCompany };
   }
 
@@ -103,11 +117,14 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
       .eq("domain", domain)
       .maybeSingle<CompanyRow>();
     if (company) {
+      const isFirstAdditionalUser = await companyHasExactlyOneUser(company.id);
       const user = await createUser(company.id, email, "member");
       const joinedExistingCompany = await describeJoinedCompany(company.id);
-      markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
-        logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
-      );
+      if (isFirstAdditionalUser) {
+        markAdditionalUserAdded(joinedExistingCompany.adminEmail).catch((err) =>
+          logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
+        );
+      }
       return { claims: toClaims(user, company, email), joinedExistingCompany };
     }
   }
