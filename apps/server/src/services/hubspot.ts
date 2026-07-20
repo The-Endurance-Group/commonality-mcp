@@ -88,7 +88,7 @@ export async function markAdditionalUserAdded(adminEmail: string): Promise<void>
         {
           idProperty: "email",
           id: adminEmail,
-          properties: { additional_commonality_user_added: "yes" },
+          properties: { additional_commonality_user_added: "Yes" },
         },
       ],
     }),
