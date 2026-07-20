@@ -18,6 +18,8 @@ const DEFAULT_OWNER_ID = "81355081";
 export async function upsertHubspotContact(
   signupEmail: string,
   companyName: string,
+  firstName?: string,
+  lastName?: string,
 ): Promise<void> {
   const apiKey = process.env.HUBSPOT_API_KEY;
   if (!apiKey) {
@@ -41,6 +43,8 @@ export async function upsertHubspotContact(
             lifecyclestage: "lead",
             lead_source: "Commonality Sign Up",
             hubspot_owner_id: DEFAULT_OWNER_ID,
+            ...(firstName ? { firstname: firstName } : {}),
+            ...(lastName ? { lastname: lastName } : {}),
           },
         },
       ],

@@ -123,6 +123,8 @@ export async function createWorkspace(
   rawEmail: string,
   companyName: string,
   domain?: string,
+  firstName?: string,
+  lastName?: string,
 ): Promise<SignableClaims> {
   const email = rawEmail.toLowerCase().trim();
   const { data: existing } = await db().from("users").select("id").eq("email", email).maybeSingle();
@@ -145,7 +147,7 @@ export async function createWorkspace(
   sendWelcomeEmail(email).catch((err) =>
     logger.error({ err, email }, "welcome email failed"),
   );
-  upsertHubspotContact(email, companyName).catch((err) => {
+  upsertHubspotContact(email, companyName, firstName, lastName).catch((err) => {
     logger.error({ err, email, companyName }, "hubspot contact upsert failed");
     sendHubspotFailureAlert(email, companyName, err instanceof Error ? err.message : String(err)).catch(
       (alertErr) => logger.error({ err: alertErr, email, companyName }, "hubspot failure alert email failed"),

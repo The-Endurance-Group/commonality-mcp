@@ -41,12 +41,14 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 
 const SESSION_EXCHANGE_TIMEOUT_MS = 12000;
 
-async function clerkEmailFromRequest(req: Request): Promise<string> {
+async function clerkUserFromRequest(
+  req: Request,
+): Promise<{ email: string; firstName?: string; lastName?: string }> {
   const header = req.header("authorization") ?? "";
   const [scheme, token] = header.split(" ");
   if (scheme?.toLowerCase() !== "bearer" || !token) throw new Error("missing Clerk token");
-  const { email } = await verifyClerkSessionToken(token);
-  return email;
+  const { email, firstName, lastName } = await verifyClerkSessionToken(token);
+  return { email, firstName, lastName };
 }
 
 // POST /api/auth/token - exchange a Clerk session for a Commonality JWT.
@@ -54,7 +56,7 @@ async function clerkEmailFromRequest(req: Request): Promise<string> {
 authRouter.post("/token", async (req, res) => {
   let email: string;
   try {
-    email = await withTimeout(clerkEmailFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS);
+    ({ email } = await withTimeout(clerkUserFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS));
   } catch (err) {
     logger.error({ err }, "clerk session verification failed or timed out");
     res.status(err instanceof TimeoutError ? 504 : 401).json({ error: "invalid_clerk_session" });
@@ -95,8 +97,10 @@ function domainFromEmail(email: string): string | undefined {
 // POST /api/auth/onboarding - first-time admin creates their workspace.
 authRouter.post("/onboarding", async (req, res) => {
   let email: string;
+  let firstName: string | undefined;
+  let lastName: string | undefined;
   try {
-    email = await withTimeout(clerkEmailFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS);
+    ({ email, firstName, lastName } = await withTimeout(clerkUserFromRequest(req), SESSION_EXCHANGE_TIMEOUT_MS));
   } catch (err) {
     logger.error({ err }, "clerk session verification failed or timed out");
     res.status(err instanceof TimeoutError ? 504 : 401).json({ error: "invalid_clerk_session" });
@@ -109,7 +113,7 @@ authRouter.post("/onboarding", async (req, res) => {
   }
   try {
     const claims = await withTimeout(
-      createWorkspace(email, companyName.trim(), domainFromEmail(email)),
+      createWorkspace(email, companyName.trim(), domainFromEmail(email), firstName, lastName),
       SESSION_EXCHANGE_TIMEOUT_MS,
     );
     const { token, expiresIn } = signAccessToken(withSuperadmin(claims));
