@@ -1,30 +1,37 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk/clerk-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
-// The site's main marketing page - "access LinkedIn via your AI," with
-// Commonality's team-network matching as the standout feature.
+// The site's main marketing page. Positioning: "Commonality teaches AI who
+// you know" - the AI answers "Who do we know at IBM?" with real relationship
+// paths from across the user's organization, not just prospect research.
+
+function StartFreeButton({ label = "Start Free", className }: { label?: string; className?: string }) {
+  const cls =
+    className ??
+    "rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark";
+  return (
+    <>
+      <SignedOut>
+        <SignUpButton mode="modal">
+          <button className={cls}>{label}</button>
+        </SignUpButton>
+      </SignedOut>
+      <SignedIn>
+        <Link to="/dashboard" className={`inline-block ${cls}`}>
+          Open your workspace
+        </Link>
+      </SignedIn>
+    </>
+  );
+}
 
 function SectionCta({ label }: { label: string }) {
   return (
     <div className="mt-10">
-      <SignedOut>
-        <SignUpButton mode="modal">
-          <button className="rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark">
-            {label}
-          </button>
-        </SignUpButton>
-      </SignedOut>
-      <SignedIn>
-        <Link
-          to="/dashboard"
-          className="inline-block rounded-lg bg-brand px-6 py-3 font-medium text-white transition hover:scale-105 hover:bg-brand-dark"
-        >
-          {label}
-        </Link>
-      </SignedIn>
+      <StartFreeButton label={label} />
     </div>
   );
 }
@@ -41,6 +48,7 @@ function CheckIcon({ className = "text-brand" }: { className?: string }) {
       strokeLinecap="round"
       strokeLinejoin="round"
       className={`shrink-0 ${className}`}
+      aria-hidden="true"
     >
       <path d="M20 6 9 17l-5-5" />
     </svg>
@@ -49,7 +57,6 @@ function CheckIcon({ className = "text-brand" }: { className?: string }) {
 
 const ICON_PATHS: Record<string, string> = {
   network: "M12 2 4 7v10l8 5 8-5V7z M12 12v10 M12 12 4 7 M12 12l8-5",
-  zap: "M13 2 3 14h7l-1 8 10-12h-7z",
   link: "M9 17H7a5 5 0 0 1 0-10h2 M15 7h2a5 5 0 0 1 0 10h-2 M8 12h8",
   history: "M3 12a9 9 0 1 0 3-6.7 M3 5v5h5",
   route: "M5 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M19 9a2 2 0 1 0 0-4 2 2 0 0 0 0 4 M5 17v-3a4 4 0 0 1 4-4h6a4 4 0 0 0 4-4",
@@ -58,10 +65,11 @@ const ICON_PATHS: Record<string, string> = {
   message:
     "M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z",
   mail: "M3 6h18v12H3z M3 6l9 7 9-7",
-  pencil: "M12 20h9 M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z",
   school: "M22 10 12 5 2 10l10 5 10-5z M6 12v5c0 1.5 2.7 3 6 3s6-1.5 6-3v-5 M22 10v6",
   pin: "M12 22s8-7.58 8-13a8 8 0 1 0-16 0c0 5.42 8 13 8 13z M12 12a2 2 0 1 0 0-4 2 2 0 0 0 0 4",
-  post: "M4 4h16v16H4z M4 9h16 M9 4v16",
+  shield: "M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z",
+  chart: "M3 3v18h18 M7 15l4-4 3 3 5-6",
+  lock: "M5 11h14v10H5z M8 11V7a4 4 0 0 1 8 0v4",
 };
 
 function Icon({ name, className = "text-brand" }: { name: string; className?: string }) {
@@ -76,257 +84,91 @@ function Icon({ name, className = "text-brand" }: { name: string; className?: st
       strokeLinecap="round"
       strokeLinejoin="round"
       className={className}
+      aria-hidden="true"
     >
       <path d={ICON_PATHS[name]} />
     </svg>
   );
 }
 
-function TypingDotsRow() {
-  return (
-    <div className="animate-fade-up flex w-fit gap-1 rounded-lg bg-gray-100 px-3 py-2.5">
-      {[0, 1, 2].map((i) => (
-        <span
-          key={i}
-          className="h-1.5 w-1.5 animate-bounce rounded-full bg-lavender"
-          style={{ animationDelay: `${i * 150}ms` }}
-        />
-      ))}
-    </div>
-  );
-}
+// --- Hero AI-conversation demonstration -------------------------------------
+// A static, semantic example conversation (not a screenshot) so it stays
+// accessible. Names are fictional; the card is labeled as an example.
 
-const chatExamples = [
+const DEMO_PATHS = [
   {
-    q: "Find me the LinkedIn for the CEO of Acme Inc.",
-    title: "Executive lookup",
-    detail: "Found Acme's CEO profile - ready to research or reach out",
+    name: "Sarah Chen",
+    kind: "Former IBM employee",
+    detail: "Sarah worked at IBM for seven years and is connected to several current IBM leaders.",
   },
   {
-    q: "Find me directors of finance in the USA who went to Boston College",
-    title: "People search",
-    detail: "3 directors of finance in the US who went to Boston College",
+    name: "Michael Torres",
+    kind: "Shared employer history",
+    detail: "Michael and IBM's Chief Information Officer worked together at a previous company.",
   },
   {
-    q: "Research Jane Doe, VP Sales at Acme, before I reach out",
-    title: "1st-degree connection found",
-    detail: "Sam K. is already connected to Jane on LinkedIn",
+    name: "David Reynolds",
+    kind: "Alumni connection",
+    detail: "David and an IBM senior executive attended Northwestern University during the same period.",
   },
   {
-    q: "No one on our team knows Marcus Lee at Globex - what's my angle?",
-    title: "Research fallback",
-    detail: "Marcus posted about supply-chain automation last week - good opener",
-  },
-  {
-    q: "Anyone with a connection to Dana Ruiz, CTO at Vantage?",
-    title: "Alma mater",
-    detail: "Devon R. and Dana both went to Wharton - MBA '16",
-  },
-  {
-    q: "What's Vantage Corp been posting about lately?",
-    title: "Company research",
-    detail: "3 recent posts on their new product line - use it in your opener",
+    name: "Rachel Adams",
+    kind: "Direct professional connection",
+    detail: "Rachel is connected to IBM's Vice President of Enterprise Technology.",
   },
 ];
 
-function ChatMock() {
-  const [step, setStep] = useState(0);
-  const [phase, setPhase] = useState<"typing" | "answer">("typing");
-
-  useEffect(() => {
-    const id = setInterval(() => setStep((s) => (s + 1) % chatExamples.length), 4200);
-    return () => clearInterval(id);
-  }, []);
-
-  useEffect(() => {
-    setPhase("typing");
-    const t = setTimeout(() => setPhase("answer"), 1100);
-    return () => clearTimeout(t);
-  }, [step]);
-
-  const ex = chatExamples[step];
-
+function HeroDemo() {
   return (
-    <div className="mx-auto max-w-md rounded-lg bg-white p-4 text-left shadow-2xl">
-      <div className="mb-3 flex gap-1.5 border-b border-gray-100 pb-3">
-        <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-        <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-        <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
-      </div>
-
-      <div className="flex min-h-[110px] flex-col justify-start gap-2.5 text-sm">
-        <div
-          key={`q-${step}`}
-          className="animate-fade-up ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink"
-        >
-          {ex.q}
+    <div className="mx-auto w-full max-w-lg rounded-xl border border-gray-200 bg-white p-4 text-left shadow-xl sm:p-5">
+      <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
+        <div className="flex gap-1.5" aria-hidden="true">
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
+          <span className="h-2.5 w-2.5 rounded-full bg-gray-300" />
         </div>
-        {phase === "typing" ? (
-          <TypingDotsRow />
-        ) : (
-          <div className="animate-fade-up w-fit max-w-[90%] rounded-lg rounded-bl-sm bg-tint-brand px-3 py-2">
-            <p className="font-medium text-ink">{ex.title}</p>
-            <p className="text-xs text-lavender">{ex.detail}</p>
-          </div>
-        )}
+        <span className="rounded-full bg-gray-100 px-2.5 py-0.5 text-[11px] font-medium text-lavender">
+          Example - illustrative names, not real data
+        </span>
       </div>
 
-      <div className="mt-3 flex justify-center gap-1.5">
-        {chatExamples.map((_, i) => (
+      <div className="space-y-3 text-sm">
+        <p className="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink">
+          Who do we know at IBM?
+        </p>
+
+        <div className="rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3">
+          <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+          <p className="mt-2.5 font-semibold text-ink">Your strongest paths into IBM</p>
+          <ul className="mt-2 space-y-2.5">
+            {DEMO_PATHS.map((p) => (
+              <li key={p.name}>
+                <p className="font-medium text-ink">
+                  {p.name} <span className="font-normal text-brand">— {p.kind}</span>
+                </p>
+                <p className="text-lavender">{p.detail}</p>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+          <p className="mt-1 text-lavender">
+            Start with Sarah. Her previous employment and active relationships at IBM appear to
+            offer the strongest path to a warm introduction.
+          </p>
+          <p className="mt-2 text-lavender">Would you like me to draft a message asking Sarah for an introduction?</p>
           <span
-            key={i}
-            className={`h-1.5 rounded-full transition-all ${
-              i === step ? "w-6 bg-brand" : "w-1.5 bg-gray-200"
-            }`}
-          />
-        ))}
+            className="mt-3 inline-block cursor-default rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm"
+            aria-hidden="true"
+          >
+            Draft Introduction Request
+          </span>
+        </div>
       </div>
     </div>
   );
 }
 
-const socialMapPaths = [
-  { name: "Sam K.", signal: "1st-degree LinkedIn", x: 70, strongest: true },
-  { name: "Devon R.", signal: "Both Wharton MBA, '16", x: 230, strongest: false },
-  { name: "Priya N.", signal: "Both worked at Initech", x: 390, strongest: false },
-  { name: "Alex P.", signal: "Both live in Portland, ME", x: 550, strongest: false },
-];
-
-const mobileFanX = [-70, -25, 25, 70];
-
-function SocialMapMobile() {
-  const colX = 170;
-  const rowGap = 78;
-  const rowStart = 56;
-  const prospectY = rowStart + rowGap * socialMapPaths.length + 40;
-  const rows = socialMapPaths.map((p, i) => ({
-    ...p,
-    x: colX + mobileFanX[i],
-    y: rowStart + i * rowGap,
-  }));
-  const orderedLines = [...rows.filter((p) => !p.strongest), ...rows.filter((p) => p.strongest)];
-
-  return (
-    <div className="mx-auto max-w-xs sm:hidden">
-      <svg
-        viewBox={`0 0 340 ${prospectY + 60}`}
-        className="mx-auto h-auto w-full"
-        aria-hidden="true"
-      >
-        {orderedLines.map((p, i) => (
-          <line
-            key={`line-${p.name}`}
-            x1={p.x}
-            y1={p.y + 22}
-            x2={colX}
-            y2={prospectY - 22}
-            stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
-            strokeWidth={p.strongest ? 3 : 1.5}
-            className={p.strongest ? "sm-line sm-line-strong" : "sm-line"}
-            style={{ animationDelay: `${i * 0.3}s` }}
-          />
-        ))}
-
-        <g transform={`translate(${colX}, ${prospectY})`}>
-          <circle r="22" fill="#65B6AE" />
-          <text x="0" y="40" fontSize="14" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
-            Jane Doe
-          </text>
-          <text x="0" y="57" fontSize="12" fill="#645D69" textAnchor="middle">
-            VP Sales, Acme
-          </text>
-        </g>
-
-        {rows.map((p) => (
-          <g key={p.name} transform={`translate(${p.x}, ${p.y})`}>
-            <circle
-              r="20"
-              fill={p.strongest ? "#C45E89" : "#FBEAF1"}
-              stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
-              strokeWidth="1.5"
-              className={p.strongest ? "sm-node-strong" : ""}
-            />
-            <text x="0" y="-42" fontSize="14" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
-              {p.name}
-            </text>
-            <text
-              x="0"
-              y="-26"
-              fontSize="12"
-              fill={p.strongest ? "#C45E89" : "#645D69"}
-              textAnchor="middle"
-            >
-              {p.signal}
-            </text>
-          </g>
-        ))}
-      </svg>
-    </div>
-  );
-}
-
-function SocialMapGraphic() {
-  const rowY = 30;
-  const prospectY = 170;
-  const prospectX = 310;
-
-  return (
-    <>
-      <SocialMapMobile />
-      <div className="mx-auto hidden max-w-3xl sm:block">
-        <svg viewBox="0 0 620 280" className="mx-auto h-auto w-full" aria-hidden="true">
-          {socialMapPaths.map((p, i) => (
-            <line
-              key={`line-${p.name}`}
-              x1={p.x}
-              y1={rowY + 22}
-              x2={prospectX}
-              y2={prospectY - 22}
-              stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
-              strokeWidth={p.strongest ? 3 : 1.5}
-              className={p.strongest ? "sm-line sm-line-strong" : "sm-line"}
-              style={{ animationDelay: `${i * 0.3}s` }}
-            />
-          ))}
-
-          <g transform={`translate(${prospectX}, ${prospectY})`}>
-            <circle r="22" fill="#65B6AE" />
-            <text x="0" y="40" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
-              Jane Doe
-            </text>
-            <text x="0" y="56" fontSize="11" fill="#645D69" textAnchor="middle">
-              VP Sales, Acme
-            </text>
-          </g>
-
-          {socialMapPaths.map((p) => (
-            <g key={p.name} transform={`translate(${p.x}, ${rowY})`}>
-              <circle
-                r="20"
-                fill={p.strongest ? "#C45E89" : "#FBEAF1"}
-                stroke={p.strongest ? "#C45E89" : "#E5E7EB"}
-                strokeWidth="1.5"
-                className={p.strongest ? "sm-node-strong" : ""}
-              />
-              <text x="0" y="40" fontSize="13" fontWeight="600" fill="#1A1A1A" textAnchor="middle">
-                {p.name}
-              </text>
-              <text
-                x="0"
-                y="56"
-                fontSize="11"
-                fill={p.strongest ? "#C45E89" : "#645D69"}
-                textAnchor="middle"
-              >
-                {p.signal}
-              </text>
-            </g>
-          ))}
-        </svg>
-      </div>
-    </>
-  );
-}
+// --- FAQ / testimonials (retained content) ----------------------------------
 
 const faqs: { q: string; a: ReactNode }[] = [
   {
@@ -439,6 +281,8 @@ const testimonials = [
   },
 ];
 
+// --- Supported AI assistants ------------------------------------------------
+
 function MqClaudeLogo() {
   return (
     <svg width="24" height="24" viewBox="0 0 16 16" aria-hidden="true">
@@ -489,15 +333,18 @@ function AIMarquee() {
   // Duplicate once — animation runs to -50% which lands on an identical frame, seamless loop
   const track = [...MQ_PROVIDERS, ...MQ_PROVIDERS];
   return (
-    <section className="border-b border-gray-100 bg-white py-8">
-      <style>{`@keyframes mq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }`}</style>
+    <section className="border-b border-gray-100 bg-white py-8" aria-label="Supported AI assistants">
+      <style>{`
+        @keyframes mq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+        @media (prefers-reduced-motion: reduce) { .mq-track { animation: none !important; } }
+      `}</style>
       <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
-        Works with your favorite AI
+        Works with the AI tools your team already uses
       </p>
       <div className="relative mx-auto max-w-xl overflow-hidden">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
-        <div style={{ display: "flex", width: "max-content", animation: "mq-loop 9s linear infinite" }}>
+        <div className="mq-track" style={{ display: "flex", width: "max-content", animation: "mq-loop 9s linear infinite" }}>
           {track.map((p, i) => (
             <div key={i} className="mx-2.5 flex items-center gap-2.5 rounded-full border border-gray-200 bg-white px-4 py-2.5 shadow-sm">
               <p.Logo />
@@ -509,6 +356,112 @@ function AIMarquee() {
     </section>
   );
 }
+
+// --- Section content --------------------------------------------------------
+
+const DISCOVER_CARDS = [
+  {
+    icon: "history",
+    title: "Previous Employment",
+    body: "Someone on your team worked at the target company.",
+  },
+  {
+    icon: "link",
+    title: "Direct Connections",
+    body: "A colleague is directly connected to a key decision-maker on LinkedIn.",
+  },
+  {
+    icon: "school",
+    title: "Shared Education",
+    body: "A teammate and an executive attended the same university or program.",
+  },
+  {
+    icon: "building",
+    title: "Shared Employer History",
+    body: "Members of each organization previously worked at the same company.",
+  },
+  {
+    icon: "pin",
+    title: "Shared Location",
+    body: "A teammate is based in the same city or region as your prospect.",
+  },
+  {
+    icon: "users",
+    title: "Team-Wide Relationships",
+    body: "The useful connection may belong to someone outside the salesperson's own network.",
+  },
+];
+
+const HOW_IT_WORKS_STEPS = [
+  {
+    n: 1,
+    title: "Connect your professional network",
+    body: "Commonality securely connects the professional relationship information authorized by you and your organization - your team roster, backgrounds, and any LinkedIn connections teammates choose to share.",
+  },
+  {
+    n: 2,
+    title: "Build organizational relationship intelligence",
+    body: "Commonality researches connections, employment histories, shared education, and other relevant professional overlaps across your whole team.",
+  },
+  {
+    n: 3,
+    title: "Ask naturally",
+    body: "Use the AI assistant your team already works with. Commonality doesn't replace it - it makes it relationship-aware.",
+  },
+];
+
+const EXAMPLE_PROMPTS = [
+  "Who do we know at IBM?",
+  "What is our strongest path into Amazon?",
+  "Does anyone here know the Chief Marketing Officer at Nike?",
+  "Who on our team previously worked at Salesforce?",
+  "Which executive should approach this account?",
+  "Find our best relationships across this target-account list.",
+  "Draft a message asking for an introduction.",
+  "Explain why this is our strongest relationship.",
+];
+
+const TEAM_OUTCOMES = [
+  {
+    icon: "message",
+    title: "Book More Warm Meetings",
+    body: "Begin with introductions instead of cold outreach.",
+  },
+  {
+    icon: "chart",
+    title: "Improve Account Planning",
+    body: "Add relationship context to target-account strategy.",
+  },
+  {
+    icon: "route",
+    title: "Make New Hires Productive Faster",
+    body: "Help new employees understand the relationships that already exist across the company.",
+  },
+  {
+    icon: "network",
+    title: "Preserve Organizational Knowledge",
+    body: "Reduce the loss of relationship intelligence when employees change roles or leave.",
+  },
+];
+
+const SECURITY_POINTS = [
+  "Your data is used only for Commonality's own features - finding your team's relationship paths.",
+  "Relationship information is never sold.",
+  "Your workspace's data is scoped to your company only - other customers can never see it.",
+  "Users see only the workspace they belong to, controlled by your admin.",
+  "Data is protected in transit and at rest.",
+  "Admins control who joins the workspace and what's on the team roster.",
+];
+
+// --- Page -------------------------------------------------------------------
+
+const NAV_LINKS = [
+  { href: "#how-it-works", label: "How It Works" },
+  { href: "#use-cases", label: "Use Cases" },
+  { href: "#security", label: "Security" },
+  { href: "#for-teams", label: "For Teams" },
+  { href: "#pricing", label: "Pricing" },
+];
 
 export function Marketing() {
   // Redirect signed-in users straight to their workspace.
@@ -533,87 +486,76 @@ export function Marketing() {
   }
 
   return (
-    <div className="min-h-screen overflow-x-hidden">
-      <header className="mx-auto flex max-w-content items-center justify-between gap-4 px-6 py-5">
-        <a href="https://theendurancegroup.com" className="flex shrink-0 items-center">
-          <img src="/logos/teg.webp" alt="The Endurance Group" className="h-8 w-auto" />
-        </a>
-        <div className="flex items-center gap-4 text-sm">
-          <a href="#how-it-works" className="hidden font-medium text-lavender hover:text-ink sm:inline">
-            How it works
+    <div className="min-h-screen overflow-x-hidden bg-gray-50">
+      <header className="border-b border-gray-100 bg-white">
+        <div className="mx-auto flex max-w-content items-center justify-between gap-4 px-6 py-4">
+          <a href="/" className="flex shrink-0 items-center" aria-label="Commonality home">
+            <img src="/logo.png" alt="Commonality" className="h-7 w-auto" />
           </a>
-          <a href="#pricing" className="hidden font-medium text-lavender hover:text-ink sm:inline">
-            Pricing
-          </a>
-          <a href="#faq" className="hidden font-medium text-lavender hover:text-ink sm:inline">
-            FAQ
-          </a>
-          <SignedOut>
-            <SignInButton mode="modal">
-              <button className="rounded-lg bg-accent px-4 py-2 font-medium text-white transition hover:bg-accent-dark">
-                Sign in
-              </button>
-            </SignInButton>
-          </SignedOut>
-          <SignedIn>
-            <Link to="/dashboard" className="text-brand font-medium">
-              Go to dashboard →
-            </Link>
-          </SignedIn>
-        </div>
-      </header>
-
-      {/* Hero */}
-      <section className="animate-gradient bg-gradient-to-br from-purple via-brand to-accent px-6 py-20 text-center">
-        <div className="mx-auto max-w-2xl animate-fade-up">
-          <div className="mx-auto w-fit rounded-full bg-white/10 px-4 py-1.5 text-xs font-medium text-white/90">
-            One of our most popular AI automations is now available for free. Try it today.
-          </div>
-          <p className="mt-6 text-sm font-semibold uppercase tracking-wide text-white/80">
-            LinkedIn Research, Right From Your AI
-          </p>
-          <h1 className="mt-4 text-4xl font-bold leading-tight text-white sm:text-5xl">
-            Search LinkedIn, right from your AI.
-          </h1>
-          <p className="mx-auto mt-4 max-w-lg text-lg text-white/90">
-            Ask Claude, ChatGPT, or whatever AI you use to research a prospect or company and get
-            real answers - who on your team is already connected to them, and what to say when you reach out.
-          </p>
-
-          <div className="mt-7 flex items-center justify-center gap-3">
+          <nav className="hidden items-center gap-5 text-sm lg:flex" aria-label="Main">
+            {NAV_LINKS.map((l) => (
+              <a key={l.href} href={l.href} className="font-medium text-lavender hover:text-ink">
+                {l.label}
+              </a>
+            ))}
+          </nav>
+          <div className="flex items-center gap-3 text-sm">
             <SignedOut>
+              <SignInButton mode="modal">
+                <button className="font-medium text-lavender hover:text-ink">Sign In</button>
+              </SignInButton>
               <SignUpButton mode="modal">
-                <button className="rounded-lg bg-white px-6 py-3 font-medium text-purple transition hover:scale-105 hover:bg-white/90">
-                  Start for free
+                <button className="rounded-lg bg-brand px-4 py-2 font-medium text-white transition hover:bg-brand-dark">
+                  Start Free
                 </button>
               </SignUpButton>
             </SignedOut>
             <SignedIn>
-              <Link
-                to="/dashboard"
-                className="rounded-lg bg-white px-6 py-3 font-medium text-purple transition hover:scale-105 hover:bg-white/90"
-              >
-                Open your workspace
+              <Link to="/dashboard" className="font-medium text-brand">
+                Go to dashboard →
               </Link>
             </SignedIn>
-            <a href="#how-it-works" className="px-6 py-3 font-medium text-white hover:underline">
-              See how →
-            </a>
           </div>
         </div>
+      </header>
 
-        <div className="mx-auto mt-12 max-w-md animate-float">
-          <ChatMock />
-          <p className="mt-4 text-sm text-white/70">Ask about a person or a whole company - anytime</p>
+      {/* Hero */}
+      <section className="bg-white px-6 pb-16 pt-14 sm:pt-20">
+        <div className="mx-auto grid max-w-content items-center gap-10 lg:grid-cols-2">
+          <div className="animate-fade-up text-center lg:text-left">
+            <p className="text-xs font-semibold uppercase tracking-widest text-brand">
+              Relationship Intelligence for AI
+            </p>
+            <h1 className="mt-4 text-4xl font-bold leading-tight text-ink sm:text-5xl">
+              Who do we know at IBM?
+            </h1>
+            <p className="mt-2 text-2xl font-semibold text-brand sm:text-3xl">Now your AI can answer.</p>
+            <p className="mx-auto mt-5 max-w-lg text-lg text-lavender lg:mx-0">
+              Commonality gives ChatGPT, Claude, and other AI assistants secure access to the
+              professional relationships across your organization - so they can find the people
+              who can help you reach a target account, not just tell you who works there.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+              <StartFreeButton />
+              <a href="#how-it-works" className="rounded-lg px-6 py-3 font-medium text-ink hover:bg-gray-50">
+                See How It Works →
+              </a>
+            </div>
+            <p className="mt-4 text-sm text-lavender">Works with the AI tools your team already uses.</p>
+          </div>
+
+          <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
+            <HeroDemo />
+          </div>
         </div>
       </section>
 
       <AIMarquee />
 
-      {/* Workflow */}
-      <section id="how-it-works" className="mx-auto max-w-content px-6 py-16 text-center">
+      {/* Video */}
+      <section id="demo" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">See it in action</h2>
-        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-lavender/40 shadow-lg">
+        <div className="mx-auto mt-8 max-w-2xl overflow-hidden rounded-xl border border-gray-200 bg-white shadow-lg">
           <div className="relative w-full" style={{ paddingTop: "56.25%" }}>
             <iframe
               className="absolute inset-0 h-full w-full"
@@ -628,137 +570,211 @@ export function Marketing() {
         </div>
       </section>
 
-      {/* Just ask */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">Just ask - no LinkedIn tab required.</h2>
-        <p className="mx-auto mt-2 max-w-xl text-lavender">
-          Look up a specific profile, or find the right person at a company. Either way, just ask
-          in plain English.
-        </p>
-        <div className="mx-auto mt-10 grid max-w-2xl gap-4 text-left sm:grid-cols-2">
-          <div className="animate-fade-up group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg">
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-                <Icon name="network" className="h-5 w-5" />
-              </span>
-              <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Look up a person</p>
+      {/* The missing context in AI */}
+      <section className="bg-white px-6 py-16">
+        <div className="mx-auto max-w-content text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">AI knows the world.</h2>
+          <p className="mt-1 text-2xl font-bold text-brand sm:text-3xl">It doesn't know your relationships.</p>
+          <p className="mx-auto mt-4 max-w-xl text-lavender">
+            AI can research companies, executives, industries, and markets. But without
+            Commonality, it doesn't understand the relationships, shared histories, and potential
+            introductions that exist across your organization.
+          </p>
+
+          <div className="mx-auto mt-10 grid max-w-3xl gap-4 text-left sm:grid-cols-2">
+            <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
+              <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Standard AI</p>
+              <p className="mt-3 text-sm italic text-ink">&ldquo;How can we approach IBM?&rdquo;</p>
+              <p className="mt-3 rounded-lg bg-white px-4 py-3 text-sm text-lavender">
+                Research IBM's priorities, identify the appropriate decision-maker, and develop a
+                personalized outreach message.
+              </p>
+              <p className="mt-3 text-xs font-medium text-lavender">Useful research. No relationship context.</p>
             </div>
-            <p className="mt-4 rounded-lg bg-gray-50 px-4 py-3 text-sm italic text-ink transition group-hover:bg-brand/5">
-              &ldquo;Tell me about John Doe - profile is linkedin.com/in/johndoe&rdquo;
-            </p>
-          </div>
-          <div
-            className="animate-fade-up group rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-brand/40 hover:shadow-lg"
-            style={{ animationDelay: "0.1s" }}
-          >
-            <div className="flex items-center gap-3">
-              <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
-                <Icon name="building" className="h-5 w-5" />
-              </span>
-              <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Find the right person</p>
+            <div className="rounded-xl border-2 border-brand/40 bg-white p-6 shadow-sm">
+              <p className="text-xs font-semibold uppercase tracking-wide text-brand">AI with Commonality</p>
+              <p className="mt-3 text-sm italic text-ink">&ldquo;Who do we know at IBM?&rdquo;</p>
+              <p className="mt-3 rounded-lg bg-tint-brand px-4 py-3 text-sm text-ink">
+                Sarah worked at IBM for seven years, Michael and its CIO worked together earlier in
+                their careers, and Rachel has a direct professional connection to a vice president.
+              </p>
+              <p className="mt-3 text-xs font-semibold text-brand">A real path into the account.</p>
             </div>
-            <p className="mt-4 rounded-lg bg-gray-50 px-4 py-3 text-sm italic text-ink transition group-hover:bg-brand/5">
-              &ldquo;Who should I reach out to at Acme Inc?&rdquo;
-            </p>
           </div>
         </div>
       </section>
 
-      {/* Two ways in */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">There's always a way in.</h2>
-        <p className="mx-auto mt-2 max-w-xl text-lavender">
-          Commonality is our proprietary matching tech, and it's the strongest way in when it
-          applies. When it doesn't, your AI still does the legwork.
-        </p>
-        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
-          <div
-            className="animate-fade-up rounded-lg bg-tint-brand p-6 text-left"
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Warm path found</p>
-            <p className="mt-3 text-sm font-medium text-ink">
-              Commonality checks your whole team's LinkedIn connections, schools, and employers to
-              find who can make the intro - the strongest way in there is.
-            </p>
-          </div>
-          <div
-            className="animate-fade-up rounded-lg border border-gray-200 p-6 text-left"
-            style={{ animationDelay: "0.1s" }}
-          >
-            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">No warm path (yet)</p>
-            <p className="mt-3 text-sm text-ink">
-              Your AI pulls the prospect's background and recent posts, checks what their company's
-              been talking about, and gives you something real to open with.
-            </p>
-          </div>
-        </div>
-
-        <SectionCta label="Find your way in to your top prospect now →" />
-      </section>
-
-      {/* How matching works */}
+      {/* What Commonality discovers */}
       <section className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">
-          How Commonality finds your way in
+          Find the relationships hidden across your organization.
         </h2>
-        <p className="mx-auto mt-2 max-w-xl text-lavender">
-          We analyze social capital on both sides - every person on your team, and your
-          prospect - then rank every possible path.
-        </p>
-
-        <div className="animate-fade-up mt-10">
-          <SocialMapGraphic />
-        </div>
-
-        <div className="mt-6 inline-flex items-center gap-2 rounded-full bg-tint-brand px-4 py-2 text-sm font-medium text-brand">
-          <CheckIcon className="text-brand" />
-          Strongest connection, ranked automatically
-        </div>
-
-        <SectionCta label="See my warmest path to a prospect →" />
-      </section>
-
-      {/* Research fallback */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
-        <h2 className="text-2xl font-bold text-ink sm:text-3xl">No warm path? Your AI still finds an angle.</h2>
-        <p className="mx-auto mt-2 max-w-xl text-lavender">
-          Ask, and your AI pulls the prospect's recent LinkedIn posts and the target company's
-          recent activity - real, specific material for your opener, not a generic cold message.
-        </p>
-        <div className="mx-auto mt-10 grid max-w-2xl gap-4 sm:grid-cols-2">
-          <div className="animate-fade-up flex flex-col items-center rounded-lg border border-gray-200 p-6 text-center">
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tint-brand text-brand">
-              <Icon name="post" />
+        <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
+          {DISCOVER_CARDS.map((c) => (
+            <div key={c.title} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand">
+                <Icon name={c.icon} className="h-5 w-5" />
+              </span>
+              <p className="mt-3 font-semibold text-ink">{c.title}</p>
+              <p className="mt-1 text-sm text-lavender">{c.body}</p>
             </div>
-            <p className="mt-3 text-sm font-medium text-ink">Their recent posts</p>
-            <p className="mt-1 text-sm text-lavender">
-              What the prospect has been posting about lately - a natural reason to reach out.
-            </p>
-          </div>
-          <div
-            className="animate-fade-up flex flex-col items-center rounded-lg border border-gray-200 p-6 text-center"
-            style={{ animationDelay: "0.1s" }}
-          >
-            <div className="flex h-9 w-9 items-center justify-center rounded-full bg-tint-brand text-brand">
-              <Icon name="building" />
-            </div>
-            <p className="mt-3 text-sm font-medium text-ink">Their company's activity</p>
-            <p className="mt-1 text-sm text-lavender">
-              What the target company's been talking about - context that makes your outreach land.
-            </p>
-          </div>
+          ))}
         </div>
       </section>
 
-      {/* Testimonial */}
+      {/* How it works */}
+      <section id="how-it-works" className="bg-white px-6 py-16">
+        <div className="mx-auto max-w-content text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Ask your AI. Commonality finds the path.</h2>
+          <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-3">
+            {HOW_IT_WORKS_STEPS.map((s) => (
+              <div key={s.n} className="rounded-xl border border-gray-200 bg-gray-50 p-6">
+                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
+                  {s.n}
+                </span>
+                <p className="mt-3 font-semibold text-ink">{s.title}</p>
+                <p className="mt-1 text-sm text-lavender">{s.body}</p>
+              </div>
+            ))}
+          </div>
+          <SectionCta label="Start Free" />
+        </div>
+      </section>
+
+      {/* Sales Navigator context */}
+      <section className="mx-auto max-w-content px-6 py-16">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Make your LinkedIn research actionable.</h2>
+          <p className="mx-auto mt-4 max-w-2xl text-lavender">
+            LinkedIn Sales Navigator can help your team identify the right accounts and people.
+            Commonality helps answer the next question:{" "}
+            <span className="font-semibold text-ink">who inside our organization can help us reach them?</span>{" "}
+            Whether a target comes from Sales Navigator, your CRM, an account list, or an AI
+            conversation, Commonality helps surface the strongest relationship path.
+          </p>
+        </div>
+        <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-2">
+          <div className="rounded-xl border border-gray-200 bg-white p-6">
+            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Sales Navigator helps you find</p>
+            <ul className="mt-3 space-y-2 text-sm text-lavender">
+              {["Target accounts", "Decision-makers", "Professional profiles", "Relevant activity"].map((x) => (
+                <li key={x} className="flex items-center gap-2">
+                  <CheckIcon className="text-lavender" />
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="rounded-xl border-2 border-brand/40 bg-white p-6 shadow-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Commonality helps your AI find</p>
+            <ul className="mt-3 space-y-2 text-sm text-ink">
+              {[
+                "Who on your team knows them",
+                "How the relationship was formed",
+                "Who should request the introduction",
+                "What to say next",
+              ].map((x) => (
+                <li key={x} className="flex items-center gap-2">
+                  <CheckIcon />
+                  {x}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* Built for teams */}
+      <section id="for-teams" className="bg-white px-6 py-16">
+        <div className="mx-auto max-w-content text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+            Turn individual connections into a company-wide advantage.
+          </h2>
+          <p className="mx-auto mt-4 max-w-2xl text-lavender">
+            The most valuable relationship into an account may belong to your CEO, a former
+            employee, or someone in another department. Commonality helps make that relationship
+            knowledge useful to the people who need it.
+          </p>
+          <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-2">
+            {TEAM_OUTCOMES.map((c) => (
+              <div key={c.title} className="rounded-xl border border-gray-200 bg-gray-50 p-6">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand">
+                  <Icon name={c.icon} className="h-5 w-5" />
+                </span>
+                <p className="mt-3 font-semibold text-ink">{c.title}</p>
+                <p className="mt-1 text-sm text-lavender">{c.body}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Security */}
+      <section id="security" className="mx-auto max-w-content px-6 py-16">
+        <div className="mx-auto max-w-3xl rounded-2xl border border-gray-200 bg-white p-8 sm:p-10">
+          <div className="flex items-center gap-3">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-brand/10 text-brand">
+              <Icon name="shield" className="h-5 w-5" />
+            </span>
+            <h2 className="text-2xl font-bold text-ink sm:text-3xl">Your relationships remain yours.</h2>
+          </div>
+          <p className="mt-4 text-lavender">
+            Commonality is designed to help your organization use its relationship intelligence -
+            not sell it, expose it, or make it available to unauthorized users.
+          </p>
+          <ul className="mt-6 grid gap-3 sm:grid-cols-2">
+            {SECURITY_POINTS.map((p) => (
+              <li key={p} className="flex items-start gap-2 text-sm text-ink">
+                <span className="mt-0.5">
+                  <CheckIcon />
+                </span>
+                {p}
+              </li>
+            ))}
+          </ul>
+          <p className="mt-6 text-sm text-lavender">
+            Read our{" "}
+            <Link to="/privacy" className="font-medium text-brand hover:underline">
+              Privacy Policy
+            </Link>{" "}
+            and{" "}
+            <Link to="/terms" className="font-medium text-brand hover:underline">
+              Terms of Service
+            </Link>
+            .
+          </p>
+        </div>
+      </section>
+
+      {/* Prompt gallery */}
+      <section id="use-cases" className="bg-white px-6 py-16">
+        <div className="mx-auto max-w-content text-center">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Start with a question.</h2>
+          <div className="mx-auto mt-10 grid max-w-4xl gap-3 text-left sm:grid-cols-2">
+            {EXAMPLE_PROMPTS.map((p) => (
+              <a
+                key={p}
+                href="#top"
+                className="group rounded-xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md"
+              >
+                <span className="mr-2 text-brand" aria-hidden="true">
+                  ›
+                </span>
+                {p}
+              </a>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials */}
       <section className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">
           Trusted by teams who needed a real way in
         </h2>
-
         <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {testimonials.map((t) => (
-            <div key={t.name} className="rounded-lg bg-tint-brand p-5 text-left">
+            <div key={t.name} className="rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm">
               {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
               {t.photo && <img src={t.photo} alt={t.name} className="mb-3 h-6 w-6 rounded-full object-cover" />}
               <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
@@ -768,113 +784,111 @@ export function Marketing() {
             </div>
           ))}
         </div>
-
-        <div className="text-center">
-          <SectionCta label="Get results like these →" />
-        </div>
       </section>
 
       {/* Pricing */}
-      <section id="pricing" className="mx-auto max-w-content px-6 py-16">
-        <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
-        <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
-          One subscription per company. Everyone can use it for free - you all share one monthly
-          credit pool, spent only on LinkedIn lookups (drafting the outreach itself is free).
-        </p>
+      <section id="pricing" className="bg-white px-6 py-16">
+        <div className="mx-auto max-w-content">
+          <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
+          <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
+            One subscription per company. Everyone can use it for free - you all share one monthly
+            credit pool, spent only on LinkedIn lookups (drafting the outreach itself is free).
+          </p>
 
-        <div className="mt-10 grid gap-8 sm:grid-cols-3">
-          <div className="relative rounded-lg border border-gray-200 p-6 transition hover:scale-105">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink px-3 py-1 text-xs font-medium text-white">
-              Free forever
-            </div>
-            <div className="font-semibold text-ink">Free</div>
-            <div className="mt-2 text-3xl font-bold text-ink">$0</div>
-            <ul className="mt-4 space-y-2 text-sm text-lavender">
-              <li>
-                <span className="flex items-center gap-2">
+          <div className="mt-10 grid gap-8 sm:grid-cols-3">
+            <div className="relative rounded-xl border border-gray-200 p-6 transition hover:scale-105">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-ink px-3 py-1 text-xs font-medium text-white">
+                Free forever
+              </div>
+              <div className="font-semibold text-ink">Free</div>
+              <div className="mt-2 text-3xl font-bold text-ink">$0</div>
+              <ul className="mt-4 space-y-2 text-sm text-lavender">
+                <li>
+                  <span className="flex items-center gap-2">
+                    <CheckIcon />
+                    25 team members
+                  </span>
+                  <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
+                </li>
+                <li className="flex items-center gap-2">
                   <CheckIcon />
-                  25 team members
-                </span>
-                <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                50 credits/mo
-              </li>
-            </ul>
-            <SignedOut>
-              <SignUpButton mode="modal">
-                <button className="mt-6 w-full rounded-lg border border-gray-300 px-6 py-3 font-medium text-ink hover:bg-gray-50">
-                  Start for free
-                </button>
-              </SignUpButton>
-            </SignedOut>
+                  50 credits/mo
+                </li>
+              </ul>
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <button className="mt-6 w-full rounded-lg border border-gray-300 px-6 py-3 font-medium text-ink hover:bg-gray-50">
+                    Start Free
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+            </div>
+
+            <div className="relative rounded-xl border-2 border-brand p-6 transition hover:scale-105">
+              <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-medium text-white">
+                Most popular
+              </div>
+              <div className="font-semibold text-ink">Pro</div>
+              <div className="mt-2 text-3xl font-bold text-ink">$49/mo</div>
+              <ul className="mt-4 space-y-2 text-sm text-lavender">
+                <li>
+                  <span className="flex items-center gap-2">
+                    <CheckIcon />
+                    150 team members
+                  </span>
+                  <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckIcon />
+                  200 credits/mo
+                </li>
+              </ul>
+              <SignedOut>
+                <SignUpButton mode="modal">
+                  <button className="mt-6 w-full rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
+                    Start Free
+                  </button>
+                </SignUpButton>
+              </SignedOut>
+            </div>
+
+            <div className="rounded-xl border border-gray-200 p-6 transition hover:scale-105">
+              <div className="font-semibold text-ink">Enterprise</div>
+              <div className="mt-2 text-3xl font-bold text-ink">Custom</div>
+              <ul className="mt-4 space-y-2 text-sm text-lavender">
+                <li>
+                  <span className="flex items-center gap-2">
+                    <CheckIcon />
+                    150+ team members
+                  </span>
+                  <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
+                </li>
+                <li className="flex items-center gap-2">
+                  <CheckIcon />
+                  Custom credits/mo
+                </li>
+              </ul>
+              <a
+                href="mailto:hello@theendurancegroup.com"
+                className="mt-6 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center font-medium text-ink hover:bg-gray-50"
+              >
+                Contact us
+              </a>
+            </div>
           </div>
 
-          <div className="relative rounded-lg border-2 border-brand p-6 transition hover:scale-105">
-            <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-brand px-3 py-1 text-xs font-medium text-white">
-              Most popular
-            </div>
-            <div className="font-semibold text-ink">Pro</div>
-            <div className="mt-2 text-3xl font-bold text-ink">$49/mo</div>
-            <ul className="mt-4 space-y-2 text-sm text-lavender">
-              <li>
-                <span className="flex items-center gap-2">
-                  <CheckIcon />
-                  150 team members
-                </span>
-                <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                200 credits/mo
-              </li>
-            </ul>
-            <SignedOut>
-              <SignUpButton mode="modal">
-                <button className="mt-6 w-full rounded-lg bg-brand px-6 py-3 font-medium text-white hover:bg-brand-dark">
-                  Start free
-                </button>
-              </SignUpButton>
-            </SignedOut>
-          </div>
-
-          <div className="rounded-lg border border-gray-200 p-6 transition hover:scale-105">
-            <div className="font-semibold text-ink">Enterprise</div>
-            <div className="mt-2 text-3xl font-bold text-ink">Custom</div>
-            <ul className="mt-4 space-y-2 text-sm text-lavender">
-              <li>
-                <span className="flex items-center gap-2">
-                  <CheckIcon />
-                  150+ team members
-                </span>
-                <span className="ml-6 text-xs text-lavender/80">who the AI searches - not a user limit</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <CheckIcon />
-                Custom credits/mo
-              </li>
-            </ul>
-            <a
-              href="mailto:hello@theendurancegroup.com"
-              className="mt-6 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center font-medium text-ink hover:bg-gray-50"
-            >
-              Contact us
+          <p className="mt-8 text-center text-sm text-lavender">
+            Commonality is built and installed for you by{" "}
+            <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+              The Endurance Group
             </a>
-          </div>
+            . Want more AI automations for your team?{" "}
+            <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
+              Give us a call
+            </a>
+            .
+          </p>
         </div>
-
-        <p className="mt-8 text-center text-sm text-lavender">
-          Commonality is built and installed for you by{" "}
-          <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
-            The Endurance Group
-          </a>
-          . Want more AI automations for your team?{" "}
-          <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
-            Give us a call
-          </a>
-          .
-        </p>
       </section>
 
       {/* FAQ */}
@@ -885,7 +899,9 @@ export function Marketing() {
             <details key={f.q} className="group py-4">
               <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
                 {f.q}
-                <span className="shrink-0 text-lavender transition group-open:rotate-45">+</span>
+                <span className="shrink-0 text-lavender transition group-open:rotate-45" aria-hidden="true">
+                  +
+                </span>
               </summary>
               <p className="mt-2 text-sm text-lavender">{f.a}</p>
             </details>
@@ -893,21 +909,63 @@ export function Marketing() {
         </div>
       </section>
 
-      <footer className="bg-footer py-10 text-center text-sm text-white/60">
-        <div className="mx-auto flex max-w-content flex-wrap items-center justify-center gap-2 px-6">
-          <span>© Commonality - The Endurance Group</span>
-          <span>·</span>
-          <a href="https://theendurancegroup.com" className="hover:text-white">
-            theendurancegroup.com
-          </a>
-          <span>·</span>
-          <Link to="/privacy" className="hover:text-white">
-            Privacy
-          </Link>
-          <span>·</span>
-          <Link to="/terms" className="hover:text-white">
-            Terms
-          </Link>
+      {/* Final CTA */}
+      <section className="bg-white px-6 py-20 text-center">
+        <div className="mx-auto max-w-2xl">
+          <h2 className="text-2xl font-bold text-ink sm:text-3xl">
+            Your next customer may already be one relationship away.
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lavender">
+            Give your AI the relationship context it needs to find the best path into your target
+            accounts.
+          </p>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <StartFreeButton />
+            <a
+              href="https://meetings.hubspot.com/conor-sullivan/commonality"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="rounded-lg border border-gray-300 px-6 py-3 font-medium text-ink hover:bg-gray-50"
+            >
+              Book a Demo
+            </a>
+          </div>
+        </div>
+      </section>
+
+      <footer className="bg-footer px-6 py-12 text-sm text-white/60">
+        <div className="mx-auto max-w-content">
+          <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:justify-between sm:text-left">
+            <div className="max-w-sm">
+              <img src="/logo.png" alt="Commonality" className="mx-auto h-6 w-auto brightness-0 invert sm:mx-0" />
+              <p className="mt-3">
+                Commonality gives AI secure access to authorized professional relationship
+                intelligence, helping teams discover who can open the right door.
+              </p>
+            </div>
+            <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2" aria-label="Footer">
+              <Link to="/privacy" className="hover:text-white">
+                Privacy Policy
+              </Link>
+              <Link to="/terms" className="hover:text-white">
+                Terms of Service
+              </Link>
+              <a href="mailto:csullivan@theendurancegroup.com" className="hover:text-white">
+                Contact
+              </a>
+              <SignedOut>
+                <SignInButton mode="modal">
+                  <button className="hover:text-white">Sign In</button>
+                </SignInButton>
+              </SignedOut>
+            </nav>
+          </div>
+          <p className="mt-8 text-center">
+            © {new Date().getFullYear()} Commonality ·{" "}
+            <a href="https://theendurancegroup.com" className="hover:text-white">
+              The Endurance Group
+            </a>
+          </p>
         </div>
       </footer>
     </div>
