@@ -557,80 +557,69 @@ function AIMarquee() {
   );
 }
 
+function TestimonialMarquee() {
+  const track = [...testimonials, ...testimonials];
+  return (
+    <div className="relative mt-10 overflow-hidden">
+      <style>{`
+        @keyframes tq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }
+        @media (prefers-reduced-motion: reduce) { .tq-track { animation: none !important; } }
+      `}</style>
+      <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-16 bg-gradient-to-r from-gray-50 to-transparent" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-16 bg-gradient-to-l from-gray-50 to-transparent" />
+      <div className="tq-track" style={{ display: "flex", width: "max-content", animation: "tq-loop 60s linear infinite" }}>
+        {track.map((t, i) => (
+          <div
+            key={`${t.name}-${i}`}
+            className="mx-2.5 w-80 shrink-0 rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm"
+          >
+            {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
+            {t.photo && <img src={t.photo} alt={t.name} className="mb-3 h-6 w-6 rounded-full object-cover" />}
+            <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
+            <p className="mt-3 text-xs font-medium text-lavender">
+              {t.name} · {t.title}
+            </p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 // --- Section content --------------------------------------------------------
 
 const DISCOVER_CARDS = [
-  {
-    icon: "history",
-    title: "Previous Employment",
-    body: "Someone on your team worked at the target company.",
-  },
-  {
-    icon: "link",
-    title: "Direct Connections",
-    body: "A colleague is directly connected to a key decision-maker on LinkedIn.",
-  },
-  {
-    icon: "school",
-    title: "Shared Education",
-    body: "A teammate and an executive attended the same university or program.",
-  },
-  {
-    icon: "building",
-    title: "Shared Employer History",
-    body: "Members of each organization previously worked at the same company.",
-  },
-  {
-    icon: "pin",
-    title: "Shared Location",
-    body: "A teammate is based in the same city or region as your prospect.",
-  },
-  {
-    icon: "users",
-    title: "Team-Wide Relationships",
-    body: "The useful connection may belong to someone outside the salesperson's own network.",
-  },
+  { icon: "history", title: "Previous Employment" },
+  { icon: "link", title: "Direct Connections" },
+  { icon: "school", title: "Shared Education" },
+  { icon: "building", title: "Shared Employer History" },
+  { icon: "pin", title: "Shared Location" },
+  { icon: "users", title: "Team-Wide Relationships" },
 ];
 
 const HOW_IT_WORKS_STEPS = [
   {
     n: 1,
-    title: "Connect your professional network",
-    body: "Commonality securely connects the professional relationship information authorized by you and your organization - your team roster, backgrounds, and any LinkedIn connections teammates choose to share.",
+    title: "Connect your network",
+    body: "Your team roster, backgrounds, and any LinkedIn connections teammates choose to share.",
   },
   {
     n: 2,
-    title: "Build organizational relationship intelligence",
-    body: "Commonality researches connections, employment histories, shared education, and other relevant professional overlaps across your whole team.",
+    title: "Build relationship intelligence",
+    body: "Commonality maps connections, employment history, and shared education across your team.",
   },
   {
     n: 3,
     title: "Ask naturally",
-    body: "Use the AI assistant your team already works with. Commonality doesn't replace it - it makes it relationship-aware.",
+    body: "Use the AI you already work with - Commonality just makes it relationship-aware.",
   },
 ];
 
 const TEAM_OUTCOMES = [
-  {
-    icon: "message",
-    title: "Book More Warm Meetings",
-    body: "Begin with introductions instead of cold outreach.",
-  },
-  {
-    icon: "chart",
-    title: "Improve Account Planning",
-    body: "Add relationship context to target-account strategy.",
-  },
-  {
-    icon: "route",
-    title: "Make New Hires Productive Faster",
-    body: "Help new employees understand the relationships that already exist across the company.",
-  },
-  {
-    icon: "network",
-    title: "Preserve Organizational Knowledge",
-    body: "Reduce the loss of relationship intelligence when employees change roles or leave.",
-  },
+  { icon: "message", title: "More warm meetings", body: "Start with introductions, not cold outreach." },
+  { icon: "chart", title: "Better account planning", body: "Add relationship context to account strategy." },
+  { icon: "route", title: "Faster-ramping new hires", body: "See relationships that already exist across the company." },
+  { icon: "network", title: "Knowledge that outlasts turnover", body: "Relationship intelligence survives when employees leave." },
 ];
 
 const SECURITY_POINTS = [
@@ -794,11 +783,6 @@ export function Marketing() {
         <div className="mx-auto max-w-content text-center">
           <h2 className="text-2xl font-bold text-ink sm:text-3xl">AI knows the world.</h2>
           <p className="mt-1 text-2xl font-bold text-brand sm:text-3xl">It doesn't know your relationships.</p>
-          <p className="mx-auto mt-4 max-w-xl text-lavender">
-            AI can research companies, executives, industries, and markets. But without
-            Commonality, it doesn't understand the relationships, shared histories, and potential
-            introductions that exist across your organization.
-          </p>
 
           <div className="mx-auto mt-10 grid max-w-3xl gap-4 text-left sm:grid-cols-2">
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
@@ -820,6 +804,10 @@ export function Marketing() {
               <p className="mt-3 text-xs font-semibold text-brand">A real path into the account.</p>
             </div>
           </div>
+          <p className="mx-auto mt-6 max-w-xl text-sm text-lavender">
+            Same question, either way - Sales Navigator and CRM tools help you find the right
+            accounts and people; Commonality is what answers who can actually get you in.
+          </p>
         </div>
       </section>
 
@@ -828,15 +816,15 @@ export function Marketing() {
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">
           Find the relationships hidden across your organization.
         </h2>
-        <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mx-auto mt-8 flex max-w-3xl flex-wrap justify-center gap-3">
           {DISCOVER_CARDS.map((c) => (
-            <div key={c.title} className="rounded-xl border border-gray-200 bg-white p-6 shadow-sm">
-              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand">
-                <Icon name={c.icon} className="h-5 w-5" />
-              </span>
-              <p className="mt-3 font-semibold text-ink">{c.title}</p>
-              <p className="mt-1 text-sm text-lavender">{c.body}</p>
-            </div>
+            <span
+              key={c.title}
+              className="flex items-center gap-2 rounded-full border border-gray-200 bg-white px-4 py-2 text-sm font-medium text-ink shadow-sm"
+            >
+              <Icon name={c.icon} className="h-4 w-4 text-brand" />
+              {c.title}
+            </span>
           ))}
         </div>
       </section>
@@ -845,61 +833,21 @@ export function Marketing() {
       <section id="how-it-works" className="bg-white px-6 py-16">
         <div className="mx-auto max-w-content text-center">
           <h2 className="text-2xl font-bold text-ink sm:text-3xl">Ask your AI. Commonality finds the path.</h2>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-3">
-            {HOW_IT_WORKS_STEPS.map((s) => (
-              <div key={s.n} className="rounded-xl border border-gray-200 bg-gray-50 p-6">
-                <span className="flex h-8 w-8 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white">
-                  {s.n}
-                </span>
-                <p className="mt-3 font-semibold text-ink">{s.title}</p>
-                <p className="mt-1 text-sm text-lavender">{s.body}</p>
-              </div>
-            ))}
+          <div className="relative mx-auto mt-12 max-w-4xl">
+            <div className="absolute left-0 right-0 top-4 hidden h-0.5 bg-gray-200 sm:block" aria-hidden="true" />
+            <div className="grid gap-8 text-left sm:grid-cols-3 sm:gap-4 sm:text-center">
+              {HOW_IT_WORKS_STEPS.map((s) => (
+                <div key={s.n} className="relative">
+                  <span className="relative z-10 mx-auto flex h-8 w-8 items-center justify-center rounded-full bg-ink text-sm font-semibold text-white sm:mx-auto">
+                    {s.n}
+                  </span>
+                  <p className="mt-3 font-semibold text-ink">{s.title}</p>
+                  <p className="mt-1 text-sm text-lavender">{s.body}</p>
+                </div>
+              ))}
+            </div>
           </div>
           <SectionCta label="Start Free" />
-        </div>
-      </section>
-
-      {/* Sales Navigator context */}
-      <section className="mx-auto max-w-content px-6 py-16">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Make your LinkedIn research actionable.</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-lavender">
-            LinkedIn Sales Navigator can help your team identify the right accounts and people.
-            Commonality helps answer the next question:{" "}
-            <span className="font-semibold text-ink">who inside our organization can help us reach them?</span>{" "}
-            Whether a target comes from Sales Navigator, your CRM, an account list, or an AI
-            conversation, Commonality helps surface the strongest relationship path.
-          </p>
-        </div>
-        <div className="mx-auto mt-10 grid max-w-3xl gap-4 sm:grid-cols-2">
-          <div className="rounded-xl border border-gray-200 bg-white p-6">
-            <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Sales Navigator helps you find</p>
-            <ul className="mt-3 space-y-2 text-sm text-lavender">
-              {["Target accounts", "Decision-makers", "Professional profiles", "Relevant activity"].map((x) => (
-                <li key={x} className="flex items-center gap-2">
-                  <CheckIcon className="text-lavender" />
-                  {x}
-                </li>
-              ))}
-            </ul>
-          </div>
-          <div className="rounded-xl border-2 border-brand/40 bg-white p-6 shadow-sm">
-            <p className="text-xs font-semibold uppercase tracking-wide text-brand">Commonality helps your AI find</p>
-            <ul className="mt-3 space-y-2 text-sm text-ink">
-              {[
-                "Who on your team knows them",
-                "How the relationship was formed",
-                "Who should request the introduction",
-                "What to say next",
-              ].map((x) => (
-                <li key={x} className="flex items-center gap-2">
-                  <CheckIcon />
-                  {x}
-                </li>
-              ))}
-            </ul>
-          </div>
         </div>
       </section>
 
@@ -910,18 +858,19 @@ export function Marketing() {
             Turn individual connections into a company-wide advantage.
           </h2>
           <p className="mx-auto mt-4 max-w-2xl text-lavender">
-            The most valuable relationship into an account may belong to your CEO, a former
-            employee, or someone in another department. Commonality helps make that relationship
-            knowledge useful to the people who need it.
+            The best relationship into an account may belong to your CEO or someone in another
+            department. Commonality puts that knowledge to work for the people who need it.
           </p>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-4 text-left sm:grid-cols-2">
+          <div className="mx-auto mt-10 grid max-w-3xl gap-x-10 gap-y-8 text-left sm:grid-cols-2">
             {TEAM_OUTCOMES.map((c) => (
-              <div key={c.title} className="rounded-xl border border-gray-200 bg-gray-50 p-6">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand/10 text-brand">
+              <div key={c.title} className="flex items-start gap-4">
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand/10 text-brand">
                   <Icon name={c.icon} className="h-5 w-5" />
                 </span>
-                <p className="mt-3 font-semibold text-ink">{c.title}</p>
-                <p className="mt-1 text-sm text-lavender">{c.body}</p>
+                <div>
+                  <p className="font-semibold text-ink">{c.title}</p>
+                  <p className="mt-1 text-sm text-lavender">{c.body}</p>
+                </div>
               </div>
             ))}
           </div>
@@ -966,22 +915,11 @@ export function Marketing() {
       </section>
 
       {/* Testimonials */}
-      <section className="mx-auto max-w-content px-6 py-16">
-        <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">
+      <section className="bg-gray-50 py-16">
+        <h2 className="px-6 text-center text-2xl font-bold text-ink sm:text-3xl">
           Trusted by teams who needed a real way in
         </h2>
-        <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {testimonials.map((t) => (
-            <div key={t.name} className="rounded-xl border border-gray-200 bg-white p-5 text-left shadow-sm">
-              {t.logo && <img src={t.logo} alt={t.title} className="mb-3 h-6 w-auto object-contain" />}
-              {t.photo && <img src={t.photo} alt={t.name} className="mb-3 h-6 w-6 rounded-full object-cover" />}
-              <p className="text-sm text-ink">&ldquo;{t.quote}&rdquo;</p>
-              <p className="mt-3 text-xs font-medium text-lavender">
-                {t.name} · {t.title}
-              </p>
-            </div>
-          ))}
-        </div>
+        <TestimonialMarquee />
       </section>
 
       {/* Pricing */}
