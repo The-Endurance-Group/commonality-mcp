@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk/clerk-react";
-import { useRef, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
@@ -93,32 +93,222 @@ function Icon({ name, className = "text-brand" }: { name: string; className?: st
 
 // --- Hero AI-conversation demonstration -------------------------------------
 // A static, semantic example conversation (not a screenshot) so it stays
-// accessible. Names are fictional; the card is labeled as an example.
+// accessible. Names/companies are fictional; the card is labeled as an
+// example. Auto-cycles through several real example questions, each with
+// its own answer, so the hero demonstrates the range of things Commonality
+// can actually answer - not just one canned IBM example.
 
-const DEMO_PATHS = [
+interface HeroDemoScenario {
+  q: string;
+  content: ReactNode;
+}
+
+const HERO_DEMOS: HeroDemoScenario[] = [
   {
-    name: "Sarah Chen",
-    kind: "Former IBM employee",
-    detail: "Sarah worked at IBM for seven years and is connected to several current IBM leaders.",
+    q: "How do we get into IBM?",
+    content: (
+      <>
+        <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+        <p className="mt-2.5 font-semibold text-ink">Your strongest paths into IBM</p>
+        <ul className="mt-2 space-y-2.5">
+          {[
+            {
+              name: "Sarah Chen",
+              kind: "Former IBM employee",
+              detail: "Sarah worked at IBM for seven years and is connected to several current IBM leaders.",
+            },
+            {
+              name: "Michael Torres",
+              kind: "Shared employer history",
+              detail: "Michael and IBM's Chief Information Officer worked together at a previous company.",
+            },
+            {
+              name: "David Reynolds",
+              kind: "Alumni connection",
+              detail: "David and an IBM senior executive attended Northwestern University during the same period.",
+            },
+            {
+              name: "Rachel Adams",
+              kind: "Direct professional connection",
+              detail: "Rachel is connected to IBM's Vice President of Enterprise Technology.",
+            },
+          ].map((p) => (
+            <li key={p.name}>
+              <p className="font-medium text-ink">
+                {p.name} <span className="font-normal text-brand">— {p.kind}</span>
+              </p>
+              <p className="text-lavender">{p.detail}</p>
+            </li>
+          ))}
+        </ul>
+        <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+        <p className="mt-1 text-lavender">
+          Start with Sarah. Her previous employment and active relationships at IBM appear to
+          offer the strongest path to a warm introduction.
+        </p>
+      </>
+    ),
   },
   {
-    name: "Michael Torres",
-    kind: "Shared employer history",
-    detail: "Michael and IBM's Chief Information Officer worked together at a previous company.",
+    q: "What is our strongest path into Amazon?",
+    content: (
+      <>
+        <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+        <p className="mt-2.5 font-semibold text-ink">Strongest path into Amazon</p>
+        <p className="mt-1 font-medium text-ink">
+          Priya Nair <span className="font-normal text-brand">— Former Amazon employee</span>
+        </p>
+        <p className="text-lavender">
+          Priya worked at Amazon for four years and is still connected to two directors on the
+          retail team.
+        </p>
+        <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+        <p className="mt-1 text-lavender">
+          Ask Priya if she's comfortable making an introduction - her tenure and active
+          connections make this your best opening.
+        </p>
+      </>
+    ),
   },
   {
-    name: "David Reynolds",
-    kind: "Alumni connection",
-    detail: "David and an IBM senior executive attended Northwestern University during the same period.",
+    q: "Does anyone here know the Chief Marketing Officer at Nike?",
+    content: (
+      <>
+        <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+        <p className="mt-2.5 font-semibold text-ink">Yes - one direct connection</p>
+        <p className="mt-1 font-medium text-ink">
+          Devon Marsh <span className="font-normal text-brand">— Direct professional connection</span>
+        </p>
+        <p className="text-lavender">
+          Devon is connected to Nike's CMO through a previous agency engagement they worked on
+          together.
+        </p>
+        <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+        <p className="mt-1 text-lavender">Ask Devon for a warm introduction before reaching out cold.</p>
+      </>
+    ),
   },
   {
-    name: "Rachel Adams",
-    kind: "Direct professional connection",
-    detail: "Rachel is connected to IBM's Vice President of Enterprise Technology.",
+    q: "Who on our team previously worked at Salesforce?",
+    content: (
+      <>
+        <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+        <p className="mt-2.5 font-semibold text-ink">2 teammates with Salesforce history</p>
+        <ul className="mt-2 space-y-2.5">
+          <li>
+            <p className="font-medium text-ink">Alex Kim</p>
+            <p className="text-lavender">3 years, Enterprise Sales - still connected to several former colleagues.</p>
+          </li>
+          <li>
+            <p className="font-medium text-ink">Jordan Lee</p>
+            <p className="text-lavender">2 years, Solutions Engineering.</p>
+          </li>
+        </ul>
+        <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+        <p className="mt-1 text-lavender">Alex's active connections make them the stronger starting point.</p>
+      </>
+    ),
+  },
+  {
+    q: "Which executive should approach this account?",
+    content: (
+      <>
+        <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+        <p className="mt-2.5 font-semibold text-ink">Recommended: your CRO, Taylor Brooks</p>
+        <p className="mt-1 text-lavender">
+          Taylor and the prospect's VP of Operations both serve on the same industry advisory
+          board - the strongest combined signal on your team for this account.
+        </p>
+        <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+        <p className="mt-1 text-lavender">
+          Have Taylor reach out directly, referencing the advisory board as shared context.
+        </p>
+      </>
+    ),
+  },
+  {
+    q: "Find our best relationships across this target-account list.",
+    content: (
+      <>
+        <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
+        <ul className="mt-2 space-y-2.5">
+          <li>
+            <p className="font-medium text-ink">
+              Acme Inc. <span className="font-normal text-brand">— warm path found</span>
+            </p>
+            <p className="text-lavender">Sam K. is a 1st-degree LinkedIn connection to their VP Sales.</p>
+          </li>
+          <li>
+            <p className="font-medium text-ink">
+              Globex Corp <span className="font-normal text-lavender">— no warm path yet</span>
+            </p>
+            <p className="text-lavender">Recent posts are available for a research-based opener instead.</p>
+          </li>
+          <li>
+            <p className="font-medium text-ink">
+              Initech <span className="font-normal text-brand">— warm path found</span>
+            </p>
+            <p className="text-lavender">Priya N. previously worked there alongside their current CTO.</p>
+          </li>
+        </ul>
+      </>
+    ),
+  },
+  {
+    q: "Draft a message asking for an introduction.",
+    content: (
+      <>
+        <p className="text-lavender">Here's a draft, based on your relationship with Sarah:</p>
+        <p className="mt-2.5 rounded-md border border-gray-200 bg-white px-3 py-2.5 italic text-ink">
+          "Hi Sarah - hope you're doing well! I noticed your time at IBM and wanted to ask: would
+          you be comfortable introducing me to someone on their enterprise tech team? Happy to
+          share more context. Thanks so much!"
+        </p>
+        <p className="mt-3 text-lavender">Want me to adjust the tone or add more detail?</p>
+      </>
+    ),
+  },
+  {
+    q: "Explain why this is our strongest relationship.",
+    content: (
+      <>
+        <p className="text-lavender">
+          Sarah's relationship is strongest because it combines two signals: seven years of
+          direct employment history at IBM, and an active, recent connection with IBM's current
+          VP of Cloud Platforms.
+        </p>
+        <p className="mt-2 text-lavender">
+          That means she can speak credibly to both the account itself and the specific
+          stakeholder you're trying to reach - stronger than a single shared-school or
+          shared-employer signal alone.
+        </p>
+      </>
+    ),
   },
 ];
 
+const HERO_DEMO_TYPING_MS = 1100;
+const HERO_DEMO_ANSWER_MS = 5200;
+
 function HeroDemo() {
+  const [step, setStep] = useState(0);
+  const [phase, setPhase] = useState<"typing" | "answer">("typing");
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    setPhase("typing");
+    const toAnswer = setTimeout(() => setPhase("answer"), HERO_DEMO_TYPING_MS);
+    const toNext = setTimeout(() => {
+      setStep((s) => (s + 1) % HERO_DEMOS.length);
+    }, HERO_DEMO_TYPING_MS + HERO_DEMO_ANSWER_MS);
+    return () => {
+      clearTimeout(toAnswer);
+      clearTimeout(toNext);
+    };
+  }, [step]);
+
+  const demo = HERO_DEMOS[step];
+
   return (
     <div className="mx-auto w-full max-w-lg rounded-xl border border-gray-200 bg-white p-4 text-left shadow-xl sm:p-5">
       <div className="mb-3 flex items-center justify-between border-b border-gray-100 pb-3">
@@ -132,37 +322,40 @@ function HeroDemo() {
         </span>
       </div>
 
-      <div className="space-y-3 text-sm">
-        <p className="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink">
-          How do we get into IBM?
+      <div className="flex min-h-[280px] flex-col gap-3 text-sm">
+        <p
+          key={`q-${step}`}
+          className="animate-fade-up ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink"
+        >
+          {demo.q}
         </p>
 
-        <div className="rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3">
-          <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
-          <p className="mt-2.5 font-semibold text-ink">Your strongest paths into IBM</p>
-          <ul className="mt-2 space-y-2.5">
-            {DEMO_PATHS.map((p) => (
-              <li key={p.name}>
-                <p className="font-medium text-ink">
-                  {p.name} <span className="font-normal text-brand">— {p.kind}</span>
-                </p>
-                <p className="text-lavender">{p.detail}</p>
-              </li>
+        {phase === "typing" ? (
+          <div className="flex w-fit gap-1 rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3" aria-hidden="true">
+            {[0, 1, 2].map((i) => (
+              <span
+                key={i}
+                className="h-1.5 w-1.5 animate-bounce rounded-full bg-lavender"
+                style={{ animationDelay: `${i * 150}ms` }}
+              />
             ))}
-          </ul>
-          <p className="mt-3 font-semibold text-ink">Recommended first step</p>
-          <p className="mt-1 text-lavender">
-            Start with Sarah. Her previous employment and active relationships at IBM appear to
-            offer the strongest path to a warm introduction.
-          </p>
-          <p className="mt-2 text-lavender">Would you like me to draft a message asking Sarah for an introduction?</p>
+          </div>
+        ) : (
+          <div key={`a-${step}`} className="animate-fade-up rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3">
+            {demo.content}
+          </div>
+        )}
+      </div>
+
+      <div className="mt-3 flex justify-center gap-1.5" aria-hidden="true">
+        {HERO_DEMOS.map((_, i) => (
           <span
-            className="mt-3 inline-block cursor-default rounded-md border border-gray-200 bg-white px-3 py-1.5 text-xs font-medium text-ink shadow-sm"
-            aria-hidden="true"
-          >
-            Draft Introduction Request
-          </span>
-        </div>
+            key={i}
+            className={`h-1.5 rounded-full transition-all ${
+              i === step ? "w-6 bg-brand" : "w-1.5 bg-gray-200"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );
@@ -410,17 +603,6 @@ const HOW_IT_WORKS_STEPS = [
   },
 ];
 
-const EXAMPLE_PROMPTS = [
-  "How do we get into IBM?",
-  "What is our strongest path into Amazon?",
-  "Does anyone here know the Chief Marketing Officer at Nike?",
-  "Who on our team previously worked at Salesforce?",
-  "Which executive should approach this account?",
-  "Find our best relationships across this target-account list.",
-  "Draft a message asking for an introduction.",
-  "Explain why this is our strongest relationship.",
-];
-
 const TEAM_OUTCOMES = [
   {
     icon: "message",
@@ -467,7 +649,6 @@ export function Marketing() {
   // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
   const { isSignedIn } = useAuth();
-  const heroDemoRef = useRef<HTMLDivElement>(null);
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
@@ -544,7 +725,7 @@ export function Marketing() {
             <p className="mt-4 text-sm text-lavender">Works with the AI tools your team already uses.</p>
           </div>
 
-          <div ref={heroDemoRef} className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
+          <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
             <HeroDemo />
           </div>
         </div>
@@ -605,7 +786,7 @@ export function Marketing() {
       </section>
 
       {/* What Commonality discovers */}
-      <section className="mx-auto max-w-content px-6 py-16 text-center">
+      <section id="use-cases" className="mx-auto max-w-content px-6 py-16 text-center">
         <h2 className="text-2xl font-bold text-ink sm:text-3xl">
           Find the relationships hidden across your organization.
         </h2>
@@ -743,28 +924,6 @@ export function Marketing() {
             </Link>
             .
           </p>
-        </div>
-      </section>
-
-      {/* Prompt gallery */}
-      <section id="use-cases" className="bg-white px-6 py-16">
-        <div className="mx-auto max-w-content text-center">
-          <h2 className="text-2xl font-bold text-ink sm:text-3xl">Start with a question.</h2>
-          <div className="mx-auto mt-10 grid max-w-4xl gap-3 text-left sm:grid-cols-2">
-            {EXAMPLE_PROMPTS.map((p) => (
-              <button
-                key={p}
-                type="button"
-                onClick={() => heroDemoRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
-                className="group rounded-xl border border-gray-200 bg-gray-50 px-5 py-4 text-left text-sm text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md"
-              >
-                <span className="mr-2 text-brand" aria-hidden="true">
-                  ›
-                </span>
-                {p}
-              </button>
-            ))}
-          </div>
         </div>
       </section>
 
