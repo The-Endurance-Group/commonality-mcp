@@ -5,7 +5,7 @@ import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
 
 // The site's main marketing page. Positioning: "Commonality teaches AI who
-// you know" - the AI answers "Who do we know at IBM?" with real relationship
+// you know" - the AI answers "How do we get into IBM?" with real relationship
 // paths from across the user's organization, not just prospect research.
 
 function StartFreeButton({ label = "Start Free", className }: { label?: string; className?: string }) {
@@ -134,7 +134,7 @@ function HeroDemo() {
 
       <div className="space-y-3 text-sm">
         <p className="ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink">
-          Who do we know at IBM?
+          How do we get into IBM?
         </p>
 
         <div className="rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3">
@@ -411,7 +411,7 @@ const HOW_IT_WORKS_STEPS = [
 ];
 
 const EXAMPLE_PROMPTS = [
-  "Who do we know at IBM?",
+  "How do we get into IBM?",
   "What is our strongest path into Amazon?",
   "Does anyone here know the Chief Marketing Officer at Nike?",
   "Who on our team previously worked at Salesforce?",
@@ -528,7 +528,7 @@ export function Marketing() {
               Relationship Intelligence for AI
             </p>
             <h1 className="mt-4 text-4xl font-bold leading-tight text-ink sm:text-5xl">
-              Who do we know at IBM?
+              How do we get into IBM?
             </h1>
             <p className="mt-2 text-2xl font-semibold text-brand sm:text-3xl">Now your AI can answer.</p>
             <p className="mx-auto mt-5 max-w-lg text-lg text-lavender lg:mx-0">
@@ -594,7 +594,7 @@ export function Marketing() {
             </div>
             <div className="rounded-xl border-2 border-brand/40 bg-white p-6 shadow-sm">
               <p className="text-xs font-semibold uppercase tracking-wide text-brand">AI with Commonality</p>
-              <p className="mt-3 text-sm italic text-ink">&ldquo;Who do we know at IBM?&rdquo;</p>
+              <p className="mt-3 text-sm italic text-ink">&ldquo;How do we get into IBM?&rdquo;</p>
               <p className="mt-3 rounded-lg bg-tint-brand px-4 py-3 text-sm text-ink">
                 Sarah worked at IBM for seven years, Michael and its CIO worked together earlier in
                 their careers, and Rachel has a direct professional connection to a vice president.
