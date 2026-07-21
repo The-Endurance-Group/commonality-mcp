@@ -649,6 +649,7 @@ export function Marketing() {
   // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
   const { isSignedIn } = useAuth();
+  const [menuOpen, setMenuOpen] = useState(false);
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
@@ -684,7 +685,7 @@ export function Marketing() {
           <div className="flex items-center gap-3 text-sm">
             <SignedOut>
               <SignInButton mode="modal">
-                <button className="font-medium text-lavender hover:text-ink">Sign In</button>
+                <button className="hidden font-medium text-lavender hover:text-ink sm:inline">Sign In</button>
               </SignInButton>
               <SignUpButton mode="modal">
                 <button className="rounded-lg bg-brand px-4 py-2 font-medium text-white transition hover:bg-brand-dark">
@@ -697,8 +698,39 @@ export function Marketing() {
                 Go to dashboard →
               </Link>
             </SignedIn>
+            <button
+              className="flex h-8 w-8 items-center justify-center rounded-md text-lavender hover:bg-gray-50 lg:hidden"
+              aria-label={menuOpen ? "Close menu" : "Open menu"}
+              aria-expanded={menuOpen}
+              onClick={() => setMenuOpen((o) => !o)}
+            >
+              <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" aria-hidden="true">
+                {menuOpen ? <path d="M6 6l12 12M18 6 6 18" /> : <path d="M4 7h16M4 12h16M4 17h16" />}
+              </svg>
+            </button>
           </div>
         </div>
+        {menuOpen && (
+          <nav className="flex flex-col gap-1 border-t border-gray-100 px-6 py-3 text-sm lg:hidden" aria-label="Main">
+            {NAV_LINKS.map((l) => (
+              <a
+                key={l.href}
+                href={l.href}
+                onClick={() => setMenuOpen(false)}
+                className="rounded-md px-2 py-2 font-medium text-lavender hover:bg-gray-50 hover:text-ink"
+              >
+                {l.label}
+              </a>
+            ))}
+            <SignedOut>
+              <SignInButton mode="modal">
+                <button className="rounded-md px-2 py-2 text-left font-medium text-lavender hover:bg-gray-50 hover:text-ink sm:hidden">
+                  Sign In
+                </button>
+              </SignInButton>
+            </SignedOut>
+          </nav>
+        )}
       </header>
 
       {/* Hero */}
