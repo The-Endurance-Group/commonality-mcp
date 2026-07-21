@@ -522,7 +522,7 @@ const MQ_PROVIDERS = [
   { name: "Claude", Logo: MqClaudeLogo },
   { name: "ChatGPT", Logo: MqChatGPTLogo },
   { name: "Gemini", Logo: MqGeminiLogo },
-  { name: "Copilot Studio", Logo: MqCopilotLogo },
+  { name: "Copilot", Logo: MqCopilotLogo },
 ];
 
 function AIMarquee() {
@@ -986,8 +986,10 @@ export function Marketing() {
         <div className="mx-auto max-w-content">
           <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
-            One subscription per company. Everyone can use it for free - you all share one monthly
-            credit pool, spent only on LinkedIn lookups (drafting the outreach itself is free).
+            One subscription per company. Unlimited users - anyone at your company can use it,
+            sharing one monthly credit pool spent only on LinkedIn lookups (drafting the outreach
+            itself is free). The only limit is team members - how many people the AI searches for
+            relationships with.
           </p>
 
           <div className="mt-10 grid gap-8 sm:grid-cols-3">
