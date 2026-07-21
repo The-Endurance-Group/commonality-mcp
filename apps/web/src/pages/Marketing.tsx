@@ -585,7 +585,7 @@ export function Marketing() {
           <div className="mx-auto mt-10 grid max-w-3xl gap-4 text-left sm:grid-cols-2">
             <div className="rounded-xl border border-gray-200 bg-gray-50 p-6">
               <p className="text-xs font-semibold uppercase tracking-wide text-lavender">Standard AI</p>
-              <p className="mt-3 text-sm italic text-ink">&ldquo;How can we approach IBM?&rdquo;</p>
+              <p className="mt-3 text-sm italic text-ink">&ldquo;How do we get into IBM?&rdquo;</p>
               <p className="mt-3 rounded-lg bg-white px-4 py-3 text-sm text-lavender">
                 Research IBM's priorities, identify the appropriate decision-maker, and develop a
                 personalized outreach message.
