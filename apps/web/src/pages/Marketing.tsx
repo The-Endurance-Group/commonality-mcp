@@ -1,5 +1,5 @@
 import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk/clerk-react";
-import { type ReactNode } from "react";
+import { useRef, type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
 import { useAuthStore } from "../lib/store";
@@ -467,6 +467,7 @@ export function Marketing() {
   // Redirect signed-in users straight to their workspace.
   const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
   const { isSignedIn } = useAuth();
+  const heroDemoRef = useRef<HTMLDivElement>(null);
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
@@ -544,7 +545,7 @@ export function Marketing() {
             <p className="mt-4 text-sm text-lavender">Works with the AI tools your team already uses.</p>
           </div>
 
-          <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
+          <div ref={heroDemoRef} className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
             <HeroDemo />
           </div>
         </div>
@@ -752,16 +753,17 @@ export function Marketing() {
           <h2 className="text-2xl font-bold text-ink sm:text-3xl">Start with a question.</h2>
           <div className="mx-auto mt-10 grid max-w-4xl gap-3 text-left sm:grid-cols-2">
             {EXAMPLE_PROMPTS.map((p) => (
-              <a
+              <button
                 key={p}
-                href="#top"
-                className="group rounded-xl border border-gray-200 bg-gray-50 px-5 py-4 text-sm text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md"
+                type="button"
+                onClick={() => heroDemoRef.current?.scrollIntoView({ behavior: "smooth", block: "center" })}
+                className="group rounded-xl border border-gray-200 bg-gray-50 px-5 py-4 text-left text-sm text-ink shadow-sm transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md"
               >
                 <span className="mr-2 text-brand" aria-hidden="true">
                   ›
                 </span>
                 {p}
-              </a>
+              </button>
             ))}
           </div>
         </div>
