@@ -534,9 +534,6 @@ function AIMarquee() {
         @keyframes mq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }
         @media (prefers-reduced-motion: reduce) { .mq-track { animation: none !important; } }
       `}</style>
-      <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
-        Supported AI assistants
-      </p>
       <div className="relative mx-auto max-w-xl overflow-hidden">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
