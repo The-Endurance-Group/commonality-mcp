@@ -535,7 +535,7 @@ function AIMarquee() {
         @media (prefers-reduced-motion: reduce) { .mq-track { animation: none !important; } }
       `}</style>
       <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
-        Works with the AI tools your team already uses
+        Supported AI assistants
       </p>
       <div className="relative mx-auto max-w-xl overflow-hidden">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
