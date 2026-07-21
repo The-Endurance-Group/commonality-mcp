@@ -322,16 +322,16 @@ function HeroDemo() {
         </span>
       </div>
 
-      <div className="flex min-h-[280px] flex-col gap-3 text-sm">
+      <div className="flex h-[420px] flex-col gap-3 text-sm">
         <p
           key={`q-${step}`}
-          className="animate-fade-up ml-auto w-fit max-w-[85%] rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink"
+          className="animate-fade-up ml-auto w-fit max-w-[85%] shrink-0 rounded-lg rounded-br-sm bg-tint-accent px-3 py-2 text-ink"
         >
           {demo.q}
         </p>
 
         {phase === "typing" ? (
-          <div className="flex w-fit gap-1 rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3" aria-hidden="true">
+          <div className="flex w-fit shrink-0 gap-1 rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3" aria-hidden="true">
             {[0, 1, 2].map((i) => (
               <span
                 key={i}
@@ -341,7 +341,10 @@ function HeroDemo() {
             ))}
           </div>
         ) : (
-          <div key={`a-${step}`} className="animate-fade-up rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3">
+          <div
+            key={`a-${step}`}
+            className="animate-fade-up flex-1 overflow-y-auto rounded-lg rounded-bl-sm bg-gray-50 px-3.5 py-3"
+          >
             {demo.content}
           </div>
         )}
