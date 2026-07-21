@@ -532,9 +532,8 @@ export function Marketing() {
             </h1>
             <p className="mt-2 text-2xl font-semibold text-brand sm:text-3xl">Now your AI can answer.</p>
             <p className="mx-auto mt-5 max-w-lg text-lg text-lavender lg:mx-0">
-              Commonality gives ChatGPT, Claude, and other AI assistants secure access to the
-              professional relationships across your organization - so they can find the people
-              who can help you reach a target account, not just tell you who works there.
+              Commonality gives ChatGPT, Claude, or whatever AI you use access to LinkedIn so it
+              can find your warmest path into any target account.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <StartFreeButton />
