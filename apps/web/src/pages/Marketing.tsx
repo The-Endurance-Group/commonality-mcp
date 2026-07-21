@@ -396,6 +396,10 @@ const faqs: { q: string; a: ReactNode }[] = [
     a: "That's what Enterprise is for - custom limits built around your organization. Contact us and we'll set it up.",
   },
   {
+    q: "How is this different from LinkedIn Sales Navigator, and do I need a Sales Navigator subscription?",
+    a: "No Sales Navigator subscription needed - Commonality works entirely on its own. They also solve different problems: Sales Navigator helps you find target accounts, decision-makers, and profiles on LinkedIn. Commonality answers the next question - who on your team can actually get you in, and how - by checking your whole team's LinkedIn connections, schools, and employers, right from the AI you already use. If you do have Sales Navigator, Commonality works alongside it; it's just never required.",
+  },
+  {
     q: "Does this work with Claude, ChatGPT, and Microsoft Copilot?",
     a: (
       <>
