@@ -534,6 +534,9 @@ function AIMarquee() {
         @keyframes mq-loop { from { transform: translateX(0) } to { transform: translateX(-50%) } }
         @media (prefers-reduced-motion: reduce) { .mq-track { animation: none !important; } }
       `}</style>
+      <p className="mb-5 text-center text-xs font-semibold uppercase tracking-widest text-lavender">
+        Works with the AI tools your team already uses
+      </p>
       <div className="relative mx-auto max-w-xl overflow-hidden">
         <div className="pointer-events-none absolute inset-y-0 left-0 z-10 w-10 bg-gradient-to-r from-white to-transparent" />
         <div className="pointer-events-none absolute inset-y-0 right-0 z-10 w-10 bg-gradient-to-l from-white to-transparent" />
@@ -754,7 +757,6 @@ export function Marketing() {
                 See How It Works →
               </a>
             </div>
-            <p className="mt-4 text-sm text-lavender">Works with the AI tools your team already uses.</p>
           </div>
 
           <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
