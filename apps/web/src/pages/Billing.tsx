@@ -19,7 +19,7 @@ interface CreditEventsResponse {
   total: number;
 }
 
-const ACTION_LABELS: Record<string, string> = {
+export const ACTION_LABELS: Record<string, string> = {
   analyze_prospect: "Analyzed a prospect",
   analyze_prospect_posts: "Fetched a prospect's posts",
   search_company_by_name: "Searched for a company",
