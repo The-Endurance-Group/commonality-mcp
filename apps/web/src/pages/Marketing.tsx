@@ -290,9 +290,13 @@ const HERO_DEMOS: HeroDemoScenario[] = [
 const HERO_DEMO_TYPING_MS = 1100;
 const HERO_DEMO_ANSWER_MS = 5200;
 
-function HeroDemo() {
+function HeroDemo({ onStepChange }: { onStepChange?: (step: number) => void }) {
   const [step, setStep] = useState(0);
   const [phase, setPhase] = useState<"typing" | "answer">("typing");
+
+  useEffect(() => {
+    onStepChange?.(step);
+  }, [step, onStepChange]);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -646,6 +650,7 @@ export function Marketing() {
   const { ready, token, needsOnboarding, authError, joinNotice } = useAuthStore();
   const { isSignedIn } = useAuth();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [heroStep, setHeroStep] = useState(0);
   if (ready && needsOnboarding) return <Navigate to="/onboarding" replace />;
   if (ready && token && joinNotice) return <JoinNoticeScreen />;
   if (ready && token) return <Navigate to="/dashboard" replace />;
@@ -736,8 +741,11 @@ export function Marketing() {
             <p className="text-xs font-semibold uppercase tracking-widest text-brand">
               Relationship Intelligence for AI
             </p>
-            <h1 className="mt-4 text-4xl font-bold leading-tight text-ink sm:text-5xl">
-              How do we get into IBM?
+            <h1
+              key={heroStep}
+              className="animate-fade-up mt-4 min-h-[3.5em] text-4xl font-bold leading-tight text-ink sm:min-h-[2.4em] sm:text-5xl"
+            >
+              {HERO_DEMOS[heroStep].q}
             </h1>
             <p className="mt-2 text-2xl font-semibold text-brand sm:text-3xl">Now your AI can answer.</p>
             <p className="mx-auto mt-5 max-w-lg text-lg text-lavender lg:mx-0">
@@ -753,7 +761,7 @@ export function Marketing() {
           </div>
 
           <div className="animate-fade-up" style={{ animationDelay: "0.1s" }}>
-            <HeroDemo />
+            <HeroDemo onStepChange={setHeroStep} />
           </div>
         </div>
       </section>
