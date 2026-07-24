@@ -65,3 +65,24 @@ export async function getEnrichedProfile(
   }
   return fresh;
 }
+
+/**
+ * Look up the cached enrichment result (name/title/company) for a batch of
+ * LinkedIn URLs, keyed by URL. Used to show "what Cassidy/Apify actually
+ * returned" next to a usage-log row whose target is a profile URL - misses
+ * (company-level targets, search-filter strings) simply aren't in the map.
+ */
+export async function getEnrichedNamesByUrl(
+  linkedinUrls: string[],
+): Promise<Map<string, Pick<EnrichmentData, "name" | "title" | "company">>> {
+  const urls = [...new Set(linkedinUrls)];
+  if (!urls.length) return new Map();
+  const { data } = await db()
+    .from("enrichment_cache")
+    .select("linkedin_url, enriched_data")
+    .in("linkedin_url", urls);
+  const rows = (data as { linkedin_url: string; enriched_data: EnrichmentData }[] | null) ?? [];
+  return new Map(
+    rows.map((r) => [r.linkedin_url, { name: r.enriched_data.name, title: r.enriched_data.title, company: r.enriched_data.company }]),
+  );
+}

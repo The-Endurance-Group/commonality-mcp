@@ -6,12 +6,14 @@ import { useAuthStore } from "../lib/store";
 
 interface Company { plan: string }
 
+export interface CreditEventResult { name: string; title: string; company: string }
 interface CreditEvent {
   id: string;
   action: string;
   target: string | null;
   created_at: string;
   user_email: string | null;
+  result: CreditEventResult | null;
 }
 interface CreditEventsResponse {
   events: CreditEvent[];
@@ -31,6 +33,18 @@ export const ACTION_LABELS: Record<string, string> = {
   get_linkedin_profile: "Got a LinkedIn profile",
   get_linkedin_posts: "Got LinkedIn posts",
 };
+
+export function ResultCell({ result }: { result: CreditEventResult | null }) {
+  if (!result) return <span className="text-lavender">-</span>;
+  return (
+    <span className="text-ink">
+      {result.name}
+      {(result.title || result.company) && (
+        <span className="text-lavender"> — {[result.title, result.company].filter(Boolean).join(" @ ")}</span>
+      )}
+    </span>
+  );
+}
 
 export function Billing() {
   const [params] = useSearchParams();
@@ -108,6 +122,7 @@ export function Billing() {
                     <th className="px-4 py-2">User</th>
                     <th className="px-4 py-2">Action</th>
                     <th className="px-4 py-2">Detail</th>
+                    <th className="px-4 py-2">Result</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -118,6 +133,9 @@ export function Billing() {
                       <td className="px-4 py-2 text-ink">{ACTION_LABELS[e.action] ?? e.action}</td>
                       <td className="max-w-xs truncate px-4 py-2 text-lavender" title={e.target ?? undefined}>
                         {e.target ?? "-"}
+                      </td>
+                      <td className="max-w-xs truncate px-4 py-2">
+                        <ResultCell result={e.result} />
                       </td>
                     </tr>
                   ))}

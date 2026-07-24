@@ -1,6 +1,7 @@
 import { Router, type Router as RouterType } from "express";
 import { PLAN_LIMITS, currentMonth } from "../auth/quota.js";
 import { db } from "../db/client.js";
+import { getEnrichedNamesByUrl } from "../services/enrichmentCache.js";
 
 // Cross-company console for superadmins only (config.superadminEmails - see
 // oauth/jwt.ts's is_superadmin claim). Every route here deliberately bypasses
@@ -120,9 +121,12 @@ superadminRouter.get("/companies/:id/usage-events", async (req, res) => {
 
   const events = (data as CreditEventRow[] | null) ?? [];
   const userIds = [...new Set(events.map((e) => e.user_id).filter((id): id is string => !!id))];
-  const { data: users } = userIds.length
-    ? await db().from("users").select("id, email").in("id", userIds)
-    : { data: [] as { id: string; email: string }[] };
+  const [{ data: users }, resultByUrl] = await Promise.all([
+    userIds.length
+      ? db().from("users").select("id, email").in("id", userIds)
+      : Promise.resolve({ data: [] as { id: string; email: string }[] }),
+    getEnrichedNamesByUrl(events.map((e) => e.target).filter((t): t is string => !!t)),
+  ]);
   const emailById = new Map((users ?? []).map((u: { id: string; email: string }) => [u.id, u.email]));
 
   res.json({
@@ -132,6 +136,7 @@ superadminRouter.get("/companies/:id/usage-events", async (req, res) => {
       target: e.target,
       created_at: e.created_at,
       user_email: e.user_id ? (emailById.get(e.user_id) ?? null) : null,
+      result: e.target ? (resultByUrl.get(e.target) ?? null) : null,
     })),
     page,
     pageSize: EVENTS_PAGE_SIZE,

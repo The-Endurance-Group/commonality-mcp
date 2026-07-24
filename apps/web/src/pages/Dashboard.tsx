@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
-import { ACTION_LABELS } from "./Billing";
+import { ACTION_LABELS, ResultCell, type CreditEventResult } from "./Billing";
 
 interface Usage { plan: string; used: number; limit: number; remaining: number }
 interface CreditEvent {
@@ -14,6 +14,7 @@ interface CreditEvent {
   target: string | null;
   created_at: string;
   user_email: string | null;
+  result: CreditEventResult | null;
 }
 interface CreditEventsResponse {
   events: CreditEvent[];
@@ -599,6 +600,7 @@ function UsageLogCard() {
                   <th className="px-4 py-2">User</th>
                   <th className="px-4 py-2">Type</th>
                   <th className="px-4 py-2">Detail</th>
+                  <th className="px-4 py-2">Result</th>
                 </tr>
               </thead>
               <tbody>
@@ -609,6 +611,9 @@ function UsageLogCard() {
                     <td className="px-4 py-2 text-ink">{ACTION_LABELS[e.action] ?? e.action}</td>
                     <td className="max-w-xs truncate px-4 py-2 text-lavender" title={e.target ?? undefined}>
                       {e.target ?? "-"}
+                    </td>
+                    <td className="max-w-xs truncate px-4 py-2">
+                      <ResultCell result={e.result} />
                     </td>
                   </tr>
                 ))}
