@@ -87,6 +87,58 @@ superadminRouter.get("/companies/:id/users", async (req, res) => {
   res.json({ users: data ?? [] });
 });
 
+const EVENTS_PAGE_SIZE = 50;
+
+interface CreditEventRow {
+  id: string;
+  user_id: string | null;
+  action: string;
+  target: string | null;
+  created_at: string;
+}
+
+// GET /api/superadmin/companies/:id/usage-events - detailed per-event credit
+// log for one company (who used a credit, when, and on what). Same shape as
+// GET /api/usage/events, but keyed off the requested company rather than the
+// caller's own - lets a superadmin drill into any company from the console.
+superadminRouter.get("/companies/:id/usage-events", async (req, res) => {
+  const companyId = req.params.id;
+  const page = Math.max(0, Number(req.query.page) || 0);
+  const from = page * EVENTS_PAGE_SIZE;
+  const to = from + EVENTS_PAGE_SIZE - 1;
+
+  const { data, count, error } = await db()
+    .from("credit_events")
+    .select("id, user_id, action, target, created_at", { count: "exact" })
+    .eq("company_id", companyId)
+    .order("created_at", { ascending: false })
+    .range(from, to);
+  if (error) {
+    res.status(502).json({ error: "usage_events_failed", message: error.message });
+    return;
+  }
+
+  const events = (data as CreditEventRow[] | null) ?? [];
+  const userIds = [...new Set(events.map((e) => e.user_id).filter((id): id is string => !!id))];
+  const { data: users } = userIds.length
+    ? await db().from("users").select("id, email").in("id", userIds)
+    : { data: [] as { id: string; email: string }[] };
+  const emailById = new Map((users ?? []).map((u: { id: string; email: string }) => [u.id, u.email]));
+
+  res.json({
+    events: events.map((e) => ({
+      id: e.id,
+      action: e.action,
+      target: e.target,
+      created_at: e.created_at,
+      user_email: e.user_id ? (emailById.get(e.user_id) ?? null) : null,
+    })),
+    page,
+    pageSize: EVENTS_PAGE_SIZE,
+    total: count ?? events.length,
+  });
+});
+
 // GET /api/superadmin/stats - platform-wide credit-event breakdown by action
 // type, across every company. Selects only the `action` column and counts in
 // JS (same pragmatic style as the rest of this router) rather than a

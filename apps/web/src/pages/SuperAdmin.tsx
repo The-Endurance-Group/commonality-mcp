@@ -22,11 +22,25 @@ interface CompanyUser {
   role: "admin" | "member";
   created_at: string;
 }
+interface CreditEvent {
+  id: string;
+  action: string;
+  target: string | null;
+  created_at: string;
+  user_email: string | null;
+}
+interface CreditEventsResponse {
+  events: CreditEvent[];
+  page: number;
+  pageSize: number;
+  total: number;
+}
 
 export function SuperAdmin() {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [eventsPage, setEventsPage] = useState(0);
 
   const companies = useQuery({
     queryKey: ["superadmin-companies"],
@@ -43,6 +57,18 @@ export function SuperAdmin() {
     queryFn: () => apiFetch<{ users: CompanyUser[] }>(`/api/superadmin/companies/${expanded}/users`),
     enabled: !!expanded,
   });
+
+  const usageEvents = useQuery({
+    queryKey: ["superadmin-company-usage-events", expanded, eventsPage],
+    queryFn: () =>
+      apiFetch<CreditEventsResponse>(`/api/superadmin/companies/${expanded}/usage-events?page=${eventsPage}`),
+    enabled: !!expanded,
+  });
+
+  function toggleExpanded(companyId: string) {
+    setExpanded((e) => (e === companyId ? null : companyId));
+    setEventsPage(0);
+  }
 
   async function setPlan(companyId: string, plan: "free" | "pro") {
     setBusyId(companyId);
@@ -118,7 +144,7 @@ export function SuperAdmin() {
                 <Fragment key={c.id}>
                   <tr className="border-t border-gray-100">
                     <td className="px-4 py-2">
-                      <button className="font-medium text-brand hover:underline" onClick={() => setExpanded((e) => (e === c.id ? null : c.id))}>
+                      <button className="font-medium text-brand hover:underline" onClick={() => toggleExpanded(c.id)}>
                         {c.name}
                       </button>
                     </td>
@@ -167,6 +193,67 @@ export function SuperAdmin() {
                             ))}
                           </ul>
                         )}
+
+                        <div className="mt-4 border-t border-gray-200 pt-3">
+                          <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-lavender">Usage log</div>
+                          {usageEvents.isLoading ? (
+                            <span className="text-sm text-lavender">Loading usage…</span>
+                          ) : !usageEvents.data?.events.length ? (
+                            <span className="text-sm text-lavender">No credits used yet.</span>
+                          ) : (
+                            <>
+                              <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white">
+                                <table className="w-full text-sm">
+                                  <thead className="bg-gray-50 text-left text-lavender">
+                                    <tr>
+                                      <th className="px-3 py-1.5">Time</th>
+                                      <th className="px-3 py-1.5">User</th>
+                                      <th className="px-3 py-1.5">Action</th>
+                                      <th className="px-3 py-1.5">Detail</th>
+                                    </tr>
+                                  </thead>
+                                  <tbody>
+                                    {usageEvents.data.events.map((e) => (
+                                      <tr key={e.id} className="border-t border-gray-100">
+                                        <td className="whitespace-nowrap px-3 py-1.5 text-lavender">
+                                          {new Date(e.created_at).toLocaleString()}
+                                        </td>
+                                        <td className="px-3 py-1.5 text-ink">{e.user_email ?? "-"}</td>
+                                        <td className="px-3 py-1.5 text-ink">{ACTION_LABELS[e.action] ?? e.action}</td>
+                                        <td className="max-w-xs truncate px-3 py-1.5 text-lavender" title={e.target ?? undefined}>
+                                          {e.target ?? "-"}
+                                        </td>
+                                      </tr>
+                                    ))}
+                                  </tbody>
+                                </table>
+                              </div>
+                              <div className="mt-2 flex items-center justify-between text-xs">
+                                <span className="text-lavender">
+                                  {usageEvents.data.total === 0
+                                    ? "0 events"
+                                    : `${eventsPage * usageEvents.data.pageSize + 1}-${Math.min((eventsPage + 1) * usageEvents.data.pageSize, usageEvents.data.total)} of ${usageEvents.data.total}`}
+                                </span>
+                                <div className="flex gap-2">
+                                  <button
+                                    className="btn-secondary"
+                                    disabled={eventsPage === 0}
+                                    onClick={() => setEventsPage((p) => Math.max(0, p - 1))}
+                                  >
+                                    Previous
+                                  </button>
+                                  <button
+                                    className="btn-secondary"
+                                    disabled={(eventsPage + 1) * usageEvents.data.pageSize >= usageEvents.data.total}
+                                    onClick={() => setEventsPage((p) => p + 1)}
+                                  >
+                                    Next
+                                  </button>
+                                </div>
+                              </div>
+                            </>
+                          )}
+                        </div>
                       </td>
                     </tr>
                   )}
