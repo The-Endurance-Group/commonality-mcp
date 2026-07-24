@@ -72,7 +72,7 @@ const sections: Section[] = [
           takes effect on their next billing cycle.
         </p>
         <p className="mt-3">
-          Paid plans are billed in advance on a recurring monthly basis via Stripe and automatically renew until
+          Paid plans are billed in advance on a recurring monthly basis via our payment processor and automatically renew until
           canceled. You can cancel anytime from your workspace's billing settings; cancellation takes effect at the
           end of your current billing period, and we don't provide prorated refunds for partial billing periods
           except where required by law. You're responsible for all applicable taxes.

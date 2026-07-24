@@ -15,12 +15,12 @@ interface Retention {
 
 const retentions: Retention[] = [
   {
-    name: "Cassidy lookups",
-    what: "The structured profile fields Cassidy returns (name, title, company, schools, past employers) for up to 90 days.",
+    name: "Profile enrichment",
+    what: "The structured profile fields returned by our enrichment service (name, title, company, schools, past employers) for up to 90 days.",
     scope: "Shared across all customers by LinkedIn URL, so a profile enriched once isn't re-scraped for every company. Raw scrape data beyond these fields isn't kept.",
   },
   {
-    name: "Apify searches & posts",
+    name: "Search & post lookups",
     what: "A short snapshot of what a search or recent-posts lookup returned (matched names/titles, or a preview of post text), so your admins can review what a lookup actually found.",
     scope: "Scoped to your own company only, visible only to your workspace's admins - never shared across companies.",
   },
@@ -28,29 +28,29 @@ const retentions: Retention[] = [
 
 const subprocessors: Subprocessor[] = [
   {
-    name: "Cassidy",
+    name: "Profile enrichment service",
     usedFor: "Scraping and structuring LinkedIn profile data for your team and prospects.",
     dataShared: "LinkedIn profile URLs you or your team submit.",
   },
   {
-    name: "Apify",
+    name: "Search service",
     usedFor: "Finding your company on LinkedIn during onboarding, pulling your team roster, and searching LinkedIn for prospects by title, location, company, or school.",
     dataShared: "Your company name/LinkedIn URL and the search filters you provide.",
   },
   {
-    name: "Perplexity",
+    name: "AI research service",
     usedFor: "Auto-drafting your company description during signup, based on your website.",
     dataShared: "Your company's public website URL.",
   },
   {
-    name: "Resend",
+    name: "Email service",
     usedFor: "Sending transactional email - password resets and workspace invites.",
     dataShared: "Recipient email address and the relevant message content (e.g. a reset link or invite).",
   },
   {
-    name: "Stripe",
+    name: "Payment processor",
     usedFor: "Billing and subscription management for paid plans.",
-    dataShared: "Your billing email and payment details (handled entirely by Stripe - Commonality never sees your card number).",
+    dataShared: "Your billing email and payment details (handled entirely by our payment processor - Commonality never sees your card number).",
   },
 ];
 
