@@ -37,6 +37,7 @@ const TEAM_LIMITS: Record<string, number> = { free: 25, pro: 150 };
 
 export function Dashboard() {
   const isAdmin = useAuthStore((s) => s.claims?.role === "admin");
+  const isSuperadmin = useAuthStore((s) => s.claims?.is_superadmin ?? false);
   const qc = useQueryClient();
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => apiFetch<Usage>("/api/usage") });
   const roster = useQuery({ queryKey: ["employees"], queryFn: () => apiFetch<{ employees: Employee[] }>("/api/employees") });
@@ -92,7 +93,7 @@ export function Dashboard() {
 
       <ConnectionsCard />
 
-      {isAdmin && <UsageLogCard />}
+      {isSuperadmin && <UsageLogCard />}
 
       <CollapsibleCard
         title="Team roster"

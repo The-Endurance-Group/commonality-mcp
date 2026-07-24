@@ -2,6 +2,7 @@ import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { apiFetch } from "../lib/api";
+import { useAuthStore } from "../lib/store";
 
 interface Company { plan: string }
 
@@ -38,11 +39,13 @@ export function Billing() {
   const [busy, setBusy] = useState(false);
   const [page, setPage] = useState(0);
 
+  const isSuperadmin = useAuthStore((s) => s.claims?.is_superadmin ?? false);
   const company = useQuery({ queryKey: ["company"], queryFn: () => apiFetch<Company>("/api/companies/me") });
   const isPro = company.data?.plan === "pro";
   const events = useQuery({
     queryKey: ["usage-events", page],
     queryFn: () => apiFetch<CreditEventsResponse>(`/api/usage/events?page=${page}`),
+    enabled: isSuperadmin,
   });
 
   async function go(path: string) {
@@ -86,6 +89,7 @@ export function Billing() {
         {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
       </div>
 
+      {isSuperadmin && (
       <div className="rounded-lg border border-gray-100 bg-white p-6">
         <div className="mb-1 text-sm font-medium text-ink">Credit usage log</div>
         <p className="mb-4 text-sm text-lavender">Every credit charged to your workspace - who used it, when, and on what.</p>
@@ -143,6 +147,7 @@ export function Billing() {
           </>
         )}
       </div>
+      )}
     </div>
   );
 }

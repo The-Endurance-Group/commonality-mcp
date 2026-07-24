@@ -21,12 +21,13 @@ interface CreditEventRow {
   created_at: string;
 }
 
-// GET /api/usage/events - admin-only usage log: who used a credit, when, and
-// on what. Two queries + a JS join (rather than a nested PostgREST select)
-// to match this codebase's existing query style (see db/queries.ts).
+// GET /api/usage/events - superadmin-only usage log: who used a credit,
+// when, and on what. Two queries + a JS join (rather than a nested
+// PostgREST select) to match this codebase's existing query style (see
+// db/queries.ts).
 usageRouter.get("/events", async (req, res) => {
   const user = req.user!;
-  if (user.role !== "admin") {
+  if (!user.is_superadmin) {
     res.status(403).json({ error: "forbidden" });
     return;
   }
