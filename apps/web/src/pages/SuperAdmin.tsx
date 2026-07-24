@@ -1,5 +1,5 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { Fragment, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
 import { ACTION_LABELS } from "./Billing";
 
@@ -36,11 +36,66 @@ interface CreditEventsResponse {
   total: number;
 }
 
+type SortKey = "name" | "user_count" | "credits_used" | "created_at";
+type SortDir = "asc" | "desc";
+
+function Stat({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-gray-100 bg-white p-5">
+      <div className="text-sm text-lavender">{label}</div>
+      <div className="mt-1 text-2xl font-semibold text-ink">{value}</div>
+    </div>
+  );
+}
+
+function PlanBadge({ plan }: { plan: "free" | "pro" }) {
+  return (
+    <span
+      className={`rounded-full px-2.5 py-0.5 text-xs font-medium capitalize ${
+        plan === "pro" ? "bg-brand/10 text-brand" : "bg-gray-100 text-lavender"
+      }`}
+    >
+      {plan}
+    </span>
+  );
+}
+
+function SortHeader({
+  label,
+  sortKey,
+  activeKey,
+  dir,
+  onSort,
+}: {
+  label: string;
+  sortKey: SortKey;
+  activeKey: SortKey;
+  dir: SortDir;
+  onSort: (key: SortKey) => void;
+}) {
+  const active = sortKey === activeKey;
+  return (
+    <th className="px-4 py-2">
+      <button
+        className={`flex items-center gap-1 font-medium ${active ? "text-ink" : "text-lavender hover:text-ink"}`}
+        onClick={() => onSort(sortKey)}
+      >
+        {label}
+        <span className="text-xs">{active ? (dir === "asc" ? "▲" : "▼") : ""}</span>
+      </button>
+    </th>
+  );
+}
+
 export function SuperAdmin() {
   const qc = useQueryClient();
   const [expanded, setExpanded] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [eventsPage, setEventsPage] = useState(0);
+  const [query, setQuery] = useState("");
+  const [sortKey, setSortKey] = useState<SortKey>("created_at");
+  const [sortDir, setSortDir] = useState<SortDir>("desc");
+  const [statsOpen, setStatsOpen] = useState(false);
 
   const companies = useQuery({
     queryKey: ["superadmin-companies"],
@@ -50,6 +105,7 @@ export function SuperAdmin() {
   const stats = useQuery({
     queryKey: ["superadmin-stats"],
     queryFn: () => apiFetch<PlatformStats>("/api/superadmin/stats"),
+    enabled: statsOpen,
   });
 
   const users = useQuery({
@@ -70,6 +126,15 @@ export function SuperAdmin() {
     setEventsPage(0);
   }
 
+  function toggleSort(key: SortKey) {
+    if (key === sortKey) {
+      setSortDir((d) => (d === "asc" ? "desc" : "asc"));
+    } else {
+      setSortKey(key);
+      setSortDir(key === "name" ? "asc" : "desc");
+    }
+  }
+
   async function setPlan(companyId: string, plan: "free" | "pro") {
     setBusyId(companyId);
     try {
@@ -83,6 +148,33 @@ export function SuperAdmin() {
     }
   }
 
+  const allCompanies = companies.data?.companies ?? [];
+  const totals = useMemo(
+    () => ({
+      companyCount: allCompanies.length,
+      userCount: allCompanies.reduce((sum, c) => sum + c.user_count, 0),
+      creditsUsed: allCompanies.reduce((sum, c) => sum + c.credits_used, 0),
+      proCount: allCompanies.filter((c) => c.plan === "pro").length,
+    }),
+    [allCompanies],
+  );
+
+  const visibleCompanies = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    const filtered = q
+      ? allCompanies.filter((c) => c.name.toLowerCase().includes(q) || (c.domain ?? "").toLowerCase().includes(q))
+      : allCompanies;
+    const sorted = [...filtered].sort((a, b) => {
+      let cmp = 0;
+      if (sortKey === "name") cmp = a.name.localeCompare(b.name);
+      else if (sortKey === "user_count") cmp = a.user_count - b.user_count;
+      else if (sortKey === "credits_used") cmp = a.credits_used - b.credits_used;
+      else cmp = new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+      return sortDir === "asc" ? cmp : -cmp;
+    });
+    return sorted;
+  }, [allCompanies, query, sortKey, sortDir]);
+
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       <div>
@@ -90,57 +182,98 @@ export function SuperAdmin() {
         <p className="text-sm text-lavender">Every company workspace - team size, plan, and this month's credit usage.</p>
       </div>
 
+      <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+        <Stat label="Companies" value={companies.isLoading ? "…" : String(totals.companyCount)} />
+        <Stat label="Users" value={companies.isLoading ? "…" : String(totals.userCount)} />
+        <Stat label="Pro accounts" value={companies.isLoading ? "…" : String(totals.proCount)} />
+        <Stat label="Credits used (month)" value={companies.isLoading ? "…" : String(totals.creditsUsed)} />
+      </section>
+
       <div className="rounded-lg border border-gray-100 bg-white p-6">
-        <div className="mb-1 text-sm font-medium text-ink">Platform-wide action breakdown</div>
-        <p className="mb-4 text-sm text-lavender">Every credit event ever charged, across all companies, by type.</p>
-        {stats.isLoading ? (
-          <p className="text-sm text-lavender">Loading…</p>
-        ) : !stats.data?.byAction.length ? (
-          <p className="text-sm text-lavender">No credit events yet.</p>
-        ) : (
-          <div className="space-y-2">
-            {stats.data.byAction.map((s, i) => {
-              const pct = stats.data!.total ? Math.round((s.count / stats.data!.total) * 100) : 0;
-              return (
-                <div key={s.action} className="flex items-center gap-3">
-                  <span className="w-48 shrink-0 truncate text-sm text-ink">
-                    {i === 0 && <span className="mr-1" title="Most common">🏆</span>}
-                    {ACTION_LABELS[s.action] ?? s.action}
-                  </span>
-                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
-                    <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
-                  </div>
-                  <span className="w-24 shrink-0 text-right text-sm text-lavender">
-                    {s.count} ({pct}%)
-                  </span>
-                </div>
-              );
-            })}
-            <p className="pt-1 text-xs text-lavender">{stats.data.total} total events</p>
+        <button
+          className="flex w-full items-center justify-between text-left"
+          onClick={() => setStatsOpen((o) => !o)}
+          aria-expanded={statsOpen}
+        >
+          <div>
+            <div className="text-sm font-medium text-ink">Platform-wide action breakdown</div>
+            <p className="mt-1 text-sm text-lavender">Every credit event ever charged, across all companies, by type.</p>
           </div>
+          <span className={`shrink-0 text-lavender transition-transform ${statsOpen ? "rotate-180" : ""}`} aria-hidden="true">
+            ▾
+          </span>
+        </button>
+        {statsOpen &&
+          (stats.isLoading ? (
+            <p className="mt-4 text-sm text-lavender">Loading…</p>
+          ) : !stats.data?.byAction.length ? (
+            <p className="mt-4 text-sm text-lavender">No credit events yet.</p>
+          ) : (
+            <div className="mt-4 space-y-2">
+              {stats.data.byAction.map((s, i) => {
+                const pct = stats.data!.total ? Math.round((s.count / stats.data!.total) * 100) : 0;
+                return (
+                  <div key={s.action} className="flex items-center gap-3">
+                    <span className="w-48 shrink-0 truncate text-sm text-ink">
+                      {i === 0 && <span className="mr-1" title="Most common">🏆</span>}
+                      {ACTION_LABELS[s.action] ?? s.action}
+                    </span>
+                    <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+                      <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
+                    </div>
+                    <span className="w-24 shrink-0 text-right text-sm text-lavender">
+                      {s.count} ({pct}%)
+                    </span>
+                  </div>
+                );
+              })}
+              <p className="pt-1 text-xs text-lavender">{stats.data.total} total events</p>
+            </div>
+          ))}
+      </div>
+
+      <div className="flex items-center justify-between gap-3">
+        <input
+          className="input max-w-xs"
+          placeholder="Search by company or domain…"
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        {query && (
+          <span className="text-sm text-lavender">
+            {visibleCompanies.length} of {allCompanies.length}
+          </span>
         )}
       </div>
 
       {companies.isLoading ? (
         <p className="text-sm text-lavender">Loading…</p>
-      ) : !companies.data?.companies.length ? (
+      ) : !allCompanies.length ? (
         <p className="text-sm text-lavender">No companies yet.</p>
+      ) : !visibleCompanies.length ? (
+        <p className="text-sm text-lavender">No companies match "{query}".</p>
       ) : (
         <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white">
           <table className="w-full text-sm">
             <thead className="bg-gray-50 text-left text-lavender">
               <tr>
-                <th className="px-4 py-2">Company</th>
+                <SortHeader label="Company" sortKey="name" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <th className="px-4 py-2">Domain</th>
                 <th className="px-4 py-2">Plan</th>
-                <th className="px-4 py-2">Users</th>
-                <th className="px-4 py-2">Credits (month)</th>
-                <th className="px-4 py-2">Created</th>
+                <SortHeader label="Users" sortKey="user_count" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <SortHeader
+                  label="Credits (month)"
+                  sortKey="credits_used"
+                  activeKey={sortKey}
+                  dir={sortDir}
+                  onSort={toggleSort}
+                />
+                <SortHeader label="Created" sortKey="created_at" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
                 <th className="px-4 py-2" />
               </tr>
             </thead>
             <tbody>
-              {companies.data.companies.map((c) => (
+              {visibleCompanies.map((c) => (
                 <Fragment key={c.id}>
                   <tr className="border-t border-gray-100">
                     <td className="px-4 py-2">
@@ -149,7 +282,9 @@ export function SuperAdmin() {
                       </button>
                     </td>
                     <td className="px-4 py-2 text-lavender">{c.domain ?? "-"}</td>
-                    <td className="px-4 py-2 text-ink capitalize">{c.plan}</td>
+                    <td className="px-4 py-2">
+                      <PlanBadge plan={c.plan} />
+                    </td>
                     <td className="px-4 py-2 text-lavender">{c.user_count}</td>
                     <td className="px-4 py-2 text-lavender">
                       {c.credits_used} / {c.credits_limit}
