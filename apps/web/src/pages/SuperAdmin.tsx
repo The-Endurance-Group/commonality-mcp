@@ -1,7 +1,7 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useMemo, useState } from "react";
 import { apiFetch } from "../lib/api";
-import { ACTION_LABELS, ResultCell, type CreditEventResult } from "./Billing";
+import { ACTION_LABELS, ResultCell, type CreditEventResult, type CreditEventSnapshot } from "./Billing";
 
 interface ActionStat { action: string; count: number }
 interface PlatformStats { total: number; byAction: ActionStat[] }
@@ -29,6 +29,7 @@ interface CreditEvent {
   created_at: string;
   user_email: string | null;
   result: CreditEventResult | null;
+  result_snapshot: CreditEventSnapshot | null;
 }
 interface CreditEventsResponse {
   events: CreditEvent[];
@@ -361,7 +362,7 @@ export function SuperAdmin() {
                                           {e.target ?? "-"}
                                         </td>
                                         <td className="max-w-xs truncate px-3 py-1.5">
-                                          <ResultCell result={e.result} />
+                                          <ResultCell result={e.result} snapshot={e.result_snapshot} />
                                         </td>
                                       </tr>
                                     ))}

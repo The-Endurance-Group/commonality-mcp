@@ -1,6 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } from "../../auth/quota.js";
-import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getProfilePosts } from "../../services/apify.js";
+import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getProfilePosts, summarizePostsSnapshot } from "../../services/apify.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizeBackground, summarizePath } from "./_prospect.js";
 
@@ -53,7 +53,7 @@ export const analyze_prospect: ToolHandler<Args> = {
         try {
           const posts = await getProfilePosts(args.url, count);
           if (posts.length) {
-            await chargeCredit(ctx, "analyze_prospect_posts", { target: args.url });
+            await chargeCredit(ctx, "analyze_prospect_posts", { target: args.url, resultSnapshot: summarizePostsSnapshot(posts) });
             const postLines = posts.map(
               (p, i) => `${i + 1}. ${p.postedAt ? `[${p.postedAt}] ` : ""}${p.text.slice(0, 200)}${p.url ? `\n   ${p.url}` : ""}`,
             );

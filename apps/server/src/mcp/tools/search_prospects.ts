@@ -1,6 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, quotaExceededMessage } from "../../auth/quota.js";
-import { searchProfiles, type ProfileSearchFilters } from "../../services/apify.js";
+import { searchProfiles, summarizeProfilesSnapshot, type ProfileSearchFilters } from "../../services/apify.js";
 import { text } from "./_result.js";
 
 interface SearchArgs {
@@ -37,7 +37,10 @@ export const search_prospects: ToolHandler<SearchArgs> = {
       return text("Search failed. Try again.", true);
     }
     const targetBits = [args.query, args.titles?.join("/"), args.companies?.join("/")].filter(Boolean);
-    await chargeCredit(ctx, "search_prospects", { target: targetBits.join(" - ") || undefined });
+    await chargeCredit(ctx, "search_prospects", {
+      target: targetBits.join(" - ") || undefined,
+      resultSnapshot: summarizeProfilesSnapshot(profiles),
+    });
     if (!profiles.length) return text("No prospects matched those filters.");
 
     const lines = profiles.map(

@@ -7,6 +7,7 @@ import { useAuthStore } from "../lib/store";
 interface Company { plan: string }
 
 export interface CreditEventResult { name: string; title: string; company: string }
+export interface CreditEventSnapshot { summary: string }
 interface CreditEvent {
   id: string;
   action: string;
@@ -14,6 +15,7 @@ interface CreditEvent {
   created_at: string;
   user_email: string | null;
   result: CreditEventResult | null;
+  result_snapshot: CreditEventSnapshot | null;
 }
 interface CreditEventsResponse {
   events: CreditEvent[];
@@ -34,16 +36,25 @@ export const ACTION_LABELS: Record<string, string> = {
   get_linkedin_posts: "Got LinkedIn posts",
 };
 
-export function ResultCell({ result }: { result: CreditEventResult | null }) {
-  if (!result) return <span className="text-lavender">-</span>;
-  return (
-    <span className="text-ink">
-      {result.name}
-      {(result.title || result.company) && (
-        <span className="text-lavender"> — {[result.title, result.company].filter(Boolean).join(" @ ")}</span>
-      )}
-    </span>
-  );
+export function ResultCell({
+  result,
+  snapshot,
+}: {
+  result: CreditEventResult | null;
+  snapshot?: CreditEventSnapshot | null;
+}) {
+  if (result) {
+    return (
+      <span className="text-ink">
+        {result.name}
+        {(result.title || result.company) && (
+          <span className="text-lavender"> — {[result.title, result.company].filter(Boolean).join(" @ ")}</span>
+        )}
+      </span>
+    );
+  }
+  if (snapshot) return <span className="text-lavender">{snapshot.summary}</span>;
+  return <span className="text-lavender">-</span>;
 }
 
 export function Billing() {
@@ -135,7 +146,7 @@ export function Billing() {
                         {e.target ?? "-"}
                       </td>
                       <td className="max-w-xs truncate px-4 py-2">
-                        <ResultCell result={e.result} />
+                        <ResultCell result={e.result} snapshot={e.result_snapshot} />
                       </td>
                     </tr>
                   ))}

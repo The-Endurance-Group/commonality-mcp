@@ -7,6 +7,25 @@ interface Subprocessor {
   dataShared: string;
 }
 
+interface Retention {
+  name: string;
+  what: string;
+  scope: string;
+}
+
+const retentions: Retention[] = [
+  {
+    name: "Cassidy lookups",
+    what: "The structured profile fields Cassidy returns (name, title, company, schools, past employers) for up to 90 days.",
+    scope: "Shared across all customers by LinkedIn URL, so a profile enriched once isn't re-scraped for every company. Raw scrape data beyond these fields isn't kept.",
+  },
+  {
+    name: "Apify searches & posts",
+    what: "A short snapshot of what a search or recent-posts lookup returned (matched names/titles, or a preview of post text), so your admins can review what a lookup actually found.",
+    scope: "Scoped to your own company only, visible only to your workspace's admins - never shared across companies.",
+  },
+];
+
 const subprocessors: Subprocessor[] = [
   {
     name: "Cassidy",
@@ -91,6 +110,21 @@ export function Privacy() {
               <p className="mt-2 text-sm text-lavender">
                 <span className="font-medium text-ink">Data shared:</span> {s.dataShared}
               </p>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="mt-12 text-xl font-bold text-ink">What we retain from lookups</h2>
+        <p className="mt-2 max-w-2xl text-lavender">
+          Beyond what's shared with the subprocessors above, we keep a small amount of what they return so your
+          admins can see what a lookup found and audit your workspace's usage.
+        </p>
+        <div className="mt-6 space-y-4">
+          {retentions.map((r) => (
+            <div key={r.name} className="rounded-lg border border-gray-100 p-6">
+              <h3 className="text-lg font-semibold text-ink">{r.name}</h3>
+              <p className="mt-3 text-sm text-ink">{r.what}</p>
+              <p className="mt-2 text-sm text-lavender">{r.scope}</p>
             </div>
           ))}
         </div>

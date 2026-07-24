@@ -79,10 +79,16 @@ export async function recordProspectUnlock(companyId: string, url: string): Prom
 }
 
 /** Record an audit-log row for one actual charge (Billing page usage log). */
-async function recordCreditEvent(companyId: string, userId: string, action: string, target?: string): Promise<void> {
+async function recordCreditEvent(
+  companyId: string,
+  userId: string,
+  action: string,
+  target?: string,
+  resultSnapshot?: unknown,
+): Promise<void> {
   await db()
     .from("credit_events")
-    .insert({ company_id: companyId, user_id: userId, action, target: target ?? null });
+    .insert({ company_id: companyId, user_id: userId, action, target: target ?? null, result_snapshot: resultSnapshot ?? null });
 }
 
 /** Has this company ever actually been charged a credit before (any month)? */
@@ -122,12 +128,17 @@ async function getCompanyAdminEmail(companyId: string): Promise<string | undefin
  * charges are audited). Omit dedupeKey for calls that should always cost
  * (e.g. a fresh people-search). Known race window (check-then-increment
  * isn't one atomic statement) matches the pre-existing risk tolerance of
- * this codebase.
+ * this codebase. `resultSnapshot` is an optional, small JSON summary of what
+ * the underlying vendor call actually returned (e.g. the top few Apify
+ * search/post results) - shown in the usage log's "Result" column for
+ * actions that don't already have a result recoverable elsewhere (Cassidy
+ * calls are recoverable via enrichment_cache; Apify calls aren't persisted
+ * anywhere else, so this is the only record of what came back).
  */
 export async function chargeCredit(
   ctx: Pick<ToolContext, "company_id" | "plan" | "user_id" | "email">,
   action: string,
-  opts?: { dedupeKey?: string | null; target?: string },
+  opts?: { dedupeKey?: string | null; target?: string; resultSnapshot?: unknown },
 ): Promise<QuotaStatus> {
   const dedupeKey = opts?.dedupeKey;
   if (dedupeKey && (await isProspectUnlocked(ctx.company_id, dedupeKey))) {
@@ -139,7 +150,7 @@ export async function chargeCredit(
   const isFirstEverCharge = await companyHasNeverBeenCharged(ctx.company_id);
   const used = await incrementUsage(ctx.company_id);
   if (dedupeKey) await recordProspectUnlock(ctx.company_id, dedupeKey);
-  await recordCreditEvent(ctx.company_id, ctx.user_id, action, opts?.target);
+  await recordCreditEvent(ctx.company_id, ctx.user_id, action, opts?.target, opts?.resultSnapshot);
   if (isFirstEverCharge) {
     (async () => {
       const adminEmail = await getCompanyAdminEmail(ctx.company_id);

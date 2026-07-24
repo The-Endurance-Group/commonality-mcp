@@ -20,6 +20,7 @@ interface CreditEventRow {
   action: string;
   target: string | null;
   created_at: string;
+  result_snapshot: { summary: string } | null;
 }
 
 // GET /api/usage/events - superadmin-only usage log: who used a credit,
@@ -39,7 +40,7 @@ usageRouter.get("/events", async (req, res) => {
 
   const { data, count, error } = await db()
     .from("credit_events")
-    .select("id, user_id, action, target, created_at", { count: "exact" })
+    .select("id, user_id, action, target, created_at, result_snapshot", { count: "exact" })
     .eq("company_id", user.company_id)
     .order("created_at", { ascending: false })
     .range(from, to);
@@ -66,6 +67,7 @@ usageRouter.get("/events", async (req, res) => {
       created_at: e.created_at,
       user_email: e.user_id ? (emailById.get(e.user_id) ?? null) : null,
       result: e.target ? (resultByUrl.get(e.target) ?? null) : null,
+      result_snapshot: e.result_snapshot,
     })),
     page,
     pageSize: EVENTS_PAGE_SIZE,

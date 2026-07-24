@@ -296,6 +296,59 @@ export async function searchProfiles(filters: ProfileSearchFilters, limit = 25):
   }
 }
 
+// --- Result snapshots for the usage-log audit trail -------------------------
+// Apify responses aren't persisted anywhere else (unlike Cassidy enrichments,
+// which live in enrichment_cache) - these build the small JSON summary passed
+// as chargeCredit()'s resultSnapshot so an admin can see what a search/posts
+// call actually returned, without storing the full raw response.
+
+const SNAPSHOT_ITEM_LIMIT = 5;
+const SNAPSHOT_POST_LIMIT = 3;
+const SNAPSHOT_POST_PREVIEW_CHARS = 200;
+
+export function summarizeProfilesSnapshot(profiles: ApifyProfile[]) {
+  const items = profiles.slice(0, SNAPSHOT_ITEM_LIMIT).map((p) => ({
+    name: p.name,
+    title: p.title || undefined,
+    company: p.company,
+    linkedinUrl: p.linkedinUrl,
+  }));
+  const summary = profiles.length
+    ? `${profiles.length} match${profiles.length === 1 ? "" : "es"}: ${items.map((p) => p.name).join(", ")}${
+        profiles.length > items.length ? ", …" : ""
+      }`
+    : "No matches";
+  return { summary, count: profiles.length, items };
+}
+
+export function summarizeCompaniesSnapshot(companies: ApifyCompany[]) {
+  const items = companies.slice(0, SNAPSHOT_ITEM_LIMIT).map((c) => ({
+    name: c.name,
+    location: c.location,
+    linkedinUrl: c.linkedinUrl,
+  }));
+  const summary = companies.length
+    ? `${companies.length} match${companies.length === 1 ? "" : "es"}: ${items.map((c) => c.name).join(", ")}${
+        companies.length > items.length ? ", …" : ""
+      }`
+    : "No matches";
+  return { summary, count: companies.length, items };
+}
+
+export function summarizePostsSnapshot(posts: ApifyPost[]) {
+  const items = posts.slice(0, SNAPSHOT_POST_LIMIT).map((p) => ({
+    postedAt: p.postedAt,
+    url: p.url,
+    preview: p.text.slice(0, SNAPSHOT_POST_PREVIEW_CHARS),
+  }));
+  const summary = posts.length
+    ? `${posts.length} post${posts.length === 1 ? "" : "s"}: "${items[0].preview.slice(0, 80)}${
+        items[0].preview.length > 80 ? "…" : ""
+      }"${posts.length > 1 ? `, +${posts.length - 1} more` : ""}`
+    : "No posts";
+  return { summary, count: posts.length, items };
+}
+
 async function runProfileSearch(filters: ProfileSearchFilters, limit: number): Promise<ApifyProfile[]> {
   const actorInput: ProfileSearchFilters = { ...filters };
   if (actorInput.companyHeadcount?.length) {

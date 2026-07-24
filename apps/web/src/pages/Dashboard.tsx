@@ -5,7 +5,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
-import { ACTION_LABELS, ResultCell, type CreditEventResult } from "./Billing";
+import { ACTION_LABELS, ResultCell, type CreditEventResult, type CreditEventSnapshot } from "./Billing";
 
 interface Usage { plan: string; used: number; limit: number; remaining: number }
 interface CreditEvent {
@@ -15,6 +15,7 @@ interface CreditEvent {
   created_at: string;
   user_email: string | null;
   result: CreditEventResult | null;
+  result_snapshot: CreditEventSnapshot | null;
 }
 interface CreditEventsResponse {
   events: CreditEvent[];
@@ -613,7 +614,7 @@ function UsageLogCard() {
                       {e.target ?? "-"}
                     </td>
                     <td className="max-w-xs truncate px-4 py-2">
-                      <ResultCell result={e.result} />
+                      <ResultCell result={e.result} snapshot={e.result_snapshot} />
                     </td>
                   </tr>
                 ))}

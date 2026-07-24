@@ -1,6 +1,6 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, quotaExceededMessage } from "../../auth/quota.js";
-import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getCompanyPosts, getProfilePosts } from "../../services/apify.js";
+import { DEFAULT_POSTS_COUNT, MAX_POSTS_COUNT, getCompanyPosts, getProfilePosts, summarizePostsSnapshot } from "../../services/apify.js";
 import { text } from "./_result.js";
 
 interface Args {
@@ -29,7 +29,7 @@ export const get_linkedin_posts: ToolHandler<Args> = {
     } catch {
       return text("Couldn't fetch recent posts right now. Please try again.", true);
     }
-    await chargeCredit(ctx, "get_linkedin_posts", { target: args.url });
+    await chargeCredit(ctx, "get_linkedin_posts", { target: args.url, resultSnapshot: summarizePostsSnapshot(posts) });
 
     if (!posts.length) return text(`No recent posts found for ${args.url}.`);
 
