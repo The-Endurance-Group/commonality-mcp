@@ -1,6 +1,10 @@
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { Fragment, useState } from "react";
 import { apiFetch } from "../lib/api";
+import { ACTION_LABELS } from "./Billing";
+
+interface ActionStat { action: string; count: number }
+interface PlatformStats { total: number; byAction: ActionStat[] }
 
 interface Company {
   id: string;
@@ -29,6 +33,11 @@ export function SuperAdmin() {
     queryFn: () => apiFetch<{ companies: Company[] }>("/api/superadmin/companies"),
   });
 
+  const stats = useQuery({
+    queryKey: ["superadmin-stats"],
+    queryFn: () => apiFetch<PlatformStats>("/api/superadmin/stats"),
+  });
+
   const users = useQuery({
     queryKey: ["superadmin-company-users", expanded],
     queryFn: () => apiFetch<{ users: CompanyUser[] }>(`/api/superadmin/companies/${expanded}/users`),
@@ -53,6 +62,37 @@ export function SuperAdmin() {
       <div>
         <h2 className="text-lg font-semibold text-ink">All accounts</h2>
         <p className="text-sm text-lavender">Every company workspace - team size, plan, and this month's credit usage.</p>
+      </div>
+
+      <div className="rounded-lg border border-gray-100 bg-white p-6">
+        <div className="mb-1 text-sm font-medium text-ink">Platform-wide action breakdown</div>
+        <p className="mb-4 text-sm text-lavender">Every credit event ever charged, across all companies, by type.</p>
+        {stats.isLoading ? (
+          <p className="text-sm text-lavender">Loading…</p>
+        ) : !stats.data?.byAction.length ? (
+          <p className="text-sm text-lavender">No credit events yet.</p>
+        ) : (
+          <div className="space-y-2">
+            {stats.data.byAction.map((s, i) => {
+              const pct = stats.data!.total ? Math.round((s.count / stats.data!.total) * 100) : 0;
+              return (
+                <div key={s.action} className="flex items-center gap-3">
+                  <span className="w-48 shrink-0 truncate text-sm text-ink">
+                    {i === 0 && <span className="mr-1" title="Most common">🏆</span>}
+                    {ACTION_LABELS[s.action] ?? s.action}
+                  </span>
+                  <div className="h-2 flex-1 overflow-hidden rounded-full bg-gray-100">
+                    <div className="h-full rounded-full bg-brand" style={{ width: `${pct}%` }} />
+                  </div>
+                  <span className="w-24 shrink-0 text-right text-sm text-lavender">
+                    {s.count} ({pct}%)
+                  </span>
+                </div>
+              );
+            })}
+            <p className="pt-1 text-xs text-lavender">{stats.data.total} total events</p>
+          </div>
+        )}
       </div>
 
       {companies.isLoading ? (

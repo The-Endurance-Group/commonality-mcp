@@ -87,6 +87,29 @@ superadminRouter.get("/companies/:id/users", async (req, res) => {
   res.json({ users: data ?? [] });
 });
 
+// GET /api/superadmin/stats - platform-wide credit-event breakdown by action
+// type, across every company. Selects only the `action` column and counts in
+// JS (same pragmatic style as the rest of this router) rather than a
+// Postgres group-by RPC.
+superadminRouter.get("/stats", async (_req, res) => {
+  const { data, count, error } = await db()
+    .from("credit_events")
+    .select("action", { count: "exact" });
+  if (error) {
+    res.status(502).json({ error: "stats_fetch_failed", message: error.message });
+    return;
+  }
+  const counts = new Map<string, number>();
+  for (const row of (data as { action: string }[] | null) ?? []) {
+    counts.set(row.action, (counts.get(row.action) ?? 0) + 1);
+  }
+  const byAction = [...counts.entries()]
+    .map(([action, eventCount]) => ({ action, count: eventCount }))
+    .sort((a, b) => b.count - a.count);
+
+  res.json({ total: count ?? 0, byAction });
+});
+
 // POST /api/superadmin/companies/:id/plan - directly set a company's plan.
 // Bypasses Stripe entirely (comping/support override) - does NOT touch their
 // Stripe subscription, so this can drift from what they're actually billed
