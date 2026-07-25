@@ -36,13 +36,22 @@ export const ACTION_LABELS: Record<string, string> = {
   get_linkedin_posts: "Got LinkedIn posts",
 };
 
+// Actions whose whole point is fetching content (posts) - showing the
+// coincidentally-cached profile identity for these would hide the thing the
+// action actually returned, so the snapshot (the real output) takes priority.
+const CONTENT_ACTIONS = new Set(["get_linkedin_posts", "analyze_prospect_posts", "analyze_company_posts"]);
+
 export function ResultCell({
+  action,
   result,
   snapshot,
 }: {
+  action: string;
   result: CreditEventResult | null;
   snapshot?: CreditEventSnapshot | null;
 }) {
+  const preferSnapshot = CONTENT_ACTIONS.has(action);
+  if (preferSnapshot && snapshot) return <span className="text-lavender">{snapshot.summary}</span>;
   if (result) {
     return (
       <span className="text-ink">
@@ -146,7 +155,7 @@ export function Billing() {
                         {e.target ?? "-"}
                       </td>
                       <td className="max-w-xs truncate px-4 py-2">
-                        <ResultCell result={e.result} snapshot={e.result_snapshot} />
+                        <ResultCell action={e.action} result={e.result} snapshot={e.result_snapshot} />
                       </td>
                     </tr>
                   ))}

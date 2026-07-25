@@ -362,7 +362,7 @@ export function SuperAdmin() {
                                           {e.target ?? "-"}
                                         </td>
                                         <td className="max-w-xs truncate px-3 py-1.5">
-                                          <ResultCell result={e.result} snapshot={e.result_snapshot} />
+                                          <ResultCell action={e.action} result={e.result} snapshot={e.result_snapshot} />
                                         </td>
                                       </tr>
                                     ))}

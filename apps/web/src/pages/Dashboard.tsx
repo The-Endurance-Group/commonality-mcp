@@ -614,7 +614,7 @@ function UsageLogCard() {
                       {e.target ?? "-"}
                     </td>
                     <td className="max-w-xs truncate px-4 py-2">
-                      <ResultCell result={e.result} snapshot={e.result_snapshot} />
+                      <ResultCell action={e.action} result={e.result} snapshot={e.result_snapshot} />
                     </td>
                   </tr>
                 ))}
