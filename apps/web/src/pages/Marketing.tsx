@@ -741,12 +741,19 @@ export function Marketing() {
             <p className="text-xs font-semibold uppercase tracking-widest text-brand">
               Relationship Intelligence for AI
             </p>
-            <h1
-              key={heroStep}
-              className="animate-fade-up mt-4 min-h-[3.5em] text-4xl font-bold leading-tight text-ink sm:min-h-[2.4em] sm:text-5xl"
-            >
-              {HERO_DEMOS[heroStep].q}
-            </h1>
+            <div className="mt-4 grid">
+              {HERO_DEMOS.map((d, i) => (
+                <h1
+                  key={i}
+                  aria-hidden={i !== heroStep}
+                  className={`col-start-1 row-start-1 text-4xl font-bold leading-tight text-ink transition-opacity duration-500 ease-in-out sm:text-5xl ${
+                    i === heroStep ? "opacity-100" : "pointer-events-none opacity-0"
+                  }`}
+                >
+                  {d.q}
+                </h1>
+              ))}
+            </div>
             <p className="mt-2 text-2xl font-semibold text-brand sm:text-3xl">Now your AI can answer.</p>
             <p className="mx-auto mt-5 max-w-lg text-lg text-lavender lg:mx-0">
               Commonality gives ChatGPT, Claude, or whatever AI you use access to LinkedIn so it
