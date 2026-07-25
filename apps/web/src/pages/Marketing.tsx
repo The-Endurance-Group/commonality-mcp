@@ -254,37 +254,6 @@ const HERO_DEMOS: HeroDemoScenario[] = [
       </>
     ),
   },
-  {
-    q: "Draft a message asking for an introduction.",
-    content: (
-      <>
-        <p className="text-lavender">Here's a draft, based on your relationship with Sarah:</p>
-        <p className="mt-2.5 rounded-md border border-gray-200 bg-white px-3 py-2.5 italic text-ink">
-          "Hi Sarah - hope you're doing well! I noticed your time at IBM and wanted to ask: would
-          you be comfortable introducing me to someone on their enterprise tech team? Happy to
-          share more context. Thanks so much!"
-        </p>
-        <p className="mt-3 text-lavender">Want me to adjust the tone or add more detail?</p>
-      </>
-    ),
-  },
-  {
-    q: "Explain why this is our strongest relationship.",
-    content: (
-      <>
-        <p className="text-lavender">
-          Sarah's relationship is strongest because it combines two signals: seven years of
-          direct employment history at IBM, and an active, recent connection with IBM's current
-          VP of Cloud Platforms.
-        </p>
-        <p className="mt-2 text-lavender">
-          That means she can speak credibly to both the account itself and the specific
-          stakeholder you're trying to reach - stronger than a single shared-school or
-          shared-employer signal alone.
-        </p>
-      </>
-    ),
-  },
 ];
 
 const HERO_DEMO_TYPING_MS = 1100;
