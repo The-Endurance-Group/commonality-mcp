@@ -225,12 +225,18 @@ export const analyze_company: ToolHandler<Args> = {
       } catch {
         return text("Couldn't search that company's people right now. Please try again.", true);
       }
-      await chargeCredit(ctx, "search_company_roles", {
-        target: `${args.company_url} (${roleLabel})`,
-        resultSnapshot: summarizeProfilesSnapshot(
-          candidates.map((c) => ({ name: c.name, title: c.title, linkedinUrl: c.linkedinUrl })),
-        ),
-      });
+      // 1 credit for the whole role search, even if it takes the one allowed
+      // broader retry to find matches - role_retry:true is us automatically
+      // continuing the same logical search after a zero-result first try,
+      // not a new search the user asked for, so it's never charged again.
+      if (!args.role_retry) {
+        await chargeCredit(ctx, "search_company_roles", {
+          target: `${args.company_url} (${roleLabel})`,
+          resultSnapshot: summarizeProfilesSnapshot(
+            candidates.map((c) => ({ name: c.name, title: c.title, linkedinUrl: c.linkedinUrl })),
+          ),
+        });
+      }
 
       if (!candidates.length) {
         if (!args.role_retry) {
