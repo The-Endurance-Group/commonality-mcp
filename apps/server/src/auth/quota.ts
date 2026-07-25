@@ -1,5 +1,6 @@
 import type { ToolContext } from "@commonality/shared";
 import { db } from "../db/client.js";
+import { canonicalizeLinkedInUrl } from "../lib/linkedinUrl.js";
 import { logger } from "../logger.js";
 import { logHubspotEmailEngagement, markCreditUsed } from "../services/hubspot.js";
 import { sendFirstCreditUsedEmail } from "../services/resend.js";
@@ -54,7 +55,7 @@ export async function incrementUsage(companyId: string): Promise<number> {
 
 /** Normalize a LinkedIn URL so re-looks of the same prospect match. */
 export function normalizeProspectUrl(url: string): string {
-  return url.trim().toLowerCase().replace(/\/+$/, "");
+  return canonicalizeLinkedInUrl(url);
 }
 
 /** Has this company already paid to analyze this prospect? */

@@ -1,4 +1,5 @@
 import { db } from "../db/client.js";
+import { canonicalizeLinkedInUrl } from "../lib/linkedinUrl.js";
 import { logger } from "../logger.js";
 import { getCompanyEmployees as apifyCompanyEmployees } from "./apify.js";
 import { getEnrichedProfile } from "./enrichmentCache.js";
@@ -27,10 +28,6 @@ export async function checkTeamLimit(companyId: string, plan: "free" | "pro"): P
   return { allowed: used < limit, used, limit, remaining: Math.max(0, limit - used) };
 }
 
-function normUrl(u: string): string {
-  return u.trim().replace(/\/+$/, "");
-}
-
 /** Insert employee rows for the given LinkedIn URLs (idempotent per company+url). */
 async function upsertRoster(
   companyId: string,
@@ -40,7 +37,7 @@ async function upsertRoster(
   const rows = people.map((p) => ({
     company_id: companyId,
     name: p.name,
-    linkedin_url: normUrl(p.linkedin_url),
+    linkedin_url: canonicalizeLinkedInUrl(p.linkedin_url),
   }));
   const { error, count } = await db()
     .from("employees")
@@ -116,9 +113,9 @@ export async function importRoster(
     ((existingRows as { linkedin_url: string | null }[] | null) ?? [])
       .map((r) => r.linkedin_url)
       .filter((u): u is string => !!u)
-      .map(normUrl),
+      .map(canonicalizeLinkedInUrl),
   );
-  const newAvailable = available.filter((p) => !existingUrls.has(normUrl(p.linkedin_url)));
+  const newAvailable = available.filter((p) => !existingUrls.has(canonicalizeLinkedInUrl(p.linkedin_url)));
 
   const trimmedByLimit = newAvailable.length > status.remaining;
   const people = newAvailable.slice(0, status.remaining);

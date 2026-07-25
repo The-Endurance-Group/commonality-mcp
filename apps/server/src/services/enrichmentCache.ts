@@ -1,5 +1,6 @@
 import type { EnrichmentData } from "@commonality/shared";
 import { db } from "../db/client.js";
+import { canonicalizeLinkedInUrl } from "../lib/linkedinUrl.js";
 import { logger } from "../logger.js";
 import { analyzeLinkedInProfile } from "./cassidy.js";
 
@@ -29,15 +30,16 @@ export async function getEnrichedProfile(
   opts: { forceRefresh?: boolean } = {},
 ): Promise<EnrichmentData> {
   const supa = db();
+  const url = canonicalizeLinkedInUrl(linkedinUrl);
 
   const { data: cached, error } = await supa
     .from("enrichment_cache")
     .select("*")
-    .eq("linkedin_url", linkedinUrl)
+    .eq("linkedin_url", url)
     .maybeSingle<CacheRow>();
 
   if (error) {
-    logger.warn({ err: error, linkedinUrl }, "enrichment_cache read failed; falling through to Cassidy");
+    logger.warn({ err: error, linkedinUrl: url }, "enrichment_cache read failed; falling through to Cassidy");
   }
 
   if (cached && !opts.forceRefresh) {
@@ -47,21 +49,22 @@ export async function getEnrichedProfile(
       await supa
         .from("enrichment_cache")
         .update({ request_count: cached.request_count + 1 })
-        .eq("linkedin_url", linkedinUrl);
+        .eq("linkedin_url", url);
       return cached.enriched_data;
     }
   }
 
-  // Miss or stale - enrich via Cassidy and upsert.
+  // Miss or stale - enrich via Cassidy and upsert (against the original URL -
+  // Cassidy itself should get the real, unmodified link).
   const fresh = await analyzeLinkedInProfile(linkedinUrl);
   const { error: upsertError } = await supa.from("enrichment_cache").upsert({
-    linkedin_url: linkedinUrl,
+    linkedin_url: url,
     enriched_data: fresh,
     last_refreshed: new Date().toISOString(),
     request_count: cached ? cached.request_count + 1 : 1,
   });
   if (upsertError) {
-    logger.warn({ err: upsertError, linkedinUrl }, "enrichment_cache upsert failed");
+    logger.warn({ err: upsertError, linkedinUrl: url }, "enrichment_cache upsert failed");
   }
   return fresh;
 }
@@ -75,14 +78,25 @@ export async function getEnrichedProfile(
 export async function getEnrichedNamesByUrl(
   linkedinUrls: string[],
 ): Promise<Map<string, Pick<EnrichmentData, "name" | "title" | "company">>> {
-  const urls = [...new Set(linkedinUrls)];
+  // Map each original (possibly non-canonical) URL to its canonical lookup
+  // key, so callers can key the returned Map by whatever raw string they
+  // have on hand (e.g. a credit_events.target value) - even if two
+  // different-looking targets both resolve to the same cached profile.
+  const canonicalByOriginal = new Map(linkedinUrls.map((u) => [u, canonicalizeLinkedInUrl(u)]));
+  const urls = [...new Set(canonicalByOriginal.values())];
   if (!urls.length) return new Map();
   const { data } = await db()
     .from("enrichment_cache")
     .select("linkedin_url, enriched_data")
     .in("linkedin_url", urls);
   const rows = (data as { linkedin_url: string; enriched_data: EnrichmentData }[] | null) ?? [];
-  return new Map(
+  const byCanonical = new Map(
     rows.map((r) => [r.linkedin_url, { name: r.enriched_data.name, title: r.enriched_data.title, company: r.enriched_data.company }]),
   );
+  const result = new Map<string, Pick<EnrichmentData, "name" | "title" | "company">>();
+  for (const [original, canonical] of canonicalByOriginal) {
+    const hit = byCanonical.get(canonical);
+    if (hit) result.set(original, hit);
+  }
+  return result;
 }
