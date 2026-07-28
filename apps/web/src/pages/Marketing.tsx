@@ -357,6 +357,10 @@ const faqs: { q: string; a: ReactNode }[] = [
     a: "We'll let you know as you approach your limit. Once you hit it, lookups pause until next month or until you upgrade - nothing is charged automatically.",
   },
   {
+    q: "Do you charge us for AI tokens, or handle our AI conversations directly?",
+    a: "Neither - Commonality isn't an AI itself. Your team's AI conversation happens entirely inside your own Claude, ChatGPT, or Copilot subscription, and that's also where its cost and data stay; we're just a tool your AI calls when it needs relationship data. We only charge credits for our own lookups (LinkedIn searches, profile/company enrichment) - never for how much your AI 'talks' to get there.",
+  },
+  {
     q: "Do teammates have to upload their LinkedIn connections?",
     a: "No, it's optional. Adding first-degree connections helps the AI find more warm paths, but nobody has to share their network to use Commonality.",
   },
