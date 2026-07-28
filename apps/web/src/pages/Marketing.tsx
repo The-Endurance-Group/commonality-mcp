@@ -138,8 +138,9 @@ function LearnMoreModal({ onClose }: { onClose: () => void }) {
 
 function SectionCta({ label }: { label: string }) {
   return (
-    <div className="mt-10">
+    <div className="mt-10 flex flex-wrap items-center justify-center gap-3">
       <StartFreeButton label={label} />
+      <LearnMoreButton />
     </div>
   );
 }
@@ -794,6 +795,7 @@ export function Marketing() {
               <SignInButton mode="modal">
                 <button className="hidden font-medium text-lavender hover:text-ink sm:inline">Sign In</button>
               </SignInButton>
+              <LearnMoreButton className="hidden font-medium text-lavender hover:text-ink sm:inline" />
               <SignUpButton mode="modal">
                 <button className="rounded-lg bg-brand px-4 py-2 font-medium text-white transition hover:bg-brand-dark">
                   Start Free
@@ -835,6 +837,7 @@ export function Marketing() {
                   Sign In
                 </button>
               </SignInButton>
+              <LearnMoreButton className="rounded-md px-2 py-2 text-left font-medium text-lavender hover:bg-gray-50 hover:text-ink" />
             </SignedOut>
           </nav>
         )}
@@ -996,6 +999,7 @@ export function Marketing() {
               </div>
             ))}
           </div>
+          <SectionCta label="Start Free" />
         </div>
       </section>
 
@@ -1137,7 +1141,11 @@ export function Marketing() {
             </div>
           </div>
 
-          <p className="mt-8 text-center text-sm text-lavender">
+          <div className="mt-8 flex justify-center">
+            <LearnMoreButton className="font-medium text-brand hover:underline" />
+          </div>
+
+          <p className="mt-4 text-center text-sm text-lavender">
             Commonality is built and installed for you by{" "}
             <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
               The Endurance Group
