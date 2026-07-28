@@ -61,6 +61,25 @@ Signed up with: ${signupEmail}`;
   await sendEmail(config.newAccountNotifyEmail, subject, text);
 }
 
+// A new user account joining an EXISTING workspace (via invite acceptance or
+// company-domain auto-join) - distinct from sendNewAccountNotification, which
+// is only for a brand-new workspace's first (admin) signup. Notifies
+// config.newAccountNotifyEmail. Best-effort: called fire-and-forget from
+// resolveWorkspaceForEmail(), a failure here must never block the login.
+export async function sendNewUserJoinedNotification(
+  email: string,
+  companyName: string,
+  role: "admin" | "member",
+): Promise<void> {
+  const subject = `New Commonality account: ${email} joined ${companyName}`;
+  const text = `A new user account was just created on Commonality.
+
+Company: ${companyName}
+Joined as: ${role}
+Email: ${email}`;
+  await sendEmail(config.newAccountNotifyEmail, subject, text);
+}
+
 // Alerts config.newAccountNotifyEmail when a HubSpot contact upsert failed for
 // a new signup, so it doesn't just silently vanish into the logs. Best-effort:
 // a failure sending THIS alert must never throw back into the caller.

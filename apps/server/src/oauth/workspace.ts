@@ -1,7 +1,12 @@
 import { db } from "../db/client.js";
 import { logHubspotEmailEngagement, markAdditionalUserAdded, upsertHubspotContact } from "../services/hubspot.js";
 import { logger } from "../logger.js";
-import { sendHubspotFailureAlert, sendNewAccountNotification, sendWelcomeEmail } from "../services/resend.js";
+import {
+  sendHubspotFailureAlert,
+  sendNewAccountNotification,
+  sendNewUserJoinedNotification,
+  sendWelcomeEmail,
+} from "../services/resend.js";
 import type { SignableClaims } from "./jwt.js";
 
 // Workspace resolution: given an authenticated email, figure out which company
@@ -100,6 +105,9 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
     await supa.from("invites").update({ accepted: true }).eq("id", invite.id);
     const company = await getCompany(invite.company_id);
     const joinedExistingCompany = await describeJoinedCompany(company.id);
+    sendNewUserJoinedNotification(email, joinedExistingCompany.companyName, "member").catch((err) =>
+      logger.error({ err, email }, "new-user-joined notification failed"),
+    );
     if (isFirstAdditionalUser) {
       markAdditionalUserAdded(joinedExistingCompany.adminEmail, email).catch((err) =>
         logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
@@ -120,6 +128,9 @@ export async function resolveWorkspaceForEmail(rawEmail: string): Promise<Worksp
       const isFirstAdditionalUser = await companyHasExactlyOneUser(company.id);
       const user = await createUser(company.id, email, "member");
       const joinedExistingCompany = await describeJoinedCompany(company.id);
+      sendNewUserJoinedNotification(email, joinedExistingCompany.companyName, "member").catch((err) =>
+        logger.error({ err, email }, "new-user-joined notification failed"),
+      );
       if (isFirstAdditionalUser) {
         markAdditionalUserAdded(joinedExistingCompany.adminEmail, email).catch((err) =>
           logger.error({ err, email, adminEmail: joinedExistingCompany.adminEmail }, "hubspot additional-user update failed"),
