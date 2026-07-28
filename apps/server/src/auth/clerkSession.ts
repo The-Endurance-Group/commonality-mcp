@@ -27,7 +27,7 @@ export async function verifyClerkSessionToken(
   });
   if (!payload.sub) throw new Error("Clerk token has no sub");
   const email = payload["email"];
-  if (typeof email !== "string" || !email) throw new Error("Clerk token missing email claim — add {{user.primary_email_address}} in Clerk dashboard → Sessions");
+  if (typeof email !== "string" || !email) throw new Error("Clerk token missing email claim - add {{user.primary_email_address}} in Clerk dashboard → Sessions");
   const firstName = typeof payload["first_name"] === "string" ? payload["first_name"] : undefined;
   const lastName = typeof payload["last_name"] === "string" ? payload["last_name"] : undefined;
   return { sub: payload.sub, email, firstName, lastName };

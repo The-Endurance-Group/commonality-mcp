@@ -266,7 +266,7 @@ function CollapsibleCard({
 
 function ClaudeLogo() {
   return (
-    // Anthropic "A" lettermark — Bootstrap Icons path, 16×16 coordinate space
+    // Anthropic "A" lettermark - Bootstrap Icons path, 16×16 coordinate space
     <svg width="32" height="32" viewBox="0 0 16 16" aria-hidden="true">
       <rect width="16" height="16" rx="3" fill="#CC785C" />
       <path
@@ -279,7 +279,7 @@ function ClaudeLogo() {
 
 function ChatGPTLogo() {
   return (
-    // OpenAI bloom logo — Simple Icons path, 24×24 coordinate space, padded 4px inside 32×32 box
+    // OpenAI bloom logo - Simple Icons path, 24×24 coordinate space, padded 4px inside 32×32 box
     <svg width="32" height="32" viewBox="0 0 32 32" aria-hidden="true">
       <rect width="32" height="32" rx="8" fill="#1A1A1A" />
       <path
@@ -330,7 +330,7 @@ const AI_PROVIDERS: AIProvider[] = [
   {
     id: "claude",
     name: "Claude",
-    requirement: "Works on every plan — Free, Pro, Max, Team, and Enterprise.",
+    requirement: "Works on every plan - Free, Pro, Max, Team, and Enterprise.",
     description: "The easiest way to get started. Follow Anthropic's official guide to add Commonality as a custom connector.",
     guideUrl: "https://support.claude.com/en/articles/11175166-get-started-with-custom-connectors-using-remote-mcp",
     color: "#CC785C",
@@ -357,7 +357,7 @@ const AI_PROVIDERS: AIProvider[] = [
   {
     id: "copilot",
     name: "Microsoft Copilot Studio",
-    requirement: "Separate from Microsoft 365 Copilot — requires its own Copilot Studio license.",
+    requirement: "Separate from Microsoft 365 Copilot - requires its own Copilot Studio license.",
     description: "Connect your Copilot Studio agent to Commonality's MCP server using Microsoft's official guide.",
     guideUrl: "https://learn.microsoft.com/en-us/microsoft-copilot-studio/mcp-add-existing-server-to-agent",
     color: "#0078D4",

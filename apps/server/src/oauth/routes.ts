@@ -154,7 +154,7 @@ oauthRouter.post("/token", async (req, res) => {
   const { grant_type, code, redirect_uri, code_verifier, refresh_token } =
     (req.body ?? {}) as Record<string, string | undefined>;
 
-  // Refresh token grant — silent re-auth, no user interaction needed.
+  // Refresh token grant - silent re-auth, no user interaction needed.
   if (grant_type === "refresh_token") {
     if (!refresh_token) {
       res.status(400).json({ error: "invalid_request", error_description: "refresh_token required" });

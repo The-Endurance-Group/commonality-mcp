@@ -57,7 +57,7 @@ export function ResultCell({
       <span className="text-ink">
         {result.name}
         {(result.title || result.company) && (
-          <span className="text-lavender"> — {[result.title, result.company].filter(Boolean).join(" @ ")}</span>
+          <span className="text-lavender"> - {[result.title, result.company].filter(Boolean).join(" @ ")}</span>
         )}
       </span>
     );

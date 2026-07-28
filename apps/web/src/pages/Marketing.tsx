@@ -244,7 +244,7 @@ const HERO_DEMOS: HeroDemoScenario[] = [
           ].map((p) => (
             <li key={p.name}>
               <p className="font-medium text-ink">
-                {p.name} <span className="font-normal text-brand">— {p.kind}</span>
+                {p.name} <span className="font-normal text-brand">- {p.kind}</span>
               </p>
               <p className="text-lavender">{p.detail}</p>
             </li>
@@ -265,7 +265,7 @@ const HERO_DEMOS: HeroDemoScenario[] = [
         <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
         <p className="mt-2.5 font-semibold text-ink">Strongest path into Amazon</p>
         <p className="mt-1 font-medium text-ink">
-          Priya Nair <span className="font-normal text-brand">— Former Amazon employee</span>
+          Priya Nair <span className="font-normal text-brand">- Former Amazon employee</span>
         </p>
         <p className="text-lavender">
           Priya worked at Amazon for four years and is still connected to two directors on the
@@ -286,7 +286,7 @@ const HERO_DEMOS: HeroDemoScenario[] = [
         <p className="text-lavender">I researched your organization's relationships using Commonality.</p>
         <p className="mt-2.5 font-semibold text-ink">Yes - one direct connection</p>
         <p className="mt-1 font-medium text-ink">
-          Devon Marsh <span className="font-normal text-brand">— Direct professional connection</span>
+          Devon Marsh <span className="font-normal text-brand">- Direct professional connection</span>
         </p>
         <p className="text-lavender">
           Devon is connected to Nike's CMO through a previous agency engagement they worked on
@@ -343,19 +343,19 @@ const HERO_DEMOS: HeroDemoScenario[] = [
         <ul className="mt-2 space-y-2.5">
           <li>
             <p className="font-medium text-ink">
-              Acme Inc. <span className="font-normal text-brand">— warm path found</span>
+              Acme Inc. <span className="font-normal text-brand">- warm path found</span>
             </p>
             <p className="text-lavender">Sam K. is a 1st-degree LinkedIn connection to their VP Sales.</p>
           </li>
           <li>
             <p className="font-medium text-ink">
-              Globex Corp <span className="font-normal text-lavender">— no warm path yet</span>
+              Globex Corp <span className="font-normal text-lavender">- no warm path yet</span>
             </p>
             <p className="text-lavender">Recent posts are available for a research-based opener instead.</p>
           </li>
           <li>
             <p className="font-medium text-ink">
-              Initech <span className="font-normal text-brand">— warm path found</span>
+              Initech <span className="font-normal text-brand">- warm path found</span>
             </p>
             <p className="text-lavender">Priya N. previously worked there alongside their current CTO.</p>
           </li>
@@ -641,7 +641,7 @@ const MQ_PROVIDERS = [
 ];
 
 function AIMarquee() {
-  // Duplicate once — animation runs to -50% which lands on an identical frame, seamless loop
+  // Duplicate once - animation runs to -50% which lands on an identical frame, seamless loop
   const track = [...MQ_PROVIDERS, ...MQ_PROVIDERS];
   return (
     <section className="border-b border-gray-100 bg-white py-8" aria-label="Supported AI assistants">
