@@ -99,6 +99,39 @@ Error: ${errorMessage}`;
 
 const CONOR_CALENDAR_URL = "https://meetings.hubspot.com/conor-sullivan/commonality";
 
+// Sent when someone submits the marketing site's "Learn more" lead form
+// (name + email, no account created) - a lighter-weight alternative to
+// signing up. Best-effort, fire-and-forget from POST /api/leads. Returns the
+// sent subject/text so the caller can log it to HubSpot's contact timeline.
+export async function sendLearnMoreEmail(email: string): Promise<{ subject: string; text: string }> {
+  const subject = "Thanks for Your Interest in Commonality!";
+  const text = `Hi There!
+
+Thanks for checking out Commonality! My name is Conor Sullivan and I am one of its creators.
+
+Happy to chat more and answer any questions - feel free to grab time on my calendar: ${CONOR_CALENDAR_URL}
+
+Or, if you prefer, let me know some times that work for you.
+
+Best,
+Conor`;
+  await sendEmail(email, subject, text);
+  return { subject, text };
+}
+
+// Notifies config.newAccountNotifyEmail whenever someone submits the
+// marketing site's "Learn more" lead form - the equivalent of
+// sendNewAccountNotification, but for a lead rather than an actual signup.
+// Best-effort: a failure here must never block the lead submission itself.
+export async function sendNewLeadNotification(name: string, email: string): Promise<void> {
+  const subject = `New Commonality "Learn more" lead: ${name}`;
+  const text = `Someone submitted the "Learn more" form on the Commonality marketing site.
+
+Name: ${name}
+Email: ${email}`;
+  await sendEmail(config.newAccountNotifyEmail, subject, text);
+}
+
 // Welcome email to whoever just created a new workspace (the signup itself,
 // not a teammate joining an existing one). Best-effort, fire-and-forget from
 // createWorkspace() - a failure here must never block or fail the signup.

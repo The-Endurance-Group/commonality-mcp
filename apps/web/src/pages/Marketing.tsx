@@ -2,6 +2,7 @@ import { SignedIn, SignedOut, SignInButton, SignUpButton, useAuth } from "@clerk
 import { useEffect, useState, type ReactNode } from "react";
 import { Link, Navigate } from "react-router-dom";
 import { JoinNoticeScreen } from "../components/JoinNoticeScreen";
+import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
 // The site's main marketing page. Positioning: "Commonality teaches AI who
@@ -25,6 +26,113 @@ function StartFreeButton({ label = "Start Free", className }: { label?: string; 
         </Link>
       </SignedIn>
     </>
+  );
+}
+
+// Lighter-weight CTA than signing up - just a name + email. No account or
+// workspace is created; the server (POST /api/leads) sends a follow-up email
+// and logs the lead in HubSpot, same as a real signup's tracking.
+function LearnMoreButton({ className }: { className?: string }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        className={className ?? "rounded-lg border border-gray-300 px-6 py-3 font-medium text-ink hover:bg-gray-50"}
+        onClick={() => setOpen(true)}
+      >
+        Learn More
+      </button>
+      {open && <LearnMoreModal onClose={() => setOpen(false)} />}
+    </>
+  );
+}
+
+function LearnMoreModal({ onClose }: { onClose: () => void }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState<"idle" | "busy" | "done" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function submit() {
+    setStatus("busy");
+    setError(null);
+    try {
+      await apiFetch("/api/leads", { method: "POST", body: JSON.stringify({ name, email }) });
+      setStatus("done");
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-4"
+      onClick={onClose}
+      role="presentation"
+    >
+      <div
+        className="animate-fade-up w-full max-w-sm rounded-xl bg-white p-6 shadow-xl"
+        onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Learn more about Commonality"
+      >
+        {status === "done" ? (
+          <>
+            <p className="text-lg font-semibold text-ink">Thanks!</p>
+            <p className="mt-2 text-sm text-lavender">
+              Check your inbox - we just sent you a note, and you're welcome to grab time with us whenever you'd
+              like.
+            </p>
+            <button
+              className="mt-5 w-full rounded-lg bg-brand px-4 py-2.5 font-medium text-white hover:bg-brand-dark"
+              onClick={onClose}
+            >
+              Close
+            </button>
+          </>
+        ) : (
+          <>
+            <p className="text-lg font-semibold text-ink">Learn more about Commonality</p>
+            <p className="mt-1 text-sm text-lavender">
+              Leave your name and email - we'll send you a note, and you can grab time with us if you'd like.
+            </p>
+            <div className="mt-4 space-y-3">
+              <input
+                className="input w-full"
+                placeholder="Your name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+              />
+              <input
+                className="input w-full"
+                type="email"
+                placeholder="you@company.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+              />
+            </div>
+            {error && <p className="mt-2 text-sm text-red-600">{error}</p>}
+            <div className="mt-5 flex gap-2">
+              <button
+                className="flex-1 rounded-lg border border-gray-300 px-4 py-2.5 font-medium text-ink hover:bg-gray-50"
+                onClick={onClose}
+              >
+                Cancel
+              </button>
+              <button
+                className="flex-1 rounded-lg bg-brand px-4 py-2.5 font-medium text-white hover:bg-brand-dark disabled:opacity-50"
+                disabled={status === "busy" || !name.trim() || !email.trim()}
+                onClick={submit}
+              >
+                {status === "busy" ? "Sending…" : "Submit"}
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -759,6 +867,7 @@ export function Marketing() {
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
               <StartFreeButton />
+              <LearnMoreButton />
               <a href="#how-it-works" className="rounded-lg px-6 py-3 font-medium text-ink hover:bg-gray-50">
                 See How It Works →
               </a>
@@ -1079,6 +1188,7 @@ export function Marketing() {
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <StartFreeButton />
+            <LearnMoreButton />
             <a
               href="https://meetings.hubspot.com/conor-sullivan/commonality"
               target="_blank"

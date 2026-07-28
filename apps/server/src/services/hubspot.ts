@@ -32,9 +32,10 @@ function requireApiKey(signupEmail: string): string | undefined {
  */
 export async function upsertHubspotContact(
   signupEmail: string,
-  companyName: string,
+  companyName?: string,
   firstName?: string,
   lastName?: string,
+  leadSource = "Commonality Sign Up",
 ): Promise<string | undefined> {
   const apiKey = requireApiKey(signupEmail);
   if (!apiKey) return undefined;
@@ -51,10 +52,10 @@ export async function upsertHubspotContact(
           id: signupEmail,
           properties: {
             email: signupEmail,
-            company: companyName,
             lifecyclestage: "lead",
-            lead_source: "Commonality Sign Up",
+            lead_source: leadSource,
             hubspot_owner_id: DEFAULT_OWNER_ID,
+            ...(companyName ? { company: companyName } : {}),
             ...(firstName ? { firstname: firstName } : {}),
             ...(lastName ? { lastname: lastName } : {}),
           },
@@ -68,6 +69,18 @@ export async function upsertHubspotContact(
   }
   const data = (await res.json()) as { results?: { id: string }[] };
   return data.results?.[0]?.id;
+}
+
+/**
+ * Create or update a HubSpot contact for a "Learn more" lead-form submission
+ * (name + email, no account/company created) - same upsert as a real signup,
+ * distinguished by lead_source so it's clear in HubSpot which funnel it came
+ * from. Best-effort, fire-and-forget from POST /api/leads.
+ */
+export async function upsertHubspotLead(email: string, name: string): Promise<string | undefined> {
+  const [firstName, ...rest] = name.trim().split(/\s+/);
+  const lastName = rest.join(" ") || undefined;
+  return upsertHubspotContact(email, undefined, firstName, lastName, "Commonality Learn More");
 }
 
 /**
