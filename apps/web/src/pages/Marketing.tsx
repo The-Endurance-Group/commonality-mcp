@@ -32,7 +32,7 @@ function StartFreeButton({ label = "Start Free", className }: { label?: string; 
 // Lighter-weight CTA than signing up - just a name + email. No account or
 // workspace is created; the server (POST /api/leads) sends a follow-up email
 // and logs the lead in HubSpot, same as a real signup's tracking.
-function LearnMoreButton({ className }: { className?: string }) {
+function LearnMoreButton({ className, label = "Learn More" }: { className?: string; label?: string }) {
   const [open, setOpen] = useState(false);
   return (
     <>
@@ -40,7 +40,7 @@ function LearnMoreButton({ className }: { className?: string }) {
         className={className ?? "rounded-lg border border-gray-300 px-6 py-3 font-medium text-ink hover:bg-gray-50"}
         onClick={() => setOpen(true)}
       >
-        Learn More
+        {label}
       </button>
       {open && <LearnMoreModal onClose={() => setOpen(false)} />}
     </>
@@ -933,6 +933,10 @@ export function Marketing() {
             Same question, either way - Sales Navigator and CRM tools help you find the right
             accounts and people; Commonality is what answers who can actually get you in.
           </p>
+          <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+            <StartFreeButton />
+            <LearnMoreButton />
+          </div>
         </div>
       </section>
 
@@ -1040,6 +1044,11 @@ export function Marketing() {
         </div>
       </section>
 
+      <div className="flex flex-wrap items-center justify-center gap-3 px-6 pb-4">
+        <StartFreeButton />
+        <LearnMoreButton />
+      </div>
+
       {/* Testimonials */}
       <section className="bg-gray-50 py-16">
         <h2 className="px-6 text-center text-2xl font-bold text-ink sm:text-3xl">
@@ -1132,20 +1141,14 @@ export function Marketing() {
                   Custom credits/mo
                 </li>
               </ul>
-              <a
-                href="mailto:hello@theendurancegroup.com"
+              <LearnMoreButton
+                label="Contact us"
                 className="mt-6 block w-full rounded-lg border border-gray-300 px-6 py-3 text-center font-medium text-ink hover:bg-gray-50"
-              >
-                Contact us
-              </a>
+              />
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center">
-            <LearnMoreButton className="font-medium text-brand hover:underline" />
-          </div>
-
-          <p className="mt-4 text-center text-sm text-lavender">
+          <p className="mt-8 text-center text-sm text-lavender">
             Commonality is built and installed for you by{" "}
             <a href="https://theendurancegroup.com" className="font-medium text-brand hover:underline">
               The Endurance Group
