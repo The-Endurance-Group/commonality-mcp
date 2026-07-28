@@ -46,17 +46,35 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 async function runActor(actorId: string, input: Record<string, unknown>, waitSecs: number, timeoutMs: number): Promise<any[]> {
-  const run = await withTimeout(
-    getClient().actor(actorId).call(input, { waitSecs }),
-    timeoutMs
-  );
+  const client = getClient();
+  // Start (not call) so we get the run's id immediately, before waiting for
+  // it to finish - needed so we can actually abort it if our own timeout
+  // fires below. (.call() bundles start+wait with no way to recover the id
+  // if the wrapping Promise.race times out first - that left every timed-out
+  // run orphaned on Apify's side, still burning time with nothing left
+  // awaiting it, which is exactly what happened during the 2026-07-28 incident:
+  // three overlapping never-cancelled runs for the same company stacked up
+  // and the container ran out of headroom.)
+  const started = await withTimeout(client.actor(actorId).start(input), timeoutMs);
+  const runClient = client.run(started.id);
+
+  let run: Awaited<ReturnType<typeof runClient.waitForFinish>>;
+  try {
+    run = await withTimeout(runClient.waitForFinish({ waitSecs }), timeoutMs);
+  } catch (err) {
+    runClient
+      .abort()
+      .catch((abortErr) => logger.warn({ abortErr, runId: started.id, actorId }, "failed to abort timed-out Apify run"));
+    throw err;
+  }
+
   if (!run || run.status !== "SUCCEEDED") {
-    if (!run || run.status === "TIMED-OUT") throw new Error("The lookup took too long.");
+    if (!run || run.status === "TIMED-OUT" || run.status === "ABORTED") throw new Error("The lookup took too long.");
     const detail = (run as { statusMessage?: string }).statusMessage;
     throw new Error(`Lookup did not complete (status: ${run.status}${detail ? `: ${detail}` : ""}).`);
   }
   const { items } = await withTimeout(
-    getClient().dataset(run.defaultDatasetId).listItems(),
+    client.dataset(run.defaultDatasetId).listItems(),
     timeoutMs
   );
   return items as any[];
@@ -105,7 +123,28 @@ export interface ApifyEmployee {
   linkedinUrl: string;
 }
 
+// Guards against the same company being scraped by two overlapping Apify
+// runs at once (e.g. a user re-clicking "Import team" while the first
+// request is still in flight) - the second caller awaits the first's
+// in-flight pull instead of starting a brand-new actor run. Whichever call
+// started the pull "wins" the limit/maxItems used for it; a slightly
+// different limit on the second caller is an acceptable trade-off against
+// hammering LinkedIn's rate limit and the container with duplicate runs.
+const inFlightCompanyPulls = new Map<string, Promise<ApifyEmployee[]>>();
+
 export async function getCompanyEmployees(companyLinkedinUrl: string, limit: number): Promise<ApifyEmployee[]> {
+  const key = companyLinkedinUrl.trim().toLowerCase();
+  const existing = inFlightCompanyPulls.get(key);
+  if (existing) return existing;
+
+  const pull = getCompanyEmployeesUncached(companyLinkedinUrl, limit).finally(() => {
+    inFlightCompanyPulls.delete(key);
+  });
+  inFlightCompanyPulls.set(key, pull);
+  return pull;
+}
+
+async function getCompanyEmployeesUncached(companyLinkedinUrl: string, limit: number): Promise<ApifyEmployee[]> {
   let items: any[];
   try {
     items = await runActor(
