@@ -74,13 +74,14 @@ export async function upsertHubspotContact(
 /**
  * Create or update a HubSpot contact for a "Learn more" lead-form submission
  * (name + email, no account/company created) - same upsert as a real signup,
- * distinguished by lead_source so it's clear in HubSpot which funnel it came
- * from. Best-effort, fire-and-forget from POST /api/leads.
+ * including the same lead_source (kept identical on purpose so both funnels
+ * roll up together in HubSpot). Best-effort, fire-and-forget from
+ * POST /api/leads.
  */
 export async function upsertHubspotLead(email: string, name: string): Promise<string | undefined> {
   const [firstName, ...rest] = name.trim().split(/\s+/);
   const lastName = rest.join(" ") || undefined;
-  return upsertHubspotContact(email, undefined, firstName, lastName, "Commonality Learn More");
+  return upsertHubspotContact(email, undefined, firstName, lastName);
 }
 
 /**
