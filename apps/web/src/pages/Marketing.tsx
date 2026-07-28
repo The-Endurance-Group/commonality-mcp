@@ -909,9 +909,8 @@ export function Marketing() {
           <h2 className="text-2xl font-bold text-ink sm:text-3xl">AI knows the world.</h2>
           <p className="mt-1 text-2xl font-bold text-brand sm:text-3xl">It doesn't know your relationships.</p>
           <p className="mx-auto mt-4 max-w-xl text-lavender">
-            Executives are overwhelmed with emails, calls, LinkedIn messages, and AI-generated outreach - warm
-            introductions have never mattered more. Most tools, including the AI you already use, can tell you
-            who to pursue. Commonality tells you who inside your organization can actually get you the meeting.
+            Most tools tell you who to pursue. Commonality tells you who inside your organization can get you
+            the meeting.
           </p>
 
           <div className="mx-auto mt-10 grid max-w-3xl gap-4 text-left sm:grid-cols-2">
@@ -935,9 +934,7 @@ export function Marketing() {
             </div>
           </div>
           <p className="mx-auto mt-6 max-w-xl text-sm text-lavender">
-            You already have Sales Navigator and ChatGPT - Commonality plugs directly into the AI you use to
-            surface warm introduction opportunities it can't see on its own, by analyzing your whole
-            organization's collective relationships, not just yours.
+            Works alongside Sales Navigator and ChatGPT - not instead of them.
           </p>
           <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
             <StartFreeButton />
