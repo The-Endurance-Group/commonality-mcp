@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from "react-router-dom";
+import { ClarityTracking } from "./components/ClarityTracking";
 import { Layout } from "./components/Layout";
 import { Protected } from "./components/Protected";
 import { useSessionBootstrap } from "./lib/useSession";
@@ -15,59 +16,62 @@ export default function App() {
   useSessionBootstrap();
 
   return (
-    <Routes>
-      <Route path="/" element={<Marketing />} />
-      <Route path="/privacy" element={<Privacy />} />
-      <Route path="/terms" element={<Terms />} />
-      <Route
-        path="/onboarding"
-        element={
-          <Protected onboarding>
-            <Onboarding />
-          </Protected>
-        }
-      />
-      <Route
-        path="/dashboard"
-        element={
-          <Protected>
-            <Layout>
-              <Dashboard />
-            </Layout>
-          </Protected>
-        }
-      />
-      <Route
-        path="/invites"
-        element={
-          <Protected admin>
-            <Layout>
-              <Invites />
-            </Layout>
-          </Protected>
-        }
-      />
-      <Route
-        path="/billing"
-        element={
-          <Protected admin>
-            <Layout>
-              <Billing />
-            </Layout>
-          </Protected>
-        }
-      />
-      <Route
-        path="/superadmin"
-        element={
-          <Protected superadmin>
-            <Layout>
-              <SuperAdmin />
-            </Layout>
-          </Protected>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    <>
+      <ClarityTracking />
+      <Routes>
+        <Route path="/" element={<Marketing />} />
+        <Route path="/privacy" element={<Privacy />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route
+          path="/onboarding"
+          element={
+            <Protected onboarding>
+              <Onboarding />
+            </Protected>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <Protected>
+              <Layout>
+                <Dashboard />
+              </Layout>
+            </Protected>
+          }
+        />
+        <Route
+          path="/invites"
+          element={
+            <Protected admin>
+              <Layout>
+                <Invites />
+              </Layout>
+            </Protected>
+          }
+        />
+        <Route
+          path="/billing"
+          element={
+            <Protected admin>
+              <Layout>
+                <Billing />
+              </Layout>
+            </Protected>
+          }
+        />
+        <Route
+          path="/superadmin"
+          element={
+            <Protected superadmin>
+              <Layout>
+                <SuperAdmin />
+              </Layout>
+            </Protected>
+          }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }

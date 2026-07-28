@@ -52,6 +52,11 @@ const subprocessors: Subprocessor[] = [
     usedFor: "Billing and subscription management for paid plans.",
     dataShared: "Your billing email and payment details (handled entirely by our payment processor - Commonality never sees your card number).",
   },
+  {
+    name: "Website analytics service",
+    usedFor: "Understanding how visitors use our public marketing site (theendurancegroup.com pages before you sign in) - page views, clicks, and session recordings, so we can improve the site.",
+    dataShared: "Your browsing activity on our public marketing pages only. This never runs on the signed-in product - your team roster, prospect data, and usage logs are never seen by this service.",
+  },
 ];
 
 export function Privacy() {
