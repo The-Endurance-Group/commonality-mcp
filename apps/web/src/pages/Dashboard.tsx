@@ -1,7 +1,7 @@
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
@@ -40,6 +40,10 @@ const TEAM_LIMITS: Record<string, number> = { free: 25, pro: 150 };
 export function Dashboard() {
   const isAdmin = useAuthStore((s) => s.claims?.role === "admin");
   const isSuperadmin = useAuthStore((s) => s.claims?.is_superadmin ?? false);
+  const location = useLocation();
+  const [showOnboardedBanner, setShowOnboardedBanner] = useState(
+    !!(location.state as { justOnboarded?: boolean } | null)?.justOnboarded,
+  );
   const qc = useQueryClient();
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => apiFetch<Usage>("/api/usage") });
   const roster = useQuery({ queryKey: ["employees"], queryFn: () => apiFetch<{ employees: Employee[] }>("/api/employees") });
@@ -87,6 +91,22 @@ export function Dashboard() {
         <p className="text-sm text-lavender">
           Questions? Reach out to your admin, <span className="font-medium text-ink">{adminEmail}</span>.
         </p>
+      )}
+
+      {showOnboardedBanner && (
+        <div className="flex items-center justify-between gap-3 rounded-lg border border-brand/30 bg-tint-brand px-4 py-3">
+          <p className="text-sm text-ink">
+            <span className="font-semibold">You're all set!</span> Connect Commonality to your AI below to start
+            finding warm paths.
+          </p>
+          <button
+            className="shrink-0 text-lavender hover:text-ink"
+            onClick={() => setShowOnboardedBanner(false)}
+            aria-label="Dismiss"
+          >
+            ✕
+          </button>
+        </div>
       )}
 
       <ConnectorCard mcpUrl={mcpUrl} />

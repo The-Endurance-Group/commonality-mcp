@@ -2,19 +2,17 @@ import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { ResponsiveConnectorDemo } from "../components/ConnectorDemo";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
-type Stage = "workspace" | "import" | "review" | "enriching" | "connector";
+type Stage = "workspace" | "import" | "review" | "enriching";
 
-const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching", "connector"];
+const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching"];
 const STAGE_LABELS: Record<Stage, string> = {
   workspace: "Workspace",
   import: "Import",
   review: "Review",
   enriching: "Enrich",
-  connector: "Connect",
 };
 
 // Matches TEAM_LIMITS in apps/server/src/services/roster.ts and the pricing page.
@@ -133,7 +131,7 @@ export function Onboarding() {
         const s = await apiFetch<{ total: number; enriched: number }>("/api/employees/enrichment-status");
         if (!active) return;
         setProgress(s);
-        if (s.total > 0 && s.enriched >= s.total) setStage("connector");
+        if (s.total > 0 && s.enriched >= s.total) navigate("/dashboard", { state: { justOnboarded: true } });
       } catch {
         /* keep polling */
       }
@@ -145,8 +143,6 @@ export function Onboarding() {
       clearInterval(id);
     };
   }, [stage]);
-
-  const mcpUrl = `${window.location.origin}/mcp`;
 
   // Cross-fade between stages: briefly play a fade-out on the outgoing stage
   // before swapping to the incoming one, instead of an instant unmount.
@@ -232,14 +228,10 @@ export function Onboarding() {
             <p className="mt-2 text-sm text-lavender">
               {progress.enriched} / {progress.total || "…"} teammates mapped
             </p>
-            <button className="btn-link mt-3" onClick={() => setStage("connector")}>
+            <button className="btn-link mt-3" onClick={() => navigate("/dashboard", { state: { justOnboarded: true } })}>
               Skip ahead →
             </button>
           </Card>
-        )}
-
-        {displayStage === "connector" && (
-          <ConnectorStep mcpUrl={mcpUrl} onDone={() => navigate("/dashboard")} />
         )}
       </div>
       <footer className="border-t border-gray-100 py-6 text-center text-sm text-lavender">
@@ -366,56 +358,6 @@ function ReviewStep({
   );
 }
 
-
-function ConnectorStep({ mcpUrl, onDone }: { mcpUrl: string; onDone: () => void }) {
-  const [copied, setCopied] = useState(false);
-  return (
-    <Card
-      title="Connect Commonality to your AI"
-      subtitle="One link to your AI, and you can start asking for warm paths immediately."
-    >
-      <ol className="list-decimal space-y-2 pl-5 text-sm text-lavender">
-        <li>Open your AI assistant's settings and add a custom connector.</li>
-        <li>Paste this URL:</li>
-      </ol>
-      <div className="mt-2 flex items-center gap-2">
-        <code className="min-w-0 flex-1 truncate rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
-        <button
-          className="btn-secondary"
-          onClick={() => {
-            navigator.clipboard.writeText(mcpUrl);
-            setCopied(true);
-            setTimeout(() => setCopied(false), 2000);
-          }}
-        >
-          {copied ? "Copied!" : "Copy"}
-        </button>
-      </div>
-      <p className="mt-3 text-sm text-lavender">
-        Sign in with your email when prompted, then ask it to find a warm path.
-      </p>
-      <button className="btn-primary mt-4" onClick={onDone}>
-        Go to dashboard
-      </button>
-
-      <div className="mt-6 border-t border-gray-100 pt-6">
-        <p className="mb-3 text-sm font-medium text-ink">Watch how it's done:</p>
-        <ResponsiveConnectorDemo />
-        <p className="mt-3 text-sm text-lavender">
-          Having trouble connecting it to your AI?{" "}
-          <a
-            href="https://meetings.hubspot.com/conor-sullivan/commonality"
-            target="_blank"
-            rel="noreferrer"
-            className="font-medium text-brand hover:underline"
-          >
-            Sign up for a time to meet with us.
-          </a>
-        </p>
-      </div>
-    </Card>
-  );
-}
 
 function EnrichingNotes() {
   const [idx, setIdx] = useState(0);
