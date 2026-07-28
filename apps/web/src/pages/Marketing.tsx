@@ -339,59 +339,84 @@ function HeroDemo({ onStepChange }: { onStepChange?: (step: number) => void }) {
 
 // --- FAQ / testimonials (retained content) ----------------------------------
 
-const faqs: { q: string; a: ReactNode }[] = [
+interface FaqEntry {
+  q: string;
+  a: ReactNode;
+}
+
+const faqCategories: { title: string; items: FaqEntry[] }[] = [
   {
-    q: "How are we defining \"team,\" in this case - is it pulling from your own colleague connections, or any and all of your network?",
-    a: "\"Team\" is a roster you control, not automatically your personal connections. We pull current employees from your company's LinkedIn page to start, then you can add or remove anyone - clients, contractors, alumni, people outside your company entirely. It's whoever you want the AI searching for warm paths, separate from who's allowed to use Commonality (that's unlimited).",
+    title: "Team & setup",
+    items: [
+      {
+        q: "How are we defining \"team,\" in this case - is it pulling from your own colleague connections, or any and all of your network?",
+        a: "\"Team\" is a roster you control, not automatically your personal connections. We pull current employees from your company's LinkedIn page to start, then you can add or remove anyone - clients, contractors, alumni, people outside your company entirely. It's whoever you want the AI searching for warm paths, separate from who's allowed to use Commonality (that's unlimited).",
+      },
+      {
+        q: "Do teammates have to upload their LinkedIn connections?",
+        a: "No, it's optional. Adding first-degree connections helps the AI find more warm paths, but nobody has to share their network to use Commonality.",
+      },
+      {
+        q: "Can I sign up with a personal email instead of my work email?",
+        a: "Yes, any email works to create your own account. Just know that teammates auto-join your workspace by matching your company's email domain - with a personal domain (Gmail, etc.) they'd need a direct invite instead.",
+      },
+    ],
   },
   {
-    q: "Is our LinkedIn and company data secure?",
-    a: "Yes - your team roster and prospect data are scoped to your company only, and we never expose them to other customers. See our Privacy page for details on exactly what's collected and how it's used.",
+    title: "Security & data",
+    items: [
+      {
+        q: "Is our LinkedIn and company data secure?",
+        a: "Yes - your team roster and prospect data are scoped to your company only, and we never expose them to other customers. See our Privacy page for details on exactly what's collected and how it's used.",
+      },
+    ],
   },
   {
-    q: "Can I cancel anytime?",
-    a: "Yes, there's no contract. Downgrade to Free or cancel from the Billing page whenever you like.",
+    title: "Billing & credits",
+    items: [
+      {
+        q: "Can I cancel anytime?",
+        a: "Yes, there's no contract. Downgrade to Free or cancel from the Billing page whenever you like.",
+      },
+      {
+        q: "What happens if we go over our monthly credits?",
+        a: "We'll let you know as you approach your limit. Once you hit it, lookups pause until next month or until you upgrade - nothing is charged automatically.",
+      },
+      {
+        q: "Do you charge us for AI tokens, or handle our AI conversations directly?",
+        a: "Neither - Commonality isn't an AI itself. Your team's AI conversation happens entirely inside your own Claude, ChatGPT, or Copilot subscription, and that's also where its cost and data stay; we're just a tool your AI calls when it needs relationship data. We only charge credits for our own lookups (LinkedIn searches, profile/company enrichment) - never for how much your AI 'talks' to get there.",
+      },
+      {
+        q: "What if we need more than 150 team members or credits?",
+        a: "That's what Enterprise is for - custom limits built around your organization. Contact us and we'll set it up.",
+      },
+    ],
   },
   {
-    q: "What happens if we go over our monthly credits?",
-    a: "We'll let you know as you approach your limit. Once you hit it, lookups pause until next month or until you upgrade - nothing is charged automatically.",
-  },
-  {
-    q: "Do you charge us for AI tokens, or handle our AI conversations directly?",
-    a: "Neither - Commonality isn't an AI itself. Your team's AI conversation happens entirely inside your own Claude, ChatGPT, or Copilot subscription, and that's also where its cost and data stay; we're just a tool your AI calls when it needs relationship data. We only charge credits for our own lookups (LinkedIn searches, profile/company enrichment) - never for how much your AI 'talks' to get there.",
-  },
-  {
-    q: "Do teammates have to upload their LinkedIn connections?",
-    a: "No, it's optional. Adding first-degree connections helps the AI find more warm paths, but nobody has to share their network to use Commonality.",
-  },
-  {
-    q: "Can I sign up with a personal email instead of my work email?",
-    a: "Yes, any email works to create your own account. Just know that teammates auto-join your workspace by matching your company's email domain - with a personal domain (Gmail, etc.) they'd need a direct invite instead.",
-  },
-  {
-    q: "What if we need more than 150 team members or credits?",
-    a: "That's what Enterprise is for - custom limits built around your organization. Contact us and we'll set it up.",
-  },
-  {
-    q: "How is this different from LinkedIn Sales Navigator, and do I need a Sales Navigator subscription?",
-    a: "No Sales Navigator subscription needed - Commonality works entirely on its own. They also solve different problems: Sales Navigator helps you find target accounts, decision-makers, and profiles on LinkedIn. Commonality answers the next question - who on your team can actually get you in, and how - by checking your whole team's LinkedIn connections, schools, and employers, right from the AI you already use. If you do have Sales Navigator, Commonality works alongside it; it's just never required.",
-  },
-  {
-    q: "Does this work with Claude, ChatGPT, and Microsoft Copilot?",
-    a: (
-      <>
-        Yes to all three. Need a hand connecting any of them?{" "}
-        <a
-          href="https://meetings.hubspot.com/conor-sullivan/commonality"
-          target="_blank"
-          rel="noopener noreferrer"
-          className="font-medium text-brand hover:underline"
-        >
-          Reach out and we'll help you onboard
-        </a>
-        .
-      </>
-    ),
+    title: "Integrations & comparisons",
+    items: [
+      {
+        q: "How is this different from LinkedIn Sales Navigator, and do I need a Sales Navigator subscription?",
+        a: "No Sales Navigator subscription needed - Commonality works entirely on its own. They also solve different problems: Sales Navigator helps you find target accounts, decision-makers, and profiles on LinkedIn. Commonality answers the next question - who on your team can actually get you in, and how - by checking your whole team's LinkedIn connections, schools, and employers, right from the AI you already use. If you do have Sales Navigator, Commonality works alongside it; it's just never required.",
+      },
+      {
+        q: "Does this work with Claude, ChatGPT, and Microsoft Copilot?",
+        a: (
+          <>
+            Yes to all three. Need a hand connecting any of them?{" "}
+            <a
+              href="https://meetings.hubspot.com/conor-sullivan/commonality"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-brand hover:underline"
+            >
+              Reach out and we'll help you onboard
+            </a>
+            .
+          </>
+        ),
+      },
+    ],
   },
 ];
 
@@ -1020,17 +1045,24 @@ export function Marketing() {
       {/* FAQ */}
       <section id="faq" className="mx-auto max-w-content px-6 py-16">
         <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Frequently asked questions</h2>
-        <div className="mx-auto mt-8 max-w-2xl divide-y divide-gray-200">
-          {faqs.map((f) => (
-            <details key={f.q} className="group py-4">
-              <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
-                {f.q}
-                <span className="shrink-0 text-lavender transition group-open:rotate-45" aria-hidden="true">
-                  +
-                </span>
-              </summary>
-              <p className="mt-2 text-sm text-lavender">{f.a}</p>
-            </details>
+        <div className="mx-auto mt-8 max-w-2xl space-y-8">
+          {faqCategories.map((cat) => (
+            <div key={cat.title}>
+              <h3 className="text-xs font-semibold uppercase tracking-widest text-brand">{cat.title}</h3>
+              <div className="mt-2 divide-y divide-gray-200">
+                {cat.items.map((f) => (
+                  <details key={f.q} className="group py-4">
+                    <summary className="flex cursor-pointer list-none items-center justify-between gap-4 font-medium text-ink">
+                      {f.q}
+                      <span className="shrink-0 text-lavender transition group-open:rotate-45" aria-hidden="true">
+                        +
+                      </span>
+                    </summary>
+                    <p className="mt-2 text-sm text-lavender">{f.a}</p>
+                  </details>
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       </section>
