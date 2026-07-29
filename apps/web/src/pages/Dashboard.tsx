@@ -1,6 +1,6 @@
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../lib/api";
@@ -46,8 +46,24 @@ export function Dashboard() {
   );
   const qc = useQueryClient();
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => apiFetch<Usage>("/api/usage") });
-  const roster = useQuery({ queryKey: ["employees"], queryFn: () => apiFetch<{ employees: Employee[] }>("/api/employees") });
+  // While any row is mid-re-enrich, poll so the "Enriching…" status clears
+  // itself as soon as the background job finishes - re-enrichment is
+  // fire-and-forget server-side, so nothing else would tell the UI it's done.
+  const [reEnrichingIds, setReEnrichingIds] = useState<Set<string>>(new Set());
+  const roster = useQuery({
+    queryKey: ["employees"],
+    queryFn: () => apiFetch<{ employees: Employee[] }>("/api/employees"),
+    refetchInterval: reEnrichingIds.size > 0 ? 2500 : false,
+  });
   const company = useQuery({ queryKey: ["company"], queryFn: () => apiFetch<Company>("/api/companies/me") });
+
+  useEffect(() => {
+    if (!roster.data || reEnrichingIds.size === 0) return;
+    const stillPending = new Set(
+      roster.data.employees.filter((e) => reEnrichingIds.has(e.id) && !e.enriched_at).map((e) => e.id),
+    );
+    if (stillPending.size !== reEnrichingIds.size) setReEnrichingIds(stillPending);
+  }, [roster.data, reEnrichingIds]);
 
   const reEnrich = useMutation({
     mutationFn: () => apiFetch("/api/employees/re-enrich", { method: "POST" }),
@@ -55,7 +71,20 @@ export function Dashboard() {
   });
   const reEnrichOne = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/employees/${id}/re-enrich`, { method: "POST" }),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
+    onSuccess: (_data, id) => {
+      setReEnrichingIds((prev) => new Set(prev).add(id));
+      qc.invalidateQueries({ queryKey: ["employees"] });
+      // Safety net - if enrichment fails silently (e.g. a bad LinkedIn URL),
+      // enriched_at never gets set and the row would otherwise poll forever.
+      setTimeout(() => {
+        setReEnrichingIds((prev) => {
+          if (!prev.has(id)) return prev;
+          const next = new Set(prev);
+          next.delete(id);
+          return next;
+        });
+      }, 45_000);
+    },
   });
   const removeEmployee = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/employees/${id}`, { method: "DELETE" }),
@@ -199,21 +228,28 @@ export function Dashboard() {
                     <td className="px-4 py-2 text-lavender">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</td>
                     <td className="px-4 py-2 text-lavender">{e.location ?? "-"}</td>
                     <td className="px-4 py-2">
-                      <span className={e.enriched_at ? "text-accent" : "text-brand"}>
-                        {e.enriched_at ? "Enriched" : "Pending"}
-                      </span>
+                      {reEnrichingIds.has(e.id) ? (
+                        <span className="flex items-center gap-1.5 text-brand">
+                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                          Enriching…
+                        </span>
+                      ) : (
+                        <span className={e.enriched_at ? "text-accent" : "text-brand"}>
+                          {e.enriched_at ? "Enriched" : "Pending"}
+                        </span>
+                      )}
                     </td>
                     {isAdmin && (
                       <td className="px-4 py-2 text-right">
                         <div className="flex items-center justify-end gap-3">
                           <button
                             className="text-lavender hover:text-ink disabled:opacity-50"
-                            disabled={reEnrichOne.isPending && reEnrichOne.variables === e.id}
+                            disabled={reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id)}
                             onClick={() => reEnrichOne.mutate(e.id)}
                             aria-label={`Re-enrich ${e.name}`}
                             title="Re-enrich this person"
                           >
-                            {reEnrichOne.isPending && reEnrichOne.variables === e.id ? "…" : "↻"}
+                            {reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id) ? "…" : "↻"}
                           </button>
                           <button
                             className="text-lavender hover:text-red-600"
