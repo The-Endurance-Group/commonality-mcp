@@ -225,7 +225,10 @@ export function quotaExceededMessage(status: QuotaStatus, plan: "free" | "pro", 
       role === "admin"
         ? "Upgrade to Pro for 200 credits/month - visit your Commonality dashboard → Billing to upgrade."
         : "Upgrade to Pro for 200 credits/month - ask your workspace admin to upgrade in Billing.";
-    return `You've used all ${status.limit} free credits this month. ${upgrade}`;
+    const alreadyUpgradedNote =
+      " Already upgraded to Pro? That can take up to an hour to reflect here - disconnect and reconnect " +
+      "Commonality in your AI's connector settings to refresh it right away.";
+    return `You've used all ${status.limit} free credits this month. ${upgrade}${alreadyUpgradedNote}`;
   }
   return `You've used all ${status.limit} credits this month. Your quota resets at the start of next month.`;
 }

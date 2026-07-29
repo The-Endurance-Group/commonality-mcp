@@ -99,7 +99,11 @@ export function Billing() {
       <h2 className="text-lg font-semibold text-ink">Billing</h2>
 
       {status === "success" && (
-        <p className="rounded-md bg-tint-accent p-3 text-sm text-accent">Thanks! Your subscription is active.</p>
+        <p className="rounded-md bg-tint-accent p-3 text-sm text-accent">
+          Thanks! Your subscription is active. If your AI still shows your old limit, that can take up to an
+          hour to refresh on its own - or disconnect and reconnect Commonality in your AI's connector settings
+          to pick up the change right away.
+        </p>
       )}
       {status === "cancelled" && (
         <p className="rounded-md bg-gray-50 p-3 text-sm text-lavender">Checkout cancelled - no charge made.</p>
