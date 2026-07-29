@@ -46,6 +46,22 @@ async function upsertRoster(
   return count ?? rows.length;
 }
 
+/** Enrich a single employee row and stamp enriched_at. Throws on failure. */
+async function enrichEmployeeRow(row: { id: string; linkedin_url: string | null }): Promise<void> {
+  if (!row.linkedin_url) return;
+  const e = await getEnrichedProfile(row.linkedin_url);
+  await db()
+    .from("employees")
+    .update({
+      name: e.name,
+      schools: e.almaMater ? e.almaMater.split(";").map((s) => s.trim()).filter(Boolean) : [],
+      past_companies: e.pastCompanies,
+      location: e.currentLocation ?? null,
+      enriched_at: new Date().toISOString(),
+    })
+    .eq("id", row.id);
+}
+
 /** Enrich every not-yet-enriched employee for a company. Fire-and-forget. */
 export function enrichRosterInBackground(companyId: string): void {
   (async () => {
@@ -55,24 +71,37 @@ export function enrichRosterInBackground(companyId: string): void {
       .eq("company_id", companyId)
       .is("enriched_at", null);
     for (const row of (rows as { id: string; linkedin_url: string | null }[] | null) ?? []) {
-      if (!row.linkedin_url) continue;
       try {
-        const e = await getEnrichedProfile(row.linkedin_url);
-        await db()
-          .from("employees")
-          .update({
-            name: e.name,
-            schools: e.almaMater ? e.almaMater.split(";").map((s) => s.trim()).filter(Boolean) : [],
-            past_companies: e.pastCompanies,
-            location: e.currentLocation ?? null,
-            enriched_at: new Date().toISOString(),
-          })
-          .eq("id", row.id);
+        await enrichEmployeeRow(row);
       } catch (err) {
         logger.warn({ err, employeeId: row.id }, "roster enrichment failed for one profile");
       }
     }
   })().catch((err) => logger.error({ err, companyId }, "background roster enrichment crashed"));
+}
+
+/**
+ * Re-enrich one specific employee (scoped to their company). Fire-and-forget,
+ * same semantics as the bulk re-enrich: clears enriched_at first so the
+ * roster shows "Pending" while it runs, then re-fetches (the 90-day shared
+ * cache may still serve a cached result rather than forcing a fresh Cassidy
+ * call - consistent with how "Re-enrich all" already behaves).
+ */
+export function enrichOneEmployeeInBackground(companyId: string, employeeId: string): void {
+  (async () => {
+    const { data: row } = await db()
+      .from("employees")
+      .select("id, linkedin_url")
+      .eq("company_id", companyId)
+      .eq("id", employeeId)
+      .maybeSingle<{ id: string; linkedin_url: string | null }>();
+    if (!row) return;
+    try {
+      await enrichEmployeeRow(row);
+    } catch (err) {
+      logger.warn({ err, employeeId }, "single-employee re-enrichment failed");
+    }
+  })().catch((err) => logger.error({ err, companyId, employeeId }, "background single-employee enrichment crashed"));
 }
 
 /** Import from a company LinkedIn URL (via Apify) or a list of profile URLs. */

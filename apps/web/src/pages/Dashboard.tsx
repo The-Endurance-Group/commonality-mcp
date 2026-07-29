@@ -53,6 +53,10 @@ export function Dashboard() {
     mutationFn: () => apiFetch("/api/employees/re-enrich", { method: "POST" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
   });
+  const reEnrichOne = useMutation({
+    mutationFn: (id: string) => apiFetch(`/api/employees/${id}/re-enrich`, { method: "POST" }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
+  });
   const removeEmployee = useMutation({
     mutationFn: (id: string) => apiFetch(`/api/employees/${id}`, { method: "DELETE" }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ["employees"] }),
@@ -201,14 +205,25 @@ export function Dashboard() {
                     </td>
                     {isAdmin && (
                       <td className="px-4 py-2 text-right">
-                        <button
-                          className="text-lavender hover:text-red-600"
-                          disabled={removeEmployee.isPending}
-                          onClick={() => removeEmployee.mutate(e.id)}
-                          aria-label={`Remove ${e.name}`}
-                        >
-                          ✕
-                        </button>
+                        <div className="flex items-center justify-end gap-3">
+                          <button
+                            className="text-lavender hover:text-ink disabled:opacity-50"
+                            disabled={reEnrichOne.isPending && reEnrichOne.variables === e.id}
+                            onClick={() => reEnrichOne.mutate(e.id)}
+                            aria-label={`Re-enrich ${e.name}`}
+                            title="Re-enrich this person"
+                          >
+                            {reEnrichOne.isPending && reEnrichOne.variables === e.id ? "…" : "↻"}
+                          </button>
+                          <button
+                            className="text-lavender hover:text-red-600"
+                            disabled={removeEmployee.isPending}
+                            onClick={() => removeEmployee.mutate(e.id)}
+                            aria-label={`Remove ${e.name}`}
+                          >
+                            ✕
+                          </button>
+                        </div>
                       </td>
                     )}
                   </tr>

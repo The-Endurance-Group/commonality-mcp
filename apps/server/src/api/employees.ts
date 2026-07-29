@@ -3,6 +3,7 @@ import { db } from "../db/client.js";
 import { deleteLinkedinConnections, insertLinkedinConnections } from "../db/queries.js";
 import {
   claimEmployeeForSelf,
+  enrichOneEmployeeInBackground,
   enrichRosterInBackground,
   importRoster,
   removeFromRoster,
@@ -146,6 +147,31 @@ employeesRouter.post("/re-enrich", async (req, res) => {
   }
   await db().from("employees").update({ enriched_at: null }).eq("company_id", user.company_id);
   enrichRosterInBackground(user.company_id);
+  res.json({ ok: true });
+});
+
+// POST /api/employees/:id/re-enrich - admins re-run enrichment for just one
+// team member, instead of the whole roster.
+employeesRouter.post("/:id/re-enrich", async (req, res) => {
+  const user = req.user!;
+  if (user.role !== "admin") {
+    res.status(403).json({ error: "forbidden" });
+    return;
+  }
+  const { error, count } = await db()
+    .from("employees")
+    .update({ enriched_at: null }, { count: "exact" })
+    .eq("company_id", user.company_id)
+    .eq("id", req.params.id);
+  if (error) {
+    res.status(500).json({ error: error.message });
+    return;
+  }
+  if (!count) {
+    res.status(404).json({ error: "team member not found in your workspace" });
+    return;
+  }
+  enrichOneEmployeeInBackground(user.company_id, req.params.id);
   res.json({ ok: true });
 });
 
