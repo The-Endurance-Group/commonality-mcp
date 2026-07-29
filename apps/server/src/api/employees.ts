@@ -54,6 +54,15 @@ employeesRouter.post("/import", async (req, res) => {
   }
   try {
     const result = await importRoster(user.company_id, user.plan, { companyLinkedinUrl, urls, limit });
+    // Bulk company-URL imports (onboarding's "import" stage) deliberately hold
+    // off on enrichment until the admin reviews/edits the roster and clicks
+    // "map their profiles" - don't preempt that here. But single-URL adds
+    // (the Dashboard's "Add someone" field, onboarding's review-step add-one,
+    // or a direct API call) have no such follow-up step of their own, so
+    // without this the new row would sit at "Pending" forever until someone
+    // happens to click "Re-enrich all". Safe to call unconditionally in that
+    // case - it only touches rows still missing enriched_at.
+    if (!companyLinkedinUrl && result.imported > 0) enrichRosterInBackground(user.company_id);
     res.json(result);
   } catch (err) {
     if (err instanceof TeamLimitError) {
