@@ -169,6 +169,27 @@ superadminRouter.get("/stats", async (_req, res) => {
   res.json({ total: count ?? 0, byAction });
 });
 
+// POST /api/superadmin/companies/:id/reset-credits - zero out a company's
+// current-month credit counter (support override, e.g. after a billing
+// confusion or a stale-token complaint). Upserts rather than a plain update
+// so it also works for a company with no monthly_usage row yet this month
+// (nothing used = nothing to reset, but the row still gets created at 0
+// rather than silently no-op'ing). Doesn't touch credit_events - the audit
+// log stays intact even though the counter resets.
+superadminRouter.post("/companies/:id/reset-credits", async (req, res) => {
+  const { error } = await db()
+    .from("monthly_usage")
+    .upsert(
+      { company_id: req.params.id, month: currentMonth(), credits_used: 0 },
+      { onConflict: "company_id,month" },
+    );
+  if (error) {
+    res.status(502).json({ error: "reset_credits_failed", message: error.message });
+    return;
+  }
+  res.json({ ok: true });
+});
+
 // POST /api/superadmin/companies/:id/plan - directly set a company's plan.
 // Bypasses Stripe entirely (comping/support override) - does NOT touch their
 // Stripe subscription, so this can drift from what they're actually billed

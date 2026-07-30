@@ -150,6 +150,17 @@ export function SuperAdmin() {
     }
   }
 
+  async function resetCredits(companyId: string, companyName: string) {
+    if (!window.confirm(`Reset ${companyName}'s credits used this month to 0?`)) return;
+    setBusyId(companyId);
+    try {
+      await apiFetch(`/api/superadmin/companies/${companyId}/reset-credits`, { method: "POST" });
+      await qc.invalidateQueries({ queryKey: ["superadmin-companies"] });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   const allCompanies = companies.data?.companies ?? [];
   const totals = useMemo(
     () => ({
@@ -293,23 +304,32 @@ export function SuperAdmin() {
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-lavender">{new Date(c.created_at).toLocaleDateString()}</td>
                     <td className="px-4 py-2 text-right">
-                      {c.plan === "pro" ? (
+                      <div className="flex flex-wrap items-center justify-end gap-2">
                         <button
                           className="btn-secondary"
                           disabled={busyId === c.id}
-                          onClick={() => setPlan(c.id, "free")}
+                          onClick={() => resetCredits(c.id, c.name)}
                         >
-                          {busyId === c.id ? "…" : "Downgrade to Free"}
+                          {busyId === c.id ? "…" : "Reset credits"}
                         </button>
-                      ) : (
-                        <button
-                          className="btn-secondary"
-                          disabled={busyId === c.id}
-                          onClick={() => setPlan(c.id, "pro")}
-                        >
-                          {busyId === c.id ? "…" : "Upgrade to Pro"}
-                        </button>
-                      )}
+                        {c.plan === "pro" ? (
+                          <button
+                            className="btn-secondary"
+                            disabled={busyId === c.id}
+                            onClick={() => setPlan(c.id, "free")}
+                          >
+                            {busyId === c.id ? "…" : "Downgrade to Free"}
+                          </button>
+                        ) : (
+                          <button
+                            className="btn-secondary"
+                            disabled={busyId === c.id}
+                            onClick={() => setPlan(c.id, "pro")}
+                          >
+                            {busyId === c.id ? "…" : "Upgrade to Pro"}
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                   {expanded === c.id && (
