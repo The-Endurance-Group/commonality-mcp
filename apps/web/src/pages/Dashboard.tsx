@@ -152,21 +152,7 @@ export function Dashboard() {
 
       {isSuperadmin && <UsageLogCard />}
 
-      <CollapsibleCard
-        title="Team roster"
-        actions={
-          isAdmin ? (
-            <div className="flex gap-2">
-              <Link to="/onboarding" className="btn-primary">
-                Import team
-              </Link>
-              <button className="btn-secondary" disabled={reEnrich.isPending || employees.length === 0} onClick={() => reEnrich.mutate()}>
-                {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
-              </button>
-            </div>
-          ) : undefined
-        }
-      >
+      <CollapsibleCard title="Team roster">
         {isAdmin ? (
           <div className="mb-3 flex flex-wrap items-center gap-2">
             <input
@@ -331,6 +317,16 @@ export function Dashboard() {
               </table>
             </div>
           </>
+        )}
+        {isAdmin && (
+          <div className="mt-4 flex flex-wrap gap-2">
+            <Link to="/onboarding" className="btn-primary">
+              Import team
+            </Link>
+            <button className="btn-secondary" disabled={reEnrich.isPending || employees.length === 0} onClick={() => reEnrich.mutate()}>
+              {reEnrich.isPending ? "Re-enriching…" : "Re-enrich all"}
+            </button>
+          </div>
         )}
       </CollapsibleCard>
 
