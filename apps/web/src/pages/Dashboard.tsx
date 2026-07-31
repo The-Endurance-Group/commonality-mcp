@@ -550,10 +550,10 @@ function AIProviderItem({ provider, open, onToggle }: { provider: AIProvider; op
 // ─────────────────────────────────────────────────────────────────────────────
 
 const CHAT_EXAMPLE_PROMPTS = [
+  "What's the best way for me to connect with [prospect LinkedIn URL]?",
   "What's our best way into Acme Corp?",
-  "Who on our team knows people at Nike?",
   "Find VPs of Sales at fintech companies in New York.",
-  "Show our team's social capital - top schools, employers, and locations.",
+  "Show me [prospect]'s recent LinkedIn posts.",
 ];
 
 // sessionStorage key used to hand off the onboarding chat step's
