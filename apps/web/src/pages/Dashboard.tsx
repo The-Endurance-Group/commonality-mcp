@@ -194,82 +194,144 @@ export function Dashboard() {
             {addEmployee.error instanceof Error ? addEmployee.error.message : "Couldn't add that person"}
           </p>
         )}
-        <div className="overflow-x-auto rounded-lg border border-gray-100 bg-white">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 text-left text-lavender">
-              <tr>
-                <th className="px-4 py-2">Name</th>
-                <th className="px-4 py-2">Alma mater</th>
-                <th className="px-4 py-2">Past companies</th>
-                <th className="px-4 py-2">Location</th>
-                <th className="px-4 py-2">Status</th>
-                {isAdmin && <th className="px-4 py-2" />}
-              </tr>
-            </thead>
-            <tbody>
-              {employees.length === 0 ? (
-                <tr><td className="px-4 py-6 text-lavender" colSpan={isAdmin ? 6 : 5}>No team members yet - click “Import team” to add your roster.</td></tr>
-              ) : (
-                employees.map((e) => (
-                  <tr key={e.id} className="border-t border-gray-100">
-                    <td className="px-4 py-2">
+        {employees.length === 0 ? (
+          <div className="rounded-lg border border-gray-100 bg-white px-4 py-6 text-sm text-lavender">
+            No team members yet - click "Import team" to add your roster.
+          </div>
+        ) : (
+          <>
+            {/* Mobile: stacked cards, one per person - the wide table below is unreadable on a narrow screen. */}
+            <div className="space-y-3 sm:hidden">
+              {employees.map((e) => (
+                <div key={e.id} className="rounded-lg border border-gray-100 bg-white p-4">
+                  <div className="flex items-start justify-between gap-2">
+                    <div className="font-medium text-ink">
                       {e.linkedin_url ? (
-                        <a
-                          href={e.linkedin_url}
-                          target="_blank"
-                          rel="noreferrer"
-                          className="text-brand hover:underline"
-                        >
+                        <a href={e.linkedin_url} target="_blank" rel="noreferrer" className="text-brand hover:underline">
                           {e.name}
                         </a>
                       ) : (
                         e.name
                       )}
-                    </td>
-                    <td className="px-4 py-2 text-lavender">{e.schools?.length ? e.schools.join(", ") : "-"}</td>
-                    <td className="px-4 py-2 text-lavender">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</td>
-                    <td className="px-4 py-2 text-lavender">{e.location ?? "-"}</td>
-                    <td className="px-4 py-2">
-                      {reEnrichingIds.has(e.id) ? (
-                        <span className="flex items-center gap-1.5 text-brand">
-                          <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" aria-hidden="true" />
-                          Enriching…
-                        </span>
-                      ) : (
-                        <span className={e.enriched_at ? "text-accent" : "text-brand"}>
-                          {e.enriched_at ? "Enriched" : "Pending"}
-                        </span>
-                      )}
-                    </td>
+                    </div>
                     {isAdmin && (
-                      <td className="px-4 py-2 text-right">
-                        <div className="flex items-center justify-end gap-3">
-                          <button
-                            className="text-lavender hover:text-ink disabled:opacity-50"
-                            disabled={reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id)}
-                            onClick={() => reEnrichOne.mutate(e.id)}
-                            aria-label={`Re-enrich ${e.name}`}
-                            title="Re-enrich this person"
-                          >
-                            {reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id) ? "…" : "↻"}
-                          </button>
-                          <button
-                            className="text-lavender hover:text-red-600"
-                            disabled={removeEmployee.isPending}
-                            onClick={() => removeEmployee.mutate(e.id)}
-                            aria-label={`Remove ${e.name}`}
-                          >
-                            ✕
-                          </button>
-                        </div>
-                      </td>
+                      <div className="flex shrink-0 items-center gap-3">
+                        <button
+                          className="text-lavender hover:text-ink disabled:opacity-50"
+                          disabled={reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id)}
+                          onClick={() => reEnrichOne.mutate(e.id)}
+                          aria-label={`Re-enrich ${e.name}`}
+                          title="Re-enrich this person"
+                        >
+                          {reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id) ? "…" : "↻"}
+                        </button>
+                        <button
+                          className="text-lavender hover:text-red-600"
+                          disabled={removeEmployee.isPending}
+                          onClick={() => removeEmployee.mutate(e.id)}
+                          aria-label={`Remove ${e.name}`}
+                        >
+                          ✕
+                        </button>
+                      </div>
                     )}
+                  </div>
+                  <dl className="mt-2 space-y-1 text-sm text-lavender">
+                    <div><dt className="inline font-medium text-ink">Alma mater: </dt><dd className="inline">{e.schools?.length ? e.schools.join(", ") : "-"}</dd></div>
+                    <div><dt className="inline font-medium text-ink">Past companies: </dt><dd className="inline">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</dd></div>
+                    <div><dt className="inline font-medium text-ink">Location: </dt><dd className="inline">{e.location ?? "-"}</dd></div>
+                  </dl>
+                  <div className="mt-2">
+                    {reEnrichingIds.has(e.id) ? (
+                      <span className="flex items-center gap-1.5 text-sm text-brand">
+                        <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                        Enriching…
+                      </span>
+                    ) : (
+                      <span className={`text-sm ${e.enriched_at ? "text-accent" : "text-brand"}`}>
+                        {e.enriched_at ? "Enriched" : "Pending"}
+                      </span>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Desktop/tablet: full table. */}
+            <div className="hidden overflow-x-auto rounded-lg border border-gray-100 bg-white sm:block">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 text-left text-lavender">
+                  <tr>
+                    <th className="px-4 py-2">Name</th>
+                    <th className="px-4 py-2">Alma mater</th>
+                    <th className="px-4 py-2">Past companies</th>
+                    <th className="px-4 py-2">Location</th>
+                    <th className="px-4 py-2">Status</th>
+                    {isAdmin && <th className="px-4 py-2" />}
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+                </thead>
+                <tbody>
+                  {employees.map((e) => (
+                    <tr key={e.id} className="border-t border-gray-100">
+                      <td className="px-4 py-2">
+                        {e.linkedin_url ? (
+                          <a
+                            href={e.linkedin_url}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-brand hover:underline"
+                          >
+                            {e.name}
+                          </a>
+                        ) : (
+                          e.name
+                        )}
+                      </td>
+                      <td className="px-4 py-2 text-lavender">{e.schools?.length ? e.schools.join(", ") : "-"}</td>
+                      <td className="px-4 py-2 text-lavender">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</td>
+                      <td className="px-4 py-2 text-lavender">{e.location ?? "-"}</td>
+                      <td className="px-4 py-2">
+                        {reEnrichingIds.has(e.id) ? (
+                          <span className="flex items-center gap-1.5 text-brand">
+                            <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-brand" aria-hidden="true" />
+                            Enriching…
+                          </span>
+                        ) : (
+                          <span className={e.enriched_at ? "text-accent" : "text-brand"}>
+                            {e.enriched_at ? "Enriched" : "Pending"}
+                          </span>
+                        )}
+                      </td>
+                      {isAdmin && (
+                        <td className="px-4 py-2 text-right">
+                          <div className="flex items-center justify-end gap-3">
+                            <button
+                              className="text-lavender hover:text-ink disabled:opacity-50"
+                              disabled={reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id)}
+                              onClick={() => reEnrichOne.mutate(e.id)}
+                              aria-label={`Re-enrich ${e.name}`}
+                              title="Re-enrich this person"
+                            >
+                              {reEnrichingIds.has(e.id) || (reEnrichOne.isPending && reEnrichOne.variables === e.id) ? "…" : "↻"}
+                            </button>
+                            <button
+                              className="text-lavender hover:text-red-600"
+                              disabled={removeEmployee.isPending}
+                              onClick={() => removeEmployee.mutate(e.id)}
+                              aria-label={`Remove ${e.name}`}
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        </td>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </>
+        )}
       </CollapsibleCard>
 
       <AccountCard />
@@ -541,7 +603,7 @@ function ChatPanelCard() {
   return (
     <CollapsibleCard
       title="Try it here"
-      subtitle="Ask a question below - no setup needed. For everyday use, connect Commonality to your own AI (below) instead."
+      subtitle="Chat with Commonality right in your browser - no setup needed. For everyday use, connect it to your own AI below instead."
     >
       <div className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg bg-gray-50 p-3">
         {turns.length === 0 ? (
@@ -885,8 +947,8 @@ function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <CollapsibleCard
-      title="Try asking your AI"
-      subtitle="Once connected, here's what you can ask - no need to remember exact tool names."
+      title="What to ask, once connected"
+      subtitle="Example prompts for your own AI (Claude, ChatGPT, Copilot) after you've connected it above - no need to remember exact tool names."
     >
       <div className="space-y-2">
         {categories.map((cat) => (
