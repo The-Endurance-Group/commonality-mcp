@@ -1004,7 +1004,7 @@ function ExamplePromptsCard({ isAdmin }: { isAdmin: boolean }) {
 
   return (
     <CollapsibleCard
-      title="What to ask, once connected"
+      title="What to ask"
       subtitle="Example prompts for your own AI (Claude, ChatGPT, Copilot) after you've connected it above - no need to remember exact tool names."
     >
       <div className="space-y-2">
