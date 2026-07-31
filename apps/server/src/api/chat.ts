@@ -5,7 +5,7 @@ import { config } from "../config.js";
 import { logger } from "../logger.js";
 import { ctxFromReq, handleToolCall, SERVER_INSTRUCTIONS } from "../mcp/server.js";
 import { TOOL_DEFS } from "../mcp/registry.js";
-import { checkAndIncrementChatUsage } from "../services/chatUsage.js";
+import { incrementChatUsage } from "../services/chatUsage.js";
 
 // In-app chat (Dashboard "Try it here" panel) - lets a team use Commonality
 // without connecting an MCP client first. Billed to Commonality's own
@@ -57,22 +57,11 @@ chatRouter.post("/", async (req, res) => {
     return;
   }
 
-  let usage;
   try {
-    usage = await checkAndIncrementChatUsage(user.company_id, config.chatDailyMessageLimit);
+    await incrementChatUsage(user.company_id);
   } catch (err) {
-    logger.error({ err }, "chat usage check failed");
-    res.status(500).json({ error: "chat_unavailable" });
-    return;
-  }
-  if (!usage.allowed) {
-    res.status(429).json({
-      error: "daily_limit_reached",
-      message:
-        `This workspace has hit its ${usage.limit}-message daily limit for the in-app chat. ` +
-        "Try again tomorrow, or connect Commonality to your own AI (see the Dashboard) for unlimited use.",
-    });
-    return;
+    logger.error({ err }, "chat usage tracking failed");
+    // Non-fatal - this is only for the superadmin usage dashboard, not a gate.
   }
 
   const ctx = ctxFromReq(user);

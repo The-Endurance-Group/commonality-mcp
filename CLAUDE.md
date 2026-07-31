@@ -88,10 +88,11 @@ customer's. It reuses `handleToolCall()` and `SERVER_INSTRUCTIONS` exported
 from `mcp/server.ts` - same tool defs, same quota/credit-charging, same
 usage-threshold notices as the MCP connector; only the transport differs.
 Tool calls it triggers still cost credits normally. The only new cost is
-Anthropic API tokens, billed to us - guarded by a per-company **daily
-message cap** (`CHAT_DAILY_MESSAGE_LIMIT`, default 40), tracked in
+Anthropic API tokens, billed to us with **no daily cap** - a deliberate
+cost we're absorbing, not metered. Message counts are still tracked in
 `chat_usage_daily` (`increment_chat_usage` RPC, mirrors `monthly_usage`'s
-pattern). After 3 user turns, the panel nudges toward the real
+pattern) purely for usage visibility in `/superadmin`, not as a gate.
+After 3 user turns, the panel nudges toward the real
 `ConnectorCard` below it for unlimited, always-available use in the
 customer's own AI. No conversation history is persisted server-side -
 the client holds it in memory only, for now.

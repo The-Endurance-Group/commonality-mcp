@@ -72,13 +72,11 @@ export const config = {
   webAppUrl: optional("WEB_APP_URL", optional("PUBLIC_BASE_URL", "http://localhost:8080")),
 
   // In-app chat (Dashboard "Try it here" panel) - uses Commonality's own
-  // Anthropic account, not the customer's. Model is env-overridable so it can
-  // be bumped without a code change as Anthropic ships new models. Daily
-  // message cap is per-company, a cost/abuse guardrail since this is billed
-  // to us, not metered by the credit system (tool calls it makes still cost
-  // credits normally via chargeCredit()).
+  // Anthropic account, not the customer's, with no daily cap (a deliberate
+  // cost we're absorbing) - tool calls it makes still cost credits normally
+  // via chargeCredit(). Model is env-overridable so it can be bumped without
+  // a code change as Anthropic ships new models.
   anthropicModel: optional("ANTHROPIC_MODEL", "claude-sonnet-4-5-20250929"),
-  chatDailyMessageLimit: Number(optional("CHAT_DAILY_MESSAGE_LIMIT", "40")),
 
   // Lazily required - only the subsystems that use them call required().
   // Kept as getters so the server can boot for healthz without every secret set.
