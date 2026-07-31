@@ -2,18 +2,31 @@ import { useAuth } from "@clerk/clerk-react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ChatConversation, type ChatTurn } from "../components/ChatConversation";
 import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 
-type Stage = "workspace" | "import" | "review" | "enriching";
+type Stage = "workspace" | "import" | "review" | "enriching" | "chat";
 
-const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching"];
+const STAGE_ORDER: Stage[] = ["workspace", "import", "review", "enriching", "chat"];
 const STAGE_LABELS: Record<Stage, string> = {
   workspace: "Workspace",
   import: "Import",
   review: "Review",
   enriching: "Enrich",
+  chat: "Try it",
 };
+
+const ONBOARDING_CHAT_PROMPTS = [
+  "What's our best way into Acme Corp?",
+  "Who on our team knows people at Nike?",
+  "Show our team's social capital - top schools, employers, and locations.",
+];
+
+// Same sessionStorage key ChatPanelCard (Dashboard.tsx) reads on landing, so
+// the conversation started here survives the redirect even on a hard
+// refresh (navigation state alone wouldn't).
+const CHAT_HANDOFF_KEY = "commonality:onboarding-chat";
 
 // Matches TEAM_LIMITS in apps/server/src/services/roster.ts and the pricing page.
 const TEAM_LIMITS: Record<"free" | "pro", number> = { free: 25, pro: 150 };
@@ -131,7 +144,7 @@ export function Onboarding() {
         const s = await apiFetch<{ total: number; enriched: number }>("/api/employees/enrichment-status");
         if (!active) return;
         setProgress(s);
-        if (s.total > 0 && s.enriched >= s.total) navigate("/dashboard", { state: { justOnboarded: true } });
+        if (s.total > 0 && s.enriched >= s.total) setStage("chat");
       } catch {
         /* keep polling */
       }
@@ -143,6 +156,12 @@ export function Onboarding() {
       clearInterval(id);
     };
   }, [stage]);
+
+  // Stage 5 - try it (chat)
+  function goToDashboard(chatTurns: ChatTurn[]) {
+    if (chatTurns.length) sessionStorage.setItem(CHAT_HANDOFF_KEY, JSON.stringify(chatTurns));
+    navigate("/dashboard", { state: { justOnboarded: true, chatTurns } });
+  }
 
   // Cross-fade between stages: briefly play a fade-out on the outgoing stage
   // before swapping to the incoming one, instead of an instant unmount.
@@ -228,7 +247,23 @@ export function Onboarding() {
             <p className="mt-2 text-sm text-lavender">
               {progress.enriched} / {progress.total || "…"} teammates mapped
             </p>
-            <button className="btn-link mt-3" onClick={() => navigate("/dashboard", { state: { justOnboarded: true } })}>
+            <button className="btn-link mt-3" onClick={() => goToDashboard([])}>
+              Skip ahead →
+            </button>
+          </Card>
+        )}
+
+        {displayStage === "chat" && (
+          <Card
+            title="Ask your first question"
+            subtitle="Your team's social map is ready. Try asking below - we'll take you to your dashboard right after."
+          >
+            <ChatConversation
+              examplePrompts={ONBOARDING_CHAT_PROMPTS}
+              placeholder="Ask about a warm path, a prospect, or a company…"
+              onReplyComplete={(turns) => setTimeout(() => goToDashboard(turns), 1200)}
+            />
+            <button className="btn-link" onClick={() => goToDashboard([])}>
               Skip ahead →
             </button>
           </Card>

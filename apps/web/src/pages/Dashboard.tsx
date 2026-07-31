@@ -1,9 +1,10 @@
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useRef, useState } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { apiFetch, streamChat } from "../lib/api";
+import { ChatConversation, type ChatTurn } from "../components/ChatConversation";
+import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 import { ACTION_LABELS, ResultCell, type CreditEventResult, type CreditEventSnapshot } from "./Billing";
 
@@ -44,6 +45,8 @@ export function Dashboard() {
   const [showOnboardedBanner, setShowOnboardedBanner] = useState(
     !!(location.state as { justOnboarded?: boolean } | null)?.justOnboarded,
   );
+  const hasHandoffChat =
+    !!(location.state as { chatTurns?: ChatTurn[] } | null)?.chatTurns?.length || !!sessionStorage.getItem(HANDOFF_KEY);
   const qc = useQueryClient();
   const usage = useQuery({ queryKey: ["usage"], queryFn: () => apiFetch<Usage>("/api/usage") });
   // While any row is mid-re-enrich, poll so the "Enriching…" status clears
@@ -129,8 +132,10 @@ export function Dashboard() {
       {showOnboardedBanner && (
         <div className="flex items-center justify-between gap-3 rounded-lg border border-brand/30 bg-tint-brand px-4 py-3">
           <p className="text-sm text-ink">
-            <span className="font-semibold">You're all set!</span> Connect Commonality to your AI below to start
-            finding warm paths.
+            <span className="font-semibold">You're all set!</span>{" "}
+            {hasHandoffChat
+              ? "Keep the conversation going below, or connect Commonality to your own AI for everyday use."
+              : "Connect Commonality to your AI below to start finding warm paths."}
           </p>
           <button
             className="shrink-0 text-lavender hover:text-ink"
@@ -142,7 +147,7 @@ export function Dashboard() {
         </div>
       )}
 
-      <ChatPanelCard />
+      <ChatPanelCard locationState={location.state} />
 
       <ConnectorCard mcpUrl={mcpUrl} />
 
@@ -544,11 +549,6 @@ function AIProviderItem({ provider, open, onToggle }: { provider: AIProvider; op
 
 // ─────────────────────────────────────────────────────────────────────────────
 
-interface ChatTurn {
-  role: "user" | "assistant";
-  content: string;
-}
-
 const CHAT_EXAMPLE_PROMPTS = [
   "What's our best way into Acme Corp?",
   "Who on our team knows people at Nike?",
@@ -556,171 +556,45 @@ const CHAT_EXAMPLE_PROMPTS = [
   "Show our team's social capital - top schools, employers, and locations.",
 ];
 
-// Turns **bold** markers from the model's reply into real bold text (the
-// model writes markdown; without this the asterisks show up literally).
-// Everything else stays plain text - whitespace-pre-wrap on the bubble
-// handles line breaks and numbered lists already.
-function renderChatText(text: string): ReactNode {
-  const parts = text.split(/(\*\*[^*]+\*\*)/g);
-  return parts.map((part, i) =>
-    part.startsWith("**") && part.endsWith("**") ? (
-      <strong key={i}>{part.slice(2, -2)}</strong>
-    ) : (
-      <span key={i}>{part}</span>
-    ),
-  );
+// sessionStorage key used to hand off the onboarding chat step's
+// conversation to this panel - navigation state (location.state) doesn't
+// survive a page refresh, so this is the fallback that does.
+const HANDOFF_KEY = "commonality:onboarding-chat";
+
+function takeHandoffTurns(locationState: unknown): ChatTurn[] {
+  const fromState = (locationState as { chatTurns?: ChatTurn[] } | null)?.chatTurns;
+  if (fromState?.length) {
+    sessionStorage.removeItem(HANDOFF_KEY);
+    return fromState;
+  }
+  const stored = sessionStorage.getItem(HANDOFF_KEY);
+  if (stored) {
+    sessionStorage.removeItem(HANDOFF_KEY);
+    try {
+      return JSON.parse(stored) as ChatTurn[];
+    } catch {
+      return [];
+    }
+  }
+  return [];
 }
 
 // "Try it here" - lets a team use Commonality without connecting an MCP
-// client first. Billed to Commonality's own Anthropic account (capped
-// server-side per company per day), not the customer's. After a few
+// client first. Billed to Commonality's own Anthropic account, not the
+// customer's - tool calls it makes still cost credits normally. After a few
 // messages, nudges toward the real ConnectorCard below for unlimited,
-// always-available use in the AI they already use.
-function ChatPanelCard() {
-  const [turns, setTurns] = useState<ChatTurn[]>([]);
-  const [input, setInput] = useState("");
-  const [busy, setBusy] = useState(false);
-  const [thinking, setThinking] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const abortRef = useRef<AbortController | null>(null);
-
-  const userTurnCount = turns.filter((t) => t.role === "user").length;
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (el) el.scrollTop = el.scrollHeight;
-  }, [turns, busy, thinking]);
-
-  async function send() {
-    const text = input.trim();
-    if (!text || busy) return;
-    const nextTurns = [...turns, { role: "user" as const, content: text }];
-    setTurns(nextTurns);
-    setInput("");
-    setBusy(true);
-    setThinking(true);
-    setError(null);
-
-    const controller = new AbortController();
-    abortRef.current = controller;
-
-    // Stream the reply in as it's generated (like Claude.ai) rather than
-    // waiting for the whole thing and popping it in at once. Appends a new
-    // assistant turn on the first text chunk, then grows it in place.
-    let started = false;
-    try {
-      await streamChat(
-        nextTurns,
-        (delta) => {
-          setThinking(false);
-          setTurns((t) => {
-            if (!started) {
-              started = true;
-              return [...t, { role: "assistant", content: delta }];
-            }
-            const last = t[t.length - 1];
-            return [...t.slice(0, -1), { role: "assistant" as const, content: last.content + delta }];
-          });
-        },
-        () => setThinking(true),
-        controller.signal,
-      );
-    } catch (e) {
-      // A user-initiated Stop aborts the fetch - that's not a failure, just
-      // keep whatever text streamed in so far.
-      if (!(e instanceof DOMException && e.name === "AbortError")) {
-        setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
-      }
-    } finally {
-      abortRef.current = null;
-      setBusy(false);
-      setThinking(false);
-    }
-  }
-
-  function stop() {
-    abortRef.current?.abort();
-  }
-
-  function fillPrompt(prompt: string) {
-    setInput(prompt);
-    textareaRef.current?.focus();
-  }
+// always-available use in the AI they already use. If the user just came
+// from the onboarding chat step, picks up that conversation right where it
+// left off instead of starting fresh.
+function ChatPanelCard({ locationState }: { locationState: unknown }) {
+  const [initialTurns] = useState(() => takeHandoffTurns(locationState));
 
   return (
     <CollapsibleCard
       title="Try it here"
       subtitle="Chat with Commonality right in your browser - no setup needed. For everyday use, connect it to your own AI below instead."
     >
-      <div ref={scrollRef} className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg bg-gray-50 p-3">
-        {turns.length === 0 ? (
-          <p className="text-sm text-lavender">Try one of the example questions below, or ask your own.</p>
-        ) : (
-          turns.map((t, i) => (
-            <div
-              key={i}
-              className={`max-w-[90%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm sm:max-w-[85%] ${
-                t.role === "user" ? "ml-auto bg-tint-accent text-ink" : "bg-white text-ink shadow-sm"
-              }`}
-            >
-              {t.role === "assistant" ? renderChatText(t.content) : t.content}
-            </div>
-          ))
-        )}
-        {thinking && <div className="max-w-[85%] rounded-lg bg-white px-3 py-2 text-sm text-lavender shadow-sm">Thinking…</div>}
-      </div>
-
-      {userTurnCount === 0 && (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {CHAT_EXAMPLE_PROMPTS.map((prompt) => (
-            <button
-              key={prompt}
-              className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-ink hover:border-brand hover:text-brand"
-              onClick={() => fillPrompt(prompt)}
-              disabled={busy}
-            >
-              {prompt}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {userTurnCount >= 3 && (
-        <p className="mt-3 rounded-md bg-tint-brand p-3 text-sm text-ink">
-          Liking this? Connect Commonality to Claude, ChatGPT, or Copilot below for unlimited use, right in the
-          AI you already work in.
-        </p>
-      )}
-
-      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
-
-      <div className="mt-3 flex flex-col gap-2">
-        <textarea
-          ref={textareaRef}
-          className="input min-h-28 resize-y text-base"
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" && !e.shiftKey) {
-              e.preventDefault();
-              send();
-            }
-          }}
-          placeholder="Ask about a warm path, a prospect, or a company…"
-          disabled={busy}
-        />
-        {busy ? (
-          <button className="btn-secondary w-full sm:w-auto sm:self-end" onClick={stop}>
-            Stop
-          </button>
-        ) : (
-          <button className="btn-primary w-full sm:w-auto sm:self-end" disabled={!input.trim()} onClick={send}>
-            Send
-          </button>
-        )}
-      </div>
+      <ChatConversation initialTurns={initialTurns} examplePrompts={CHAT_EXAMPLE_PROMPTS} showUpsell />
     </CollapsibleCard>
   );
 }
