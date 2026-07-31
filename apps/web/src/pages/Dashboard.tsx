@@ -731,7 +731,7 @@ function ConnectorCard({ mcpUrl }: { mcpUrl: string }) {
   return (
     <CollapsibleCard
       title="Connect to your AI"
-      subtitle="Add this URL as a custom connector in your AI, then ask it to find a warm path."
+      subtitle='Add this URL as a custom connector in your AI. Then, ask it to find a warm path or just say "Use Commonality."'
     >
       <div className="flex items-center gap-2">
         <code className="min-w-0 flex-1 truncate rounded-md bg-gray-100 px-3 py-2 text-sm">{mcpUrl}</code>
