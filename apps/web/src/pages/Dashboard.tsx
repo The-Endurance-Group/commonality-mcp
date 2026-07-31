@@ -672,18 +672,20 @@ function ChatPanelCard() {
         {thinking && <div className="max-w-[85%] rounded-lg bg-white px-3 py-2 text-sm text-lavender shadow-sm">Thinking…</div>}
       </div>
 
-      <div className="mt-3 flex flex-wrap gap-2">
-        {CHAT_EXAMPLE_PROMPTS.map((prompt) => (
-          <button
-            key={prompt}
-            className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-ink hover:border-brand hover:text-brand"
-            onClick={() => fillPrompt(prompt)}
-            disabled={busy}
-          >
-            {prompt}
-          </button>
-        ))}
-      </div>
+      {userTurnCount === 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {CHAT_EXAMPLE_PROMPTS.map((prompt) => (
+            <button
+              key={prompt}
+              className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-ink hover:border-brand hover:text-brand"
+              onClick={() => fillPrompt(prompt)}
+              disabled={busy}
+            >
+              {prompt}
+            </button>
+          ))}
+        </div>
+      )}
 
       {userTurnCount >= 3 && (
         <p className="mt-3 rounded-md bg-tint-brand p-3 text-sm text-ink">
