@@ -3,7 +3,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import { apiFetch } from "../lib/api";
+import { apiFetch, streamChat } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 import { ACTION_LABELS, ResultCell, type CreditEventResult, type CreditEventSnapshot } from "./Billing";
 
@@ -560,6 +560,21 @@ const CHAT_EXAMPLE_PROMPTS = [
   "Show our team's social capital - top schools, employers, and locations.",
 ];
 
+// Turns **bold** markers from the model's reply into real bold text (the
+// model writes markdown; without this the asterisks show up literally).
+// Everything else stays plain text - whitespace-pre-wrap on the bubble
+// handles line breaks and numbered lists already.
+function renderChatText(text: string): ReactNode {
+  const parts = text.split(/(\*\*[^*]+\*\*)/g);
+  return parts.map((part, i) =>
+    part.startsWith("**") && part.endsWith("**") ? (
+      <strong key={i}>{part.slice(2, -2)}</strong>
+    ) : (
+      <span key={i}>{part}</span>
+    ),
+  );
+}
+
 // "Try it here" - lets a team use Commonality without connecting an MCP
 // client first. Billed to Commonality's own Anthropic account (capped
 // server-side per company per day), not the customer's. After a few
@@ -569,10 +584,17 @@ function ChatPanelCard() {
   const [turns, setTurns] = useState<ChatTurn[]>([]);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
+  const [thinking, setThinking] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const userTurnCount = turns.filter((t) => t.role === "user").length;
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (el) el.scrollTop = el.scrollHeight;
+  }, [turns, busy, thinking]);
 
   async function send() {
     const text = input.trim();
@@ -581,17 +603,34 @@ function ChatPanelCard() {
     setTurns(nextTurns);
     setInput("");
     setBusy(true);
+    setThinking(true);
     setError(null);
+
+    // Stream the reply in as it's generated (like Claude.ai) rather than
+    // waiting for the whole thing and popping it in at once. Appends a new
+    // assistant turn on the first text chunk, then grows it in place.
+    let started = false;
     try {
-      const { reply } = await apiFetch<{ reply: string }>("/api/chat", {
-        method: "POST",
-        body: JSON.stringify({ messages: nextTurns }),
-      });
-      setTurns((t) => [...t, { role: "assistant", content: reply }]);
+      await streamChat(
+        nextTurns,
+        (delta) => {
+          setThinking(false);
+          setTurns((t) => {
+            if (!started) {
+              started = true;
+              return [...t, { role: "assistant", content: delta }];
+            }
+            const last = t[t.length - 1];
+            return [...t.slice(0, -1), { role: "assistant" as const, content: last.content + delta }];
+          });
+        },
+        () => setThinking(true),
+      );
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
     } finally {
       setBusy(false);
+      setThinking(false);
     }
   }
 
@@ -605,7 +644,7 @@ function ChatPanelCard() {
       title="Try it here"
       subtitle="Chat with Commonality right in your browser - no setup needed. For everyday use, connect it to your own AI below instead."
     >
-      <div className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg bg-gray-50 p-3">
+      <div ref={scrollRef} className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg bg-gray-50 p-3">
         {turns.length === 0 ? (
           <p className="text-sm text-lavender">Try one of the example questions below, or ask your own.</p>
         ) : (
@@ -616,11 +655,11 @@ function ChatPanelCard() {
                 t.role === "user" ? "ml-auto bg-tint-accent text-ink" : "bg-white text-ink shadow-sm"
               }`}
             >
-              {t.content}
+              {t.role === "assistant" ? renderChatText(t.content) : t.content}
             </div>
           ))
         )}
-        {busy && <div className="max-w-[85%] rounded-lg bg-white px-3 py-2 text-sm text-lavender shadow-sm">Thinking…</div>}
+        {thinking && <div className="max-w-[85%] rounded-lg bg-white px-3 py-2 text-sm text-lavender shadow-sm">Thinking…</div>}
       </div>
 
       <div className="mt-3 flex flex-wrap gap-2">

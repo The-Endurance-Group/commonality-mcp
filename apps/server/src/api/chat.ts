@@ -36,6 +36,19 @@ interface ChatMessage {
   content: string;
 }
 
+// Newline-delimited JSON events, one per line, so the client can render the
+// reply as it's generated (matching the "typing" feel of Claude.ai) instead
+// of waiting for the whole response and popping it in at once.
+type ChatEvent =
+  | { type: "delta"; text: string }
+  | { type: "tool_start" }
+  | { type: "done" }
+  | { type: "error"; message: string };
+
+function writeEvent(res: import("express").Response, event: ChatEvent) {
+  res.write(`${JSON.stringify(event)}\n`);
+}
+
 chatRouter.post("/", async (req, res) => {
   const user = req.user!;
   const { messages } = (req.body ?? {}) as { messages?: ChatMessage[] };
@@ -65,27 +78,33 @@ chatRouter.post("/", async (req, res) => {
   const ctx = ctxFromReq(user);
   const conversation: MessageParam[] = messages.map((m) => ({ role: m.role, content: m.content }));
 
+  res.writeHead(200, {
+    "Content-Type": "application/x-ndjson",
+    "Cache-Control": "no-cache",
+    "X-Accel-Buffering": "no",
+  });
+
   try {
     for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
-      const response = await getClient().messages.create({
+      const stream = getClient().messages.stream({
         model: config.anthropicModel,
         max_tokens: MAX_TOKENS,
         system: SERVER_INSTRUCTIONS,
         tools: ANTHROPIC_TOOLS,
         messages: conversation,
       });
+      stream.on("text", (delta) => writeEvent(res, { type: "delta", text: delta }));
+      const response = await stream.finalMessage();
       conversation.push({ role: "assistant", content: response.content });
 
       const toolUses = response.content.filter((b): b is ToolUseBlock => b.type === "tool_use");
       if (toolUses.length === 0) {
-        const text = response.content
-          .filter((b): b is Anthropic.TextBlock => b.type === "text")
-          .map((b) => b.text)
-          .join("\n");
-        res.json({ reply: text });
+        writeEvent(res, { type: "done" });
+        res.end();
         return;
       }
 
+      writeEvent(res, { type: "tool_start" });
       const toolResults = [];
       for (const tu of toolUses) {
         const result = await handleToolCall(ctx, tu.name, (tu.input as Record<string, unknown>) ?? {});
@@ -98,9 +117,11 @@ chatRouter.post("/", async (req, res) => {
       }
       conversation.push({ role: "user", content: toolResults });
     }
-    res.status(502).json({ error: "chat_incomplete", message: "Took too many steps to find an answer. Try rephrasing." });
+    writeEvent(res, { type: "error", message: "Took too many steps to find an answer. Try rephrasing." });
+    res.end();
   } catch (err) {
     logger.error({ err }, "chat completion failed");
-    res.status(502).json({ error: "chat_failed", message: "Something went wrong. Please try again." });
+    writeEvent(res, { type: "error", message: "Something went wrong. Please try again." });
+    res.end();
   }
 });
