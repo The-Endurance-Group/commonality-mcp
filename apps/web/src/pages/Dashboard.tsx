@@ -588,6 +588,7 @@ function ChatPanelCard() {
   const [error, setError] = useState<string | null>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   const userTurnCount = turns.filter((t) => t.role === "user").length;
 
@@ -605,6 +606,9 @@ function ChatPanelCard() {
     setBusy(true);
     setThinking(true);
     setError(null);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
 
     // Stream the reply in as it's generated (like Claude.ai) rather than
     // waiting for the whole thing and popping it in at once. Appends a new
@@ -625,13 +629,23 @@ function ChatPanelCard() {
           });
         },
         () => setThinking(true),
+        controller.signal,
       );
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      // A user-initiated Stop aborts the fetch - that's not a failure, just
+      // keep whatever text streamed in so far.
+      if (!(e instanceof DOMException && e.name === "AbortError")) {
+        setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+      }
     } finally {
+      abortRef.current = null;
       setBusy(false);
       setThinking(false);
     }
+  }
+
+  function stop() {
+    abortRef.current?.abort();
   }
 
   function fillPrompt(prompt: string) {
@@ -699,9 +713,15 @@ function ChatPanelCard() {
           placeholder="Ask about a warm path, a prospect, or a company…"
           disabled={busy}
         />
-        <button className="btn-primary w-full sm:w-auto sm:self-end" disabled={busy || !input.trim()} onClick={send}>
-          {busy ? "Sending…" : "Send"}
-        </button>
+        {busy ? (
+          <button className="btn-secondary w-full sm:w-auto sm:self-end" onClick={stop}>
+            Stop
+          </button>
+        ) : (
+          <button className="btn-primary w-full sm:w-auto sm:self-end" disabled={!input.trim()} onClick={send}>
+            Send
+          </button>
+        )}
       </div>
     </CollapsibleCard>
   );

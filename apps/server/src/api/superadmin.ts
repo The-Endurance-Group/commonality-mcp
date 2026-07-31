@@ -39,7 +39,8 @@ superadminRouter.get("/companies", async (_req, res) => {
   const rows = (companies as CompanyRow[] | null) ?? [];
   const companyIds = rows.map((c) => c.id);
 
-  const [{ data: users }, { data: usage }] = await Promise.all([
+  const today = new Date().toISOString().slice(0, 10);
+  const [{ data: users }, { data: usage }, { data: chatToday }] = await Promise.all([
     companyIds.length
       ? db().from("users").select("id, company_id").in("company_id", companyIds)
       : Promise.resolve({ data: [] as { id: string; company_id: string }[] }),
@@ -50,6 +51,16 @@ superadminRouter.get("/companies", async (_req, res) => {
           .eq("month", currentMonth())
           .in("company_id", companyIds)
       : Promise.resolve({ data: [] as { company_id: string; credits_used: number }[] }),
+    // In-app chat ("Try it here" panel) usage - a signal for whether that
+    // experiment is actually getting used, separate from the MCP credit
+    // system above (chat tool calls still show up in credits_used too).
+    companyIds.length
+      ? db()
+          .from("chat_usage_daily")
+          .select("company_id, message_count")
+          .eq("day", today)
+          .in("company_id", companyIds)
+      : Promise.resolve({ data: [] as { company_id: string; message_count: number }[] }),
   ]);
 
   const userCountByCompany = new Map<string, number>();
@@ -58,6 +69,12 @@ superadminRouter.get("/companies", async (_req, res) => {
   }
   const usedByCompany = new Map(
     ((usage as { company_id: string; credits_used: number }[] | null) ?? []).map((u) => [u.company_id, u.credits_used]),
+  );
+  const chatTodayByCompany = new Map(
+    ((chatToday as { company_id: string; message_count: number }[] | null) ?? []).map((c) => [
+      c.company_id,
+      c.message_count,
+    ]),
   );
 
   res.json({
@@ -70,6 +87,7 @@ superadminRouter.get("/companies", async (_req, res) => {
       user_count: userCountByCompany.get(c.id) ?? 0,
       credits_used: usedByCompany.get(c.id) ?? 0,
       credits_limit: PLAN_LIMITS[c.plan],
+      chat_messages_today: chatTodayByCompany.get(c.id) ?? 0,
     })),
   });
 });

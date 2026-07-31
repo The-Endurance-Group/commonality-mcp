@@ -33,6 +33,7 @@ export async function streamChat(
   messages: { role: "user" | "assistant"; content: string }[],
   onDelta: (text: string) => void,
   onToolStart: () => void,
+  signal?: AbortSignal,
 ): Promise<void> {
   const token = useAuthStore.getState().token;
   const res = await fetch("/api/chat", {
@@ -42,6 +43,7 @@ export async function streamChat(
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
     body: JSON.stringify({ messages }),
+    signal,
   });
 
   if (!res.ok || !res.body) {

@@ -84,8 +84,16 @@ chatRouter.post("/", async (req, res) => {
     "X-Accel-Buffering": "no",
   });
 
+  // A user hitting "Stop" aborts the fetch client-side, which closes this
+  // connection - stop mid-loop instead of continuing to burn Anthropic/tool
+  // calls (and writing to a socket that's gone) for a reply nobody will see.
+  let clientGone = false;
+  req.on("close", () => {
+    clientGone = true;
+  });
+
   try {
-    for (let i = 0; i < MAX_TOOL_ITERATIONS; i++) {
+    for (let i = 0; i < MAX_TOOL_ITERATIONS && !clientGone; i++) {
       const stream = getClient().messages.stream({
         model: config.anthropicModel,
         max_tokens: MAX_TOKENS,
@@ -93,8 +101,11 @@ chatRouter.post("/", async (req, res) => {
         tools: ANTHROPIC_TOOLS,
         messages: conversation,
       });
-      stream.on("text", (delta) => writeEvent(res, { type: "delta", text: delta }));
+      stream.on("text", (delta) => {
+        if (!clientGone) writeEvent(res, { type: "delta", text: delta });
+      });
       const response = await stream.finalMessage();
+      if (clientGone) return;
       conversation.push({ role: "assistant", content: response.content });
 
       const toolUses = response.content.filter((b): b is ToolUseBlock => b.type === "tool_use");
@@ -117,9 +128,12 @@ chatRouter.post("/", async (req, res) => {
       }
       conversation.push({ role: "user", content: toolResults });
     }
-    writeEvent(res, { type: "error", message: "Took too many steps to find an answer. Try rephrasing." });
-    res.end();
+    if (!clientGone) {
+      writeEvent(res, { type: "error", message: "Took too many steps to find an answer. Try rephrasing." });
+      res.end();
+    }
   } catch (err) {
+    if (clientGone) return;
     logger.error({ err }, "chat completion failed");
     writeEvent(res, { type: "error", message: "Something went wrong. Please try again." });
     res.end();

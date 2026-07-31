@@ -15,6 +15,7 @@ interface Company {
   user_count: number;
   credits_used: number;
   credits_limit: number;
+  chat_messages_today: number;
 }
 interface CompanyUser {
   id: string;
@@ -168,6 +169,7 @@ export function SuperAdmin() {
       userCount: allCompanies.reduce((sum, c) => sum + c.user_count, 0),
       creditsUsed: allCompanies.reduce((sum, c) => sum + c.credits_used, 0),
       proCount: allCompanies.filter((c) => c.plan === "pro").length,
+      chatMessagesToday: allCompanies.reduce((sum, c) => sum + c.chat_messages_today, 0),
     }),
     [allCompanies],
   );
@@ -195,11 +197,12 @@ export function SuperAdmin() {
         <p className="text-sm text-lavender">Every company workspace - team size, plan, and this month's credit usage.</p>
       </div>
 
-      <section className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <section className="grid grid-cols-2 gap-4 sm:grid-cols-5">
         <Stat label="Companies" value={companies.isLoading ? "…" : String(totals.companyCount)} />
         <Stat label="Users" value={companies.isLoading ? "…" : String(totals.userCount)} />
         <Stat label="Pro accounts" value={companies.isLoading ? "…" : String(totals.proCount)} />
         <Stat label="Credits used (month)" value={companies.isLoading ? "…" : String(totals.creditsUsed)} />
+        <Stat label="In-app chat msgs (today)" value={companies.isLoading ? "…" : String(totals.chatMessagesToday)} />
       </section>
 
       <div className="rounded-lg border border-gray-100 bg-white p-6">
@@ -282,6 +285,7 @@ export function SuperAdmin() {
                   onSort={toggleSort}
                 />
                 <SortHeader label="Created" sortKey="created_at" activeKey={sortKey} dir={sortDir} onSort={toggleSort} />
+                <th className="px-4 py-2">Chat (today)</th>
                 <th className="px-4 py-2" />
               </tr>
             </thead>
@@ -303,6 +307,7 @@ export function SuperAdmin() {
                       {c.credits_used} / {c.credits_limit}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-lavender">{new Date(c.created_at).toLocaleDateString()}</td>
+                    <td className="px-4 py-2 text-lavender">{c.chat_messages_today}</td>
                     <td className="px-4 py-2 text-right">
                       <div className="flex flex-wrap items-center justify-end gap-2">
                         <button
@@ -334,7 +339,7 @@ export function SuperAdmin() {
                   </tr>
                   {expanded === c.id && (
                     <tr className="border-t border-gray-100 bg-gray-50">
-                      <td colSpan={7} className="px-4 py-3">
+                      <td colSpan={8} className="px-4 py-3">
                         {users.isLoading ? (
                           <span className="text-sm text-lavender">Loading users…</span>
                         ) : !users.data?.users.length ? (
