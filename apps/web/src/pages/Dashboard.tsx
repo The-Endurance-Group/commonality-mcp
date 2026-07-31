@@ -850,7 +850,7 @@ function ConnectionsCard() {
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <label className="block">
-          <span className="mb-1 block text-sm font-medium text-lavender">Whose connections is this?</span>
+          <span className="mb-1 block text-sm font-medium text-lavender">Whose connections are these?</span>
           <select className="input" value={employeeId} onChange={(e) => setEmployeeId(e.target.value)}>
             <option value="">Select a teammate…</option>
             {employees.map((e) => (
