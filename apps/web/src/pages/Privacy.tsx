@@ -57,6 +57,11 @@ const subprocessors: Subprocessor[] = [
     usedFor: "Understanding how visitors use our public marketing site (theendurancegroup.com pages before you sign in) - page views, clicks, and session recordings, so we can improve the site.",
     dataShared: "Your browsing activity on our public marketing pages only. This never runs on the signed-in product - your team roster, prospect data, and usage logs are never seen by this service.",
   },
+  {
+    name: "In-app AI assistant",
+    usedFor: "Powering the optional \"Try it here\" chat panel in your dashboard, so your team can ask Commonality questions without connecting it to your own AI first.",
+    dataShared: "The messages you type into that chat panel, processed under our own account with this service - not yours. This is separate from using Commonality through your own AI (Claude, ChatGPT, Copilot), where your conversation stays entirely within your own AI subscription.",
+  },
 ];
 
 export function Privacy() {

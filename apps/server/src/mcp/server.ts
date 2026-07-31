@@ -21,7 +21,10 @@ const SERVER_INFO = { name: "commonality", version: "0.1.0" };
 // about LinkedIn, prospecting, or finding a way in - not only when the user
 // names a tool or types something that happens to match a tool description
 // word-for-word.
-const SERVER_INSTRUCTIONS =
+// Exported so the in-app chat (apps/server/src/api/chat.ts) can use the same
+// system prompt as the MCP connector - one source of truth for how the model
+// should behave, regardless of which surface it's talking through.
+export const SERVER_INSTRUCTIONS =
   "Commonality finds warm paths through the user's team's LinkedIn network and researches " +
   "prospects/companies for outreach. Reach for it proactively - don't wait for the user to name " +
   "a tool - whenever the conversation involves: a LinkedIn profile or company URL; a prospect or " +
@@ -49,7 +52,7 @@ function rpcError(id: RpcRequest["id"], code: number, message: string, data?: un
   return { jsonrpc: "2.0" as const, id: id ?? null, error: { code, message, ...(data ? { data } : {}) } };
 }
 
-function ctxFromReq(user: NonNullable<Express.Request["user"]>): ToolContext {
+export function ctxFromReq(user: NonNullable<Express.Request["user"]>): ToolContext {
   return {
     company_id: user.company_id,
     user_id: user.user_id,
@@ -59,7 +62,11 @@ function ctxFromReq(user: NonNullable<Express.Request["user"]>): ToolContext {
   };
 }
 
-async function handleToolCall(
+// Exported for the in-app chat endpoint (apps/server/src/api/chat.ts), which
+// reuses this exact function so a lookup triggered from in-app chat gets the
+// same quota gate, credit charging, and usage-threshold notice as one
+// triggered from the MCP connector - no separate accounting to keep in sync.
+export async function handleToolCall(
   ctx: ToolContext,
   name: string,
   args: Record<string, unknown>,

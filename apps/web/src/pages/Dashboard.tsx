@@ -142,6 +142,8 @@ export function Dashboard() {
         </div>
       )}
 
+      <ChatPanelCard />
+
       <ConnectorCard mcpUrl={mcpUrl} />
 
       <ExamplePromptsCard isAdmin={isAdmin} />
@@ -483,6 +485,101 @@ function AIProviderItem({ provider, open, onToggle }: { provider: AIProvider; op
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+
+interface ChatTurn {
+  role: "user" | "assistant";
+  content: string;
+}
+
+// "Try it here" - lets a team use Commonality without connecting an MCP
+// client first. Billed to Commonality's own Anthropic account (capped
+// server-side per company per day), not the customer's. After a few
+// messages, nudges toward the real ConnectorCard below for unlimited,
+// always-available use in the AI they already use.
+function ChatPanelCard() {
+  const [turns, setTurns] = useState<ChatTurn[]>([]);
+  const [input, setInput] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const userTurnCount = turns.filter((t) => t.role === "user").length;
+
+  async function send() {
+    const text = input.trim();
+    if (!text || busy) return;
+    const nextTurns = [...turns, { role: "user" as const, content: text }];
+    setTurns(nextTurns);
+    setInput("");
+    setBusy(true);
+    setError(null);
+    try {
+      const { reply } = await apiFetch<{ reply: string }>("/api/chat", {
+        method: "POST",
+        body: JSON.stringify({ messages: nextTurns }),
+      });
+      setTurns((t) => [...t, { role: "assistant", content: reply }]);
+    } catch (e) {
+      setError(e instanceof Error ? e.message : "Something went wrong. Please try again.");
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  return (
+    <CollapsibleCard
+      title="Try it here"
+      subtitle="Ask a question below - no setup needed. For everyday use, connect Commonality to your own AI (below) instead."
+    >
+      <div className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg bg-gray-50 p-3">
+        {turns.length === 0 ? (
+          <p className="text-sm text-lavender">
+            Try asking: "What's our best way into Acme Corp?" or "Who on our team knows people at Nike?"
+          </p>
+        ) : (
+          turns.map((t, i) => (
+            <div
+              key={i}
+              className={`max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm ${
+                t.role === "user" ? "ml-auto bg-tint-accent text-ink" : "bg-white text-ink shadow-sm"
+              }`}
+            >
+              {t.content}
+            </div>
+          ))
+        )}
+        {busy && <div className="max-w-[85%] rounded-lg bg-white px-3 py-2 text-sm text-lavender shadow-sm">Thinking…</div>}
+      </div>
+
+      {userTurnCount >= 3 && (
+        <p className="mt-3 rounded-md bg-tint-brand p-3 text-sm text-ink">
+          Liking this? Connect Commonality to Claude, ChatGPT, or Copilot below for unlimited use, right in the
+          AI you already work in.
+        </p>
+      )}
+
+      {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
+
+      <div className="mt-3 flex gap-2">
+        <input
+          className="input flex-1"
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && !e.shiftKey) {
+              e.preventDefault();
+              send();
+            }
+          }}
+          placeholder="Ask about a warm path, a prospect, or a company…"
+          disabled={busy}
+        />
+        <button className="btn-primary" disabled={busy || !input.trim()} onClick={send}>
+          {busy ? "…" : "Send"}
+        </button>
+      </div>
+    </CollapsibleCard>
+  );
+}
 
 function ConnectorCard({ mcpUrl }: { mcpUrl: string }) {
   const [copiedUrl, setCopiedUrl] = useState(false);

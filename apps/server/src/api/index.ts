@@ -1,6 +1,7 @@
 import { Router, type Router as RouterType } from "express";
 import { requireAuth } from "../auth/middleware.js";
 import { billingRouter } from "./billing.js";
+import { chatRouter } from "./chat.js";
 import { companiesRouter } from "./companies.js";
 import { employeesRouter } from "./employees.js";
 import { invitesRouter } from "./invites.js";
@@ -16,6 +17,7 @@ export const apiRouter: RouterType = Router();
 apiRouter.use(requireAuth);
 
 apiRouter.use("/usage", usageRouter);
+apiRouter.use("/chat", chatRouter);
 apiRouter.use("/companies", companiesRouter);
 apiRouter.use("/employees", employeesRouter);
 apiRouter.use("/invites", invitesRouter);

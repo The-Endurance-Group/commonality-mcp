@@ -6,7 +6,8 @@ Operating guide for Claude Code sessions in this repo. Read before making change
 
 MCP-native re-packaging of the Commonality sales-intelligence product. Daily
 usage lives in Claude.ai via an MCP server (`apps/server/src/mcp`). A small
-React app (`apps/web`) handles one-time team setup, billing, and invites only.
+React app (`apps/web`) handles one-time team setup, billing, and invites -
+plus an in-app chat (see "In-app chat" below) as a frictionless trial path.
 
 Business logic (matching algorithm, enrichment integrations, schema) was ported
 from the private reference repo `The-Endurance-Group/commonality_revised`. That
@@ -75,6 +76,25 @@ directly overwrite `companies.plan` - a support/comp override that does
 **not** touch Stripe. If a company has a real paid Stripe subscription, this
 can drift the `plan` column out of sync with what they're actually being
 billed - a deliberate tradeoff (confirmed with the user), not an oversight.
+
+## In-app chat
+
+`apps/server/src/api/chat.ts` (`POST /api/chat`, mounted under the gated
+`apiRouter` - same Commonality JWT as everything else). A "try it here"
+alternative to connecting an MCP client: a chat panel on the Dashboard
+(`ChatPanelCard` in `Dashboard.tsx`) that talks to Commonality's own
+Anthropic account (`ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` env vars), not the
+customer's. It reuses `handleToolCall()` and `SERVER_INSTRUCTIONS` exported
+from `mcp/server.ts` - same tool defs, same quota/credit-charging, same
+usage-threshold notices as the MCP connector; only the transport differs.
+Tool calls it triggers still cost credits normally. The only new cost is
+Anthropic API tokens, billed to us - guarded by a per-company **daily
+message cap** (`CHAT_DAILY_MESSAGE_LIMIT`, default 40), tracked in
+`chat_usage_daily` (`increment_chat_usage` RPC, mirrors `monthly_usage`'s
+pattern). After 3 user turns, the panel nudges toward the real
+`ConnectorCard` below it for unlimited, always-available use in the
+customer's own AI. No conversation history is persisted server-side -
+the client holds it in memory only, for now.
 
 ## Deploy
 
