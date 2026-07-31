@@ -1,6 +1,6 @@
 import { useClerk } from "@clerk/clerk-react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { type ReactNode, useEffect, useState } from "react";
+import { type ReactNode, useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { apiFetch } from "../lib/api";
@@ -491,6 +491,13 @@ interface ChatTurn {
   content: string;
 }
 
+const CHAT_EXAMPLE_PROMPTS = [
+  "What's our best way into Acme Corp?",
+  "Who on our team knows people at Nike?",
+  "Find VPs of Sales at fintech companies in New York.",
+  "Show our team's social capital - top schools, employers, and locations.",
+];
+
 // "Try it here" - lets a team use Commonality without connecting an MCP
 // client first. Billed to Commonality's own Anthropic account (capped
 // server-side per company per day), not the customer's. After a few
@@ -501,6 +508,7 @@ function ChatPanelCard() {
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   const userTurnCount = turns.filter((t) => t.role === "user").length;
 
@@ -525,6 +533,11 @@ function ChatPanelCard() {
     }
   }
 
+  function fillPrompt(prompt: string) {
+    setInput(prompt);
+    textareaRef.current?.focus();
+  }
+
   return (
     <CollapsibleCard
       title="Try it here"
@@ -532,14 +545,12 @@ function ChatPanelCard() {
     >
       <div className="flex max-h-96 flex-col gap-3 overflow-y-auto rounded-lg bg-gray-50 p-3">
         {turns.length === 0 ? (
-          <p className="text-sm text-lavender">
-            Try asking: "What's our best way into Acme Corp?" or "Who on our team knows people at Nike?"
-          </p>
+          <p className="text-sm text-lavender">Try one of the example questions below, or ask your own.</p>
         ) : (
           turns.map((t, i) => (
             <div
               key={i}
-              className={`max-w-[85%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm ${
+              className={`max-w-[90%] whitespace-pre-wrap rounded-lg px-3 py-2 text-sm sm:max-w-[85%] ${
                 t.role === "user" ? "ml-auto bg-tint-accent text-ink" : "bg-white text-ink shadow-sm"
               }`}
             >
@@ -548,6 +559,19 @@ function ChatPanelCard() {
           ))
         )}
         {busy && <div className="max-w-[85%] rounded-lg bg-white px-3 py-2 text-sm text-lavender shadow-sm">Thinking…</div>}
+      </div>
+
+      <div className="mt-3 flex flex-wrap gap-2">
+        {CHAT_EXAMPLE_PROMPTS.map((prompt) => (
+          <button
+            key={prompt}
+            className="rounded-full border border-gray-200 bg-white px-3 py-1.5 text-left text-xs font-medium text-ink hover:border-brand hover:text-brand"
+            onClick={() => fillPrompt(prompt)}
+            disabled={busy}
+          >
+            {prompt}
+          </button>
+        ))}
       </div>
 
       {userTurnCount >= 3 && (
@@ -559,9 +583,10 @@ function ChatPanelCard() {
 
       {error && <p className="mt-3 text-sm text-red-600">{error}</p>}
 
-      <div className="mt-3 flex gap-2">
-        <input
-          className="input flex-1"
+      <div className="mt-3 flex flex-col gap-2">
+        <textarea
+          ref={textareaRef}
+          className="input min-h-28 resize-y text-base"
           value={input}
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => {
@@ -573,8 +598,8 @@ function ChatPanelCard() {
           placeholder="Ask about a warm path, a prospect, or a company…"
           disabled={busy}
         />
-        <button className="btn-primary" disabled={busy || !input.trim()} onClick={send}>
-          {busy ? "…" : "Send"}
+        <button className="btn-primary w-full sm:w-auto sm:self-end" disabled={busy || !input.trim()} onClick={send}>
+          {busy ? "Sending…" : "Send"}
         </button>
       </div>
     </CollapsibleCard>
