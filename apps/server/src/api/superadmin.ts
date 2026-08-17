@@ -106,6 +106,55 @@ superadminRouter.get("/companies/:id/users", async (req, res) => {
   res.json({ users: data ?? [] });
 });
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+// POST /api/superadmin/companies/:id/users - directly add a user to a
+// company (support action - no invite email, no pending state). Mirrors
+// createUser() in oauth/workspace.ts: since `users.email` is what a Clerk
+// login matches against, this pre-provisions membership so that email logs
+// straight into this company next time they sign in.
+superadminRouter.post("/companies/:id/users", async (req, res) => {
+  const email = String((req.body ?? {}).email ?? "").toLowerCase().trim();
+  const role = (req.body ?? {}).role === "admin" ? "admin" : "member";
+  if (!EMAIL_RE.test(email)) {
+    res.status(400).json({ error: "invalid_email" });
+    return;
+  }
+  const { data, error } = await db()
+    .from("users")
+    .insert({ company_id: req.params.id, email, role })
+    .select("id, email, role, created_at")
+    .single();
+  if (error) {
+    // users.email is globally unique - most likely failure is "already a member somewhere".
+    const message = error.code === "23505" ? "That email already belongs to a workspace." : error.message;
+    res.status(409).json({ error: "add_user_failed", message });
+    return;
+  }
+  res.status(201).json({ user: data });
+});
+
+// DELETE /api/superadmin/companies/:id/users/:userId - remove a user from a
+// company entirely (support action, e.g. cleaning up a duplicate/test
+// account). Scoped to both ids so a stale userId can't touch another
+// company's row.
+superadminRouter.delete("/companies/:id/users/:userId", async (req, res) => {
+  const { error, count } = await db()
+    .from("users")
+    .delete({ count: "exact" })
+    .eq("id", req.params.userId)
+    .eq("company_id", req.params.id);
+  if (error) {
+    res.status(502).json({ error: "remove_user_failed", message: error.message });
+    return;
+  }
+  if (!count) {
+    res.status(404).json({ error: "user_not_found" });
+    return;
+  }
+  res.json({ ok: true });
+});
+
 const EVENTS_PAGE_SIZE = 50;
 
 interface CreditEventRow {

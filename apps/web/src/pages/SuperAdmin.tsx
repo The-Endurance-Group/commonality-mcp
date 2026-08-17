@@ -99,6 +99,10 @@ export function SuperAdmin() {
   const [sortKey, setSortKey] = useState<SortKey>("created_at");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [statsOpen, setStatsOpen] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserRole, setNewUserRole] = useState<"member" | "admin">("member");
+  const [userBusy, setUserBusy] = useState(false);
+  const [userError, setUserError] = useState<string | null>(null);
 
   const companies = useQuery({
     queryKey: ["superadmin-companies"],
@@ -127,6 +131,48 @@ export function SuperAdmin() {
   function toggleExpanded(companyId: string) {
     setExpanded((e) => (e === companyId ? null : companyId));
     setEventsPage(0);
+    setNewUserEmail("");
+    setUserError(null);
+  }
+
+  async function addUser(companyId: string) {
+    const email = newUserEmail.trim();
+    if (!email) return;
+    setUserBusy(true);
+    setUserError(null);
+    try {
+      await apiFetch(`/api/superadmin/companies/${companyId}/users`, {
+        method: "POST",
+        body: JSON.stringify({ email, role: newUserRole }),
+      });
+      setNewUserEmail("");
+      setNewUserRole("member");
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["superadmin-company-users", companyId] }),
+        qc.invalidateQueries({ queryKey: ["superadmin-companies"] }),
+      ]);
+    } catch (e) {
+      setUserError(e instanceof Error ? e.message : "Couldn't add that user");
+    } finally {
+      setUserBusy(false);
+    }
+  }
+
+  async function removeUser(companyId: string, userId: string, email: string) {
+    if (!window.confirm(`Remove ${email} from this workspace?`)) return;
+    setUserBusy(true);
+    setUserError(null);
+    try {
+      await apiFetch(`/api/superadmin/companies/${companyId}/users/${userId}`, { method: "DELETE" });
+      await Promise.all([
+        qc.invalidateQueries({ queryKey: ["superadmin-company-users", companyId] }),
+        qc.invalidateQueries({ queryKey: ["superadmin-companies"] }),
+      ]);
+    } catch (e) {
+      setUserError(e instanceof Error ? e.message : "Couldn't remove that user");
+    } finally {
+      setUserBusy(false);
+    }
   }
 
   function toggleSort(key: SortKey) {
@@ -351,10 +397,43 @@ export function SuperAdmin() {
                                 <span className="text-ink">{u.email}</span>
                                 <span className="text-xs uppercase tracking-wide text-lavender">{u.role}</span>
                                 <span className="text-xs text-lavender">joined {new Date(u.created_at).toLocaleDateString()}</span>
+                                <button
+                                  className="ml-auto text-lavender hover:text-red-600 disabled:opacity-50"
+                                  disabled={userBusy}
+                                  onClick={() => removeUser(c.id, u.id, u.email)}
+                                  aria-label={`Remove ${u.email}`}
+                                >
+                                  ✕
+                                </button>
                               </li>
                             ))}
                           </ul>
                         )}
+
+                        <div className="mt-3 flex flex-wrap items-center gap-2">
+                          <input
+                            className="input max-w-xs"
+                            placeholder="Add user by email…"
+                            value={newUserEmail}
+                            onChange={(e) => setNewUserEmail(e.target.value)}
+                          />
+                          <select
+                            className="input w-auto"
+                            value={newUserRole}
+                            onChange={(e) => setNewUserRole(e.target.value === "admin" ? "admin" : "member")}
+                          >
+                            <option value="member">Member</option>
+                            <option value="admin">Admin</option>
+                          </select>
+                          <button
+                            className="btn-secondary"
+                            disabled={userBusy || !newUserEmail.trim()}
+                            onClick={() => addUser(c.id)}
+                          >
+                            {userBusy ? "…" : "Add"}
+                          </button>
+                        </div>
+                        {userError && <p className="mt-2 text-sm text-red-600">{userError}</p>}
 
                         <div className="mt-4 border-t border-gray-200 pt-3">
                           <div className="mb-2 text-xs font-semibold uppercase tracking-wide text-lavender">Usage log</div>
