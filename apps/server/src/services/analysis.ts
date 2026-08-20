@@ -362,8 +362,13 @@ export function findConnections(
       for (const ps of prospectSchools) {
         const psNorm = normalizeSchool(ps);
         for (const es of employeeSchools) {
-          if (es.toLowerCase() === "none listed" || es.length < 4) continue;
+          if (es.toLowerCase() === "none listed") continue;
           const esNorm = normalizeSchool(es);
+          // Length check happens after normalization, not before - a raw
+          // 3-char acronym like "NYU" expands to "new york university" via
+          // the alias table, so gating on es.length would wrongly drop
+          // legitimate short school names before they ever get expanded.
+          if (esNorm.length < 4) continue;
           const matched =
             psNorm === esNorm ||
             ((psNorm.includes(esNorm) || esNorm.includes(psNorm)) && psNorm.length >= 6 && esNorm.length >= 6);
