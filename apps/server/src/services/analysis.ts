@@ -298,12 +298,27 @@ const SCHOOL_ALIASES: Record<string, string> = {
   "tufts": "tufts university",
 };
 
+// Longest-first so a multi-word alias (e.g. "penn state") is tried before a
+// shorter one that's also a prefix of it (e.g. "penn") - otherwise a school
+// like "Penn State Harrisburg" would wrongly expand off "penn" alone.
+const SCHOOL_ALIAS_PREFIXES = Object.keys(SCHOOL_ALIASES).sort((a, b) => b.length - a.length);
+
 function normalizeSchool(name: string): string {
   // Unicode-normalize first: LinkedIn scrapes from different sources can encode the
   // same accented text in different normalization forms (NFC vs NFD), which otherwise
   // makes visually-identical school names compare as different strings.
   const lower = name.normalize("NFC").toLowerCase().replace(/\s+/g, " ").trim();
   if (SCHOOL_ALIASES[lower]) return SCHOOL_ALIASES[lower];
+  // Expand a school's own subdivision/campus (e.g. "NYU Stern", "NYU Schack",
+  // "UCLA Anderson") by swapping just its leading acronym/short-name for the
+  // canonical parent institution and keeping the rest - so "NYU Stern" folds
+  // into the same "new york university ..." bucket as plain "NYU" or "New
+  // York University" without losing "Stern" as the more specific detail.
+  for (const alias of SCHOOL_ALIAS_PREFIXES) {
+    if (lower.startsWith(alias + " ")) {
+      return `${SCHOOL_ALIASES[alias]} ${lower.slice(alias.length).trim()}`;
+    }
+  }
   // Expand "u of X" / "univ of X" / "univ. of X" to "university of X" when no explicit alias.
   const uOf = lower.match(/^(?:u\.?|univ\.?) of (.+)$/);
   if (uOf) return `university of ${uOf[1].trim()}`;
