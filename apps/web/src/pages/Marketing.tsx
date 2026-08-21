@@ -339,12 +339,12 @@ const HERO_DEMOS: HeroDemoScenario[] = [
     q: "Who's the VP of Sales at L.L.Bean?",
     content: (
       <>
-        <p className="text-lavender">I searched LinkedIn directly - no existing team connection needed for this one.</p>
+        <p className="text-lavender">I searched directly for this - no existing team connection needed.</p>
         <p className="mt-2.5 font-semibold text-ink">Jordan Ellis</p>
         <p className="text-lavender">VP of Sales, L.L.Bean - based in Freeport, ME.</p>
         <p className="mt-3 font-semibold text-ink">Recommended first step</p>
         <p className="mt-1 text-lavender">
-          No warm path found yet - want me to check for one, or pull their recent LinkedIn posts for a
+          No warm path found yet - want me to check for one, or pull their recent posts for a
           research-based opener instead?
         </p>
       </>
@@ -360,7 +360,7 @@ const HERO_DEMOS: HeroDemoScenario[] = [
             <p className="font-medium text-ink">
               Acme Inc. <span className="font-normal text-brand">- warm path found</span>
             </p>
-            <p className="text-lavender">Sam K. is a 1st-degree LinkedIn connection to their VP Sales.</p>
+            <p className="text-lavender">Sam K. is a 1st-degree connection to their VP Sales.</p>
           </li>
           <li>
             <p className="font-medium text-ink">
@@ -884,7 +884,7 @@ export function Marketing() {
             </div>
             <p className="mt-2 text-2xl font-semibold text-brand sm:text-3xl">Now your AI can answer.</p>
             <p className="mx-auto mt-5 max-w-lg text-lg text-lavender lg:mx-0">
-              Commonality gives ChatGPT, Claude, or whatever AI you use access to LinkedIn so it
+              Commonality gives ChatGPT, Claude, or whatever AI you use access to sales research so it
               can find your warmest path into any target account.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
@@ -1089,7 +1089,7 @@ export function Marketing() {
           <h2 className="text-center text-2xl font-bold text-ink sm:text-3xl">Simple pricing</h2>
           <p className="mx-auto mt-2 max-w-lg text-center text-sm text-lavender">
             One subscription per company. Unlimited users - anyone at your company can use it,
-            sharing one monthly credit pool spent only on LinkedIn lookups (drafting the outreach
+            sharing one monthly credit pool spent only on sales research lookups (drafting the outreach
             itself is free). The only limit is team members - how many people the AI searches for
             relationships with.
           </p>
