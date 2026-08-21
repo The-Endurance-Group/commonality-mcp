@@ -478,6 +478,10 @@ const faqCategories: { title: string; items: FaqEntry[] }[] = [
         q: "Is our LinkedIn and company data secure?",
         a: "Yes - your team roster and prospect data are scoped to your company only, and we never expose them to other customers. See our Privacy page for details on exactly what's collected and how it's used.",
       },
+      {
+        q: "We have stricter data requirements - can Commonality run in an isolated or private environment?",
+        a: "Yes, that's part of Enterprise. We can set up an isolated deployment for your organization - including running inside your own cloud environment - so your data never leaves infrastructure you control. Contact us to talk through what your security team needs.",
+      },
     ],
   },
   {
@@ -1142,6 +1146,13 @@ export function Marketing() {
                 <li className="flex items-center gap-2">
                   <CheckIcon />
                   Custom credits/mo
+                </li>
+                <li>
+                  <span className="flex items-center gap-2">
+                    <CheckIcon />
+                    Dedicated, private deployment
+                  </span>
+                  <span className="ml-6 text-xs text-lavender/80">for teams with stricter data requirements</span>
                 </li>
               </ul>
               <LearnMoreButton
