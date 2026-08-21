@@ -336,6 +336,21 @@ const HERO_DEMOS: HeroDemoScenario[] = [
     ),
   },
   {
+    q: "Who's the VP of Sales at L.L.Bean?",
+    content: (
+      <>
+        <p className="text-lavender">I searched LinkedIn directly - no existing team connection needed for this one.</p>
+        <p className="mt-2.5 font-semibold text-ink">Jordan Ellis</p>
+        <p className="text-lavender">VP of Sales, L.L.Bean - based in Freeport, ME.</p>
+        <p className="mt-3 font-semibold text-ink">Recommended first step</p>
+        <p className="mt-1 text-lavender">
+          No warm path found yet - want me to check for one, or pull their recent LinkedIn posts for a
+          research-based opener instead?
+        </p>
+      </>
+    ),
+  },
+  {
     q: "Find our best relationships across this target-account list.",
     content: (
       <>
