@@ -140,6 +140,11 @@ export function Privacy() {
         </div>
 
         <p className="mt-10 text-sm text-lavender">
+          Enterprise customers with additional data-handling or security requirements: these terms can be amended
+          for your organization. Contact us to discuss.
+        </p>
+
+        <p className="mt-4 text-sm text-lavender">
           Questions about how your data is handled? Contact your account administrator or reach out to support.
         </p>
       </section>

@@ -1038,6 +1038,10 @@ export function Marketing() {
             ))}
           </ul>
           <p className="mt-6 text-sm text-lavender">
+            Have higher security needs? Enterprise packages are available - including isolated, private
+            deployments. <LearnMoreButton label="Contact us" className="font-medium text-brand hover:underline" />
+          </p>
+          <p className="mt-4 text-sm text-lavender">
             Read our{" "}
             <Link to="/privacy" className="font-medium text-brand hover:underline">
               Privacy Policy

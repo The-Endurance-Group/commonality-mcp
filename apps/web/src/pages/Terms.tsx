@@ -205,11 +205,17 @@ const sections: Section[] = [
   {
     title: "12. Changes to these Terms",
     body: (
-      <p>
-        We may update these Terms from time to time. If we make a material change, we'll provide reasonable notice
-        (for example, by email or an in-product notice) before it takes effect. Continuing to use Commonality after
-        a change takes effect means you accept the updated Terms.
-      </p>
+      <>
+        <p>
+          We may update these Terms from time to time. If we make a material change, we'll provide reasonable notice
+          (for example, by email or an in-product notice) before it takes effect. Continuing to use Commonality after
+          a change takes effect means you accept the updated Terms.
+        </p>
+        <p className="mt-3">
+          Enterprise customers with additional data-handling or security requirements: these Terms can be amended
+          for your organization. Contact us to discuss.
+        </p>
+      </>
     ),
   },
   {
