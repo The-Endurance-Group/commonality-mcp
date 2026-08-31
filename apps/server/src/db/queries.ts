@@ -1,6 +1,7 @@
 import type { Employee, EnrichmentData } from "@commonality/shared";
 import { db } from "./client.js";
 import { canonicalizeLinkedInUrl } from "../lib/linkedinUrl.js";
+import { normalizeCompany } from "../services/analysis.js";
 
 // Data access for MCP tools. The lean `employees` row holds identity + company
 // scoping; the rich profile (grad year, degrees, bio, …) lives in the shared
@@ -83,32 +84,56 @@ export async function getCompanyEmployees(companyId: string): Promise<Employee[]
   );
 }
 
+// Confidence ranking for the match types findLinkedInConnectors can produce -
+// higher wins when the same employee has multiple connection rows matching
+// the prospect (e.g. two stale exports). "url" is a real profile-identity
+// match; "name_company" corroborates a name match with the connection's
+// stored company so a common name (e.g. "John Smith") at the wrong company
+// isn't mistaken for the prospect; "name" alone is the weakest signal.
+const MATCH_RANK = { url: 3, name_company: 2, name: 1 } as const;
+type ConnectorMatch = keyof typeof MATCH_RANK;
+
 /**
  * Map of employeeId → match type for team members who have the prospect as a
- * 1st-degree LinkedIn connection (by URL or, failing that, by full name).
+ * 1st-degree LinkedIn connection. Tries the profile URL first (most
+ * reliable); falls back to full name, optionally corroborated by company,
+ * for cases where the prospect URL is LinkedIn's internal member-URN form
+ * (returned by profile search in "Short" mode) rather than the public
+ * vanity URL a personal connections export uses - those never match by URL
+ * even for a genuine 1st-degree connection.
  */
 export async function findLinkedInConnectors(
   companyId: string,
   prospectUrl: string,
   prospectName: string,
-): Promise<Map<string, "url" | "name">> {
-  const result = new Map<string, "url" | "name">();
+  prospectCompany?: string,
+): Promise<Map<string, ConnectorMatch>> {
+  const result = new Map<string, ConnectorMatch>();
   // Use the shared canonicalizer, not ad-hoc lowercase/trailing-slash
   // stripping - a stored connection URL and the prospect URL passed in here
   // routinely differ by "www.", http vs https, or a tracking query string,
   // and those need to compare equal or a real 1st-degree match gets missed.
   const urlKey = canonicalizeLinkedInUrl(prospectUrl);
   const nameKey = prospectName.trim().toLowerCase();
+  const companyKey = prospectCompany ? normalizeCompany(prospectCompany) : null;
 
   const { data } = await db()
     .from("linkedin_connections")
-    .select("employee_id, linkedin_url, full_name")
+    .select("employee_id, linkedin_url, full_name, company")
     .eq("company_id", companyId);
-  for (const row of (data as { employee_id: string; linkedin_url: string | null; full_name: string | null }[] | null) ?? []) {
+  for (const row of (data as
+    | { employee_id: string; linkedin_url: string | null; full_name: string | null; company: string | null }[]
+    | null) ?? []) {
+    let match: ConnectorMatch | null = null;
     if (row.linkedin_url && canonicalizeLinkedInUrl(row.linkedin_url) === urlKey) {
-      result.set(row.employee_id, "url");
-    } else if (!result.has(row.employee_id) && row.full_name && row.full_name.trim().toLowerCase() === nameKey) {
-      result.set(row.employee_id, "name");
+      match = "url";
+    } else if (row.full_name && row.full_name.trim().toLowerCase() === nameKey) {
+      match = companyKey && row.company && normalizeCompany(row.company) === companyKey ? "name_company" : "name";
+    }
+    if (!match) continue;
+    const existing = result.get(row.employee_id);
+    if (!existing || MATCH_RANK[match] > MATCH_RANK[existing]) {
+      result.set(row.employee_id, match);
     }
   }
   return result;
@@ -118,7 +143,7 @@ export async function findLinkedInConnectors(
 export async function insertLinkedinConnections(
   companyId: string,
   employeeId: string,
-  connections: { name?: string; url?: string; connected_on?: string }[],
+  connections: { name?: string; url?: string; company?: string; connected_on?: string }[],
 ): Promise<number> {
   const rows = connections
     .filter((c) => c.url || c.name)
@@ -127,6 +152,7 @@ export async function insertLinkedinConnections(
       employee_id: employeeId,
       linkedin_url: c.url ? canonicalizeLinkedInUrl(c.url) : null,
       full_name: c.name ? c.name.trim().toLowerCase() : null,
+      company: c.company ? c.company.trim().toLowerCase() : null,
       connected_on: c.connected_on ?? null,
     }));
   if (!rows.length) return 0;

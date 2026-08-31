@@ -176,7 +176,7 @@ const COMPANY_ALIASES: Record<string, string> = {
   "the walt disney company": "disney",
 };
 
-function normalizeCompany(name: string): string {
+export function normalizeCompany(name: string): string {
   const normalized = name.normalize("NFC");
   const stripped = stripCompanySuffixes(normalized);
   const lower = stripped.toLowerCase().replace(/\s*&\s*/g, "&").replace(/&/g, "and").replace(/\s+/g, " ").trim();
@@ -337,7 +337,7 @@ function normalizeSchool(name: string): string {
 export function findConnections(
   prospect: ProspectProfile,
   employees: Employee[],
-  linkedInConnectors?: Map<string, "url" | "name">
+  linkedInConnectors?: Map<string, "url" | "name" | "name_company">
 ): ConnectionResult[] {
   const results: ConnectionResult[] = [];
 

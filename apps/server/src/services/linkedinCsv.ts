@@ -7,6 +7,7 @@
 interface ParsedConnection {
   name?: string;
   url?: string;
+  company?: string;
   connected_on?: string;
 }
 
@@ -63,6 +64,7 @@ export function parseConnectionsCsv(text: string): ParsedConnection[] {
   const firstNameCol = col("first name");
   const lastNameCol = col("last name");
   const urlCol = col("url");
+  const companyCol = col("company");
   const connectedOnCol = col("connected on");
 
   return rows
@@ -72,10 +74,12 @@ export function parseConnectionsCsv(text: string): ParsedConnection[] {
       const last = lastNameCol >= 0 ? r[lastNameCol]?.trim() : "";
       const name = [first, last].filter(Boolean).join(" ").trim();
       const url = urlCol >= 0 ? r[urlCol]?.trim() : "";
+      const company = companyCol >= 0 ? r[companyCol]?.trim() : "";
       const connected_on = connectedOnCol >= 0 ? r[connectedOnCol]?.trim() : "";
       return {
         name: name || undefined,
         url: url || undefined,
+        company: company || undefined,
         connected_on: connected_on || undefined,
       };
     })

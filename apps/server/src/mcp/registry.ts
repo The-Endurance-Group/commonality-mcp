@@ -115,7 +115,7 @@ export const TOOL_DEFS: McpToolDef[] = [
       properties: {
         employee_id: { type: "string" },
         employee_url: { type: "string" },
-        connections: { type: "array", items: { type: "object", properties: { name: { type: "string" }, url: { type: "string" }, connected_on: { type: "string" } } } },
+        connections: { type: "array", items: { type: "object", properties: { name: { type: "string" }, url: { type: "string" }, company: { type: "string" }, connected_on: { type: "string" } } } },
       },
       required: ["connections"],
     },

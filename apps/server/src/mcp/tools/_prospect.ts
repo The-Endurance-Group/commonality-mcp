@@ -36,7 +36,7 @@ export async function analyzeProspectUrl(
   const prospect = toProspectProfile(enriched);
   const [employees, connectors] = await Promise.all([
     getCompanyEmployees(ctx.company_id),
-    findLinkedInConnectors(ctx.company_id, url, enriched.name),
+    findLinkedInConnectors(ctx.company_id, url, enriched.name, enriched.company),
   ]);
   const results = findConnections(prospect, employees, connectors);
   return { url, enriched, prospect, results };

@@ -3,7 +3,7 @@ import { db } from "../../db/client.js";
 import { insertLinkedinConnections } from "../../db/queries.js";
 import { text } from "./_result.js";
 
-interface Conn { name?: string; url?: string; connected_on?: string }
+interface Conn { name?: string; url?: string; company?: string; connected_on?: string }
 interface Args { employee_id?: string; employee_url?: string; connections: Conn[] }
 
 // Store a team member's 1st-degree LinkedIn connections so they count as the
