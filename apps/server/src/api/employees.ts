@@ -1,6 +1,6 @@
 import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
-import { deleteLinkedinConnections, insertLinkedinConnections } from "../db/queries.js";
+import { countLinkedinConnections, deleteLinkedinConnections, insertLinkedinConnections } from "../db/queries.js";
 import {
   claimEmployeeForSelf,
   enrichOneEmployeeInBackground,
@@ -178,10 +178,14 @@ employeesRouter.post("/:id/re-enrich", async (req, res) => {
 // POST /api/employees/:id/connections - upload a teammate's exported
 // Connections.csv. Any signed-in workspace member can do this for
 // themselves or a teammate; it's optional and only strengthens 1st-degree
-// warm-path matching.
+// warm-path matching. If that person already has connections on file, this
+// blocks with 409 rather than silently appending - a second file uploaded
+// under the wrong person (or duplicate re-uploads of the same file) has
+// caused real "why isn't my connection matching" confusion. The client must
+// explicitly pass replace:true (after the user confirms) to overwrite.
 employeesRouter.post("/:id/connections", async (req, res) => {
   const user = req.user!;
-  const { csv } = (req.body ?? {}) as { csv?: string };
+  const { csv, replace } = (req.body ?? {}) as { csv?: string; replace?: boolean };
   if (!csv || typeof csv !== "string" || !csv.trim()) {
     res.status(400).json({ error: "provide csv (raw text of Connections.csv)" });
     return;
@@ -205,6 +209,18 @@ employeesRouter.post("/:id/connections", async (req, res) => {
   }
 
   try {
+    const existing = await countLinkedinConnections(user.company_id, employee.id);
+    if (existing > 0 && !replace) {
+      res.status(409).json({
+        error: "connections_already_uploaded",
+        existing,
+        message: `This person already has ${existing} connections on file. Delete and replace them with this file?`,
+      });
+      return;
+    }
+    if (existing > 0 && replace) {
+      await deleteLinkedinConnections(user.company_id, employee.id);
+    }
     const saved = await insertLinkedinConnections(user.company_id, employee.id, connections);
     res.json({ saved });
   } catch (err) {

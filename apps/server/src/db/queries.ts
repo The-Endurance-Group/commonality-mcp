@@ -146,3 +146,17 @@ export async function deleteLinkedinConnections(companyId: string, employeeId: s
   if (error) throw new Error(error.message);
   return count ?? 0;
 }
+
+/** How many uploaded LinkedIn connections an employee already has - used to
+ * block a silent second upload (which would just pile duplicates/wrong-file
+ * rows on top, as happened when someone else's export got uploaded under
+ * the wrong teammate) unless the caller explicitly confirms a replace. */
+export async function countLinkedinConnections(companyId: string, employeeId: string): Promise<number> {
+  const { count, error } = await db()
+    .from("linkedin_connections")
+    .select("id", { count: "exact", head: true })
+    .eq("company_id", companyId)
+    .eq("employee_id", employeeId);
+  if (error) throw new Error(error.message);
+  return count ?? 0;
+}

@@ -655,7 +655,7 @@ function ConnectionsCard() {
   const [deleting, setDeleting] = useState(false);
   const [deleteNotice, setDeleteNotice] = useState<string | null>(null);
 
-  async function upload() {
+  async function upload(replace = false) {
     if (!employeeId || !file) return;
     setBusy(true);
     setError(null);
@@ -663,14 +663,28 @@ function ConnectionsCard() {
       const csv = await file.text();
       const { saved } = await apiFetch<{ saved: number }>(`/api/employees/${employeeId}/connections`, {
         method: "POST",
-        body: JSON.stringify({ csv }),
+        body: JSON.stringify({ csv, replace }),
       });
       const empName = employees.find((e) => e.id === employeeId)?.name ?? "Teammate";
       setAdded((a) => [...a, { name: empName, saved }]);
       setEmployeeId("");
       setFile(null);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Couldn't save that file");
+      // Server blocks a second upload for someone who already has
+      // connections on file (409, code "connections_already_uploaded") -
+      // a silent second upload is how a mis-filed export (someone else's
+      // connections uploaded under the wrong teammate) went unnoticed
+      // before. Confirm with the user, then retry as an explicit replace.
+      if (!replace && e instanceof Error && e.message === "connections_already_uploaded") {
+        const empName = employees.find((emp) => emp.id === employeeId)?.name ?? "This person";
+        if (window.confirm(`${empName} already has connections on file. Delete them and replace with this upload?`)) {
+          await upload(true);
+          return;
+        }
+        setError("Upload cancelled - existing connections were kept.");
+      } else {
+        setError(e instanceof Error ? e.message : "Couldn't save that file");
+      }
     } finally {
       setBusy(false);
     }
@@ -753,7 +767,7 @@ function ConnectionsCard() {
       </div>
 
       <div className="mt-4 flex flex-wrap gap-3">
-        <button className="btn-primary" disabled={busy || !employeeId || !file} onClick={upload}>
+        <button className="btn-primary" disabled={busy || !employeeId || !file} onClick={() => upload()}>
           {busy ? "Saving…" : "Upload"}
         </button>
         <button className="btn-secondary" disabled={deleting || !employeeId} onClick={deleteConnections}>
