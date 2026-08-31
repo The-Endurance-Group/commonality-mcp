@@ -85,6 +85,22 @@ function firstString(...vals: unknown[]): string | undefined {
   return undefined;
 }
 
+// Prefer a public vanity-slug profile URL (linkedin.com/in/john-doe) over the
+// internal member-URN URL (linkedin.com/in/ACwAAA...) that LinkedIn's own
+// search results return when the actor doesn't visit the profile page (e.g.
+// profileScraperMode "Short"). The URN form is opaque and stable per-member,
+// but it never matches the public vanity URLs stored in a user's uploaded
+// 1st-degree connections (from a LinkedIn "Export connections" CSV), which
+// silently breaks warm-path matching for anyone found via profile search.
+// publicIdentifier/vanityName/username are the slug alone (no host/path) -
+// build the full URL from whichever is present before falling back to
+// whatever URL field the actor did return.
+function buildProfileUrl(p: Record<string, unknown>): string | undefined {
+  const slug = firstString(p.publicIdentifier, p.vanityName, p.username);
+  if (slug) return `https://www.linkedin.com/in/${slug}`;
+  return firstString(p.linkedinUrl, p.profileUrl, p.url, p.publicProfileUrl);
+}
+
 export interface ApifyCompany {
   name: string;
   description?: string;
@@ -160,7 +176,7 @@ async function getCompanyEmployeesUncached(companyLinkedinUrl: string, limit: nu
   const seen = new Set<string>();
   const out: ApifyEmployee[] = [];
   for (const p of items) {
-    const linkedinUrl = firstString(p.linkedinUrl, p.profileUrl, p.url, p.publicProfileUrl);
+    const linkedinUrl = buildProfileUrl(p);
     if (!linkedinUrl || !linkedinUrl.includes("linkedin.com/in/")) continue;
     const key = linkedinUrl.toLowerCase();
     if (seen.has(key)) continue;
@@ -404,7 +420,7 @@ async function runProfileSearch(filters: ProfileSearchFilters, limit: number): P
   const seen = new Set<string>();
   const out: ApifyProfile[] = [];
   for (const p of items) {
-    const linkedinUrl = firstString(p.linkedinUrl, p.profileUrl, p.url, p.publicProfileUrl);
+    const linkedinUrl = buildProfileUrl(p);
     if (!linkedinUrl || !linkedinUrl.includes("linkedin.com/in/")) continue;
     const key = linkedinUrl.toLowerCase();
     if (seen.has(key)) continue;
