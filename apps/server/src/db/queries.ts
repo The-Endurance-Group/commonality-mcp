@@ -1,5 +1,6 @@
 import type { Employee, EnrichmentData } from "@commonality/shared";
 import { db } from "./client.js";
+import { canonicalizeLinkedInUrl } from "../lib/linkedinUrl.js";
 
 // Data access for MCP tools. The lean `employees` row holds identity + company
 // scoping; the rich profile (grad year, degrees, bio, …) lives in the shared
@@ -92,7 +93,11 @@ export async function findLinkedInConnectors(
   prospectName: string,
 ): Promise<Map<string, "url" | "name">> {
   const result = new Map<string, "url" | "name">();
-  const urlKey = prospectUrl.toLowerCase().replace(/\/+$/, "");
+  // Use the shared canonicalizer, not ad-hoc lowercase/trailing-slash
+  // stripping - a stored connection URL and the prospect URL passed in here
+  // routinely differ by "www.", http vs https, or a tracking query string,
+  // and those need to compare equal or a real 1st-degree match gets missed.
+  const urlKey = canonicalizeLinkedInUrl(prospectUrl);
   const nameKey = prospectName.trim().toLowerCase();
 
   const { data } = await db()
@@ -100,7 +105,7 @@ export async function findLinkedInConnectors(
     .select("employee_id, linkedin_url, full_name")
     .eq("company_id", companyId);
   for (const row of (data as { employee_id: string; linkedin_url: string | null; full_name: string | null }[] | null) ?? []) {
-    if (row.linkedin_url && row.linkedin_url.toLowerCase().replace(/\/+$/, "") === urlKey) {
+    if (row.linkedin_url && canonicalizeLinkedInUrl(row.linkedin_url) === urlKey) {
       result.set(row.employee_id, "url");
     } else if (!result.has(row.employee_id) && row.full_name && row.full_name.trim().toLowerCase() === nameKey) {
       result.set(row.employee_id, "name");
@@ -120,7 +125,7 @@ export async function insertLinkedinConnections(
     .map((c) => ({
       company_id: companyId,
       employee_id: employeeId,
-      linkedin_url: c.url ?? null,
+      linkedin_url: c.url ? canonicalizeLinkedInUrl(c.url) : null,
       full_name: c.name ? c.name.trim().toLowerCase() : null,
       connected_on: c.connected_on ?? null,
     }));
