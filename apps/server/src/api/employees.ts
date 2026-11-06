@@ -1,6 +1,11 @@
 import { Router, type Router as RouterType } from "express";
 import { db } from "../db/client.js";
-import { countLinkedinConnections, deleteLinkedinConnections, insertLinkedinConnections } from "../db/queries.js";
+import {
+  countLinkedinConnections,
+  countLinkedinConnectionsByEmployee,
+  deleteLinkedinConnections,
+  insertLinkedinConnections,
+} from "../db/queries.js";
 import {
   claimEmployeeForSelf,
   enrichOneEmployeeInBackground,
@@ -28,10 +33,19 @@ employeesRouter.get("/", async (req, res) => {
     return;
   }
   const userId = req.user!.user_id;
-  const employees = ((data ?? []) as { claimed_by_user_id: string | null; [k: string]: unknown }[]).map((e) => {
+  const rows = (data ?? []) as { id: string; claimed_by_user_id: string | null; [k: string]: unknown }[];
+  // How many 1st-degree connections each person has uploaded (0 = none yet).
+  let counts = new Map<string, number>();
+  try {
+    counts = await countLinkedinConnectionsByEmployee(req.user!.company_id, rows.map((r) => r.id));
+  } catch {
+    // Non-critical for the roster view - fall back to 0 rather than failing the whole list.
+  }
+  const employees = rows.map((e) => {
     const { claimed_by_user_id, ...rest } = e;
     return {
       ...rest,
+      connectionCount: counts.get(e.id) ?? 0,
       claimedByMe: claimed_by_user_id === userId,
       claimedByOther: !!claimed_by_user_id && claimed_by_user_id !== userId,
     };

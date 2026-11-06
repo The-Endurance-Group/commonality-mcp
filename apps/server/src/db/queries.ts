@@ -216,3 +216,16 @@ export async function countLinkedinConnections(companyId: string, employeeId: st
   if (error) throw new Error(error.message);
   return count ?? 0;
 }
+
+/** Uploaded-connection counts for a set of employees (employeeId → count, 0 when none).
+ * One head-count query per employee on purpose: a single select of all rows would
+ * hit PostgREST's 1,000-row response cap and silently under-count big uploads. */
+export async function countLinkedinConnectionsByEmployee(
+  companyId: string,
+  employeeIds: string[],
+): Promise<Map<string, number>> {
+  const entries = await Promise.all(
+    employeeIds.map(async (id) => [id, await countLinkedinConnections(companyId, id)] as const),
+  );
+  return new Map(entries);
+}
