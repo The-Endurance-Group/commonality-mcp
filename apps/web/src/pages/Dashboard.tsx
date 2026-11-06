@@ -32,6 +32,7 @@ interface Employee {
   schools: string[] | null;
   past_companies: string[] | null;
   enriched_at: string | null;
+  connectionCount?: number;
 }
 interface Company { adminEmail: string | null }
 
@@ -231,6 +232,10 @@ export function Dashboard() {
                     <div><dt className="inline font-medium text-ink">Alma mater: </dt><dd className="inline">{e.schools?.length ? e.schools.join(", ") : "-"}</dd></div>
                     <div><dt className="inline font-medium text-ink">Past companies: </dt><dd className="inline">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</dd></div>
                     <div><dt className="inline font-medium text-ink">Location: </dt><dd className="inline">{e.location ?? "-"}</dd></div>
+                    <div>
+                      <dt className="inline font-medium text-ink">Connections: </dt>
+                      <dd className="inline"><ConnectionsStatus count={e.connectionCount} /></dd>
+                    </div>
                   </dl>
                   <div className="mt-2">
                     {reEnrichingIds.has(e.id) ? (
@@ -257,6 +262,7 @@ export function Dashboard() {
                     <th className="px-4 py-2">Alma mater</th>
                     <th className="px-4 py-2">Past companies</th>
                     <th className="px-4 py-2">Location</th>
+                    <th className="px-4 py-2">Connections</th>
                     <th className="px-4 py-2">Status</th>
                     {isAdmin && <th className="px-4 py-2" />}
                   </tr>
@@ -281,6 +287,7 @@ export function Dashboard() {
                       <td className="px-4 py-2 text-lavender">{e.schools?.length ? e.schools.join(", ") : "-"}</td>
                       <td className="px-4 py-2 text-lavender">{e.past_companies?.length ? e.past_companies.join(", ") : "-"}</td>
                       <td className="px-4 py-2 text-lavender">{e.location ?? "-"}</td>
+                      <td className="px-4 py-2"><ConnectionsStatus count={e.connectionCount} /></td>
                       <td className="px-4 py-2">
                         {reEnrichingIds.has(e.id) ? (
                           <span className="flex items-center gap-1.5 text-brand">
@@ -343,6 +350,12 @@ export function Dashboard() {
 // Shared shell for every major dashboard section - a bordered white card
 // with a title/actions header that can collapse, so users can hide
 // sections they don't care about instead of scrolling past them.
+/** Whether a teammate has uploaded their LinkedIn connections, and how many. */
+function ConnectionsStatus({ count }: { count?: number }) {
+  if (!count) return <span className="text-lavender">Not added</span>;
+  return <span className="text-accent">{count.toLocaleString()}</span>;
+}
+
 function CollapsibleCard({
   title,
   subtitle,
