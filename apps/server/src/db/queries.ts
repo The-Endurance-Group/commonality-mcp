@@ -90,6 +90,11 @@ export async function getCompanyEmployees(companyId: string): Promise<Employee[]
 // match; "name_company" corroborates a name match with the connection's
 // stored company so a common name (e.g. "John Smith") at the wrong company
 // isn't mistaken for the prospect; "name" alone is the weakest signal.
+/** Escape LIKE/ILIKE wildcards so a slug containing "_" or "%" matches literally. */
+function escapeLike(s: string): string {
+  return s.replace(/[\\%_]/g, "\\$&");
+}
+
 const MATCH_RANK = { url: 3, name_company: 2, name: 1 } as const;
 type ConnectorMatch = keyof typeof MATCH_RANK;
 
@@ -117,13 +122,38 @@ export async function findLinkedInConnectors(
   const nameKey = prospectName.trim().toLowerCase();
   const companyKey = prospectCompany ? normalizeCompany(prospectCompany) : null;
 
-  const { data } = await db()
-    .from("linkedin_connections")
-    .select("employee_id, linkedin_url, full_name, company")
-    .eq("company_id", companyId);
-  for (const row of (data as
-    | { employee_id: string; linkedin_url: string | null; full_name: string | null; company: string | null }[]
-    | null) ?? []) {
+  // Narrow in the database instead of loading every connection row for the
+  // company: PostgREST silently caps a response at 1,000 rows, so a single
+  // large export (12k+ rows) was only ever partially scanned and real 1st-degree
+  // matches were missed. Two targeted queries - the vanity/URN slug (matched
+  // loosely with ILIKE so older rows stored with "www."/trailing slash/query
+  // strings still come back; the exact canonical compare below decides) and the
+  // lowercase full name - keep the result set tiny.
+  const slug = urlKey.match(/\/in\/([^/?#]+)/)?.[1];
+  const columns = "employee_id, linkedin_url, full_name, company";
+  const [byUrl, byName] = await Promise.all([
+    slug
+      ? db()
+          .from("linkedin_connections")
+          .select(columns)
+          .eq("company_id", companyId)
+          .ilike("linkedin_url", `%/in/${escapeLike(slug)}%`)
+      : Promise.resolve({ data: [] as unknown[] }),
+    nameKey
+      ? db().from("linkedin_connections").select(columns).eq("company_id", companyId).eq("full_name", nameKey)
+      : Promise.resolve({ data: [] as unknown[] }),
+  ]);
+  const seen = new Set<string>();
+  const rows = [...((byUrl.data as unknown[] | null) ?? []), ...((byName.data as unknown[] | null) ?? [])] as {
+    employee_id: string;
+    linkedin_url: string | null;
+    full_name: string | null;
+    company: string | null;
+  }[];
+  for (const row of rows) {
+    const dedupeKey = `${row.employee_id}|${row.linkedin_url}|${row.full_name}`;
+    if (seen.has(dedupeKey)) continue;
+    seen.add(dedupeKey);
     let match: ConnectorMatch | null = null;
     if (row.linkedin_url && canonicalizeLinkedInUrl(row.linkedin_url) === urlKey) {
       match = "url";
