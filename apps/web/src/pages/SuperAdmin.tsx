@@ -15,6 +15,7 @@ interface Company {
   user_count: number;
   credits_used: number;
   credits_limit: number;
+  unlimited_credits: boolean;
   chat_messages_today: number;
 }
 interface CompanyUser {
@@ -197,6 +198,23 @@ export function SuperAdmin() {
     }
   }
 
+  async function setUnlimited(companyId: string, companyName: string, unlimited: boolean) {
+    const msg = unlimited
+      ? `Give ${companyName} unlimited credits? Usage is still counted, but the monthly limit won't be enforced.`
+      : `Remove unlimited credits from ${companyName}? Their plan limit applies again immediately.`;
+    if (!window.confirm(msg)) return;
+    setBusyId(companyId);
+    try {
+      await apiFetch(`/api/superadmin/companies/${companyId}/unlimited`, {
+        method: "POST",
+        body: JSON.stringify({ unlimited }),
+      });
+      await qc.invalidateQueries({ queryKey: ["superadmin-companies"] });
+    } finally {
+      setBusyId(null);
+    }
+  }
+
   async function resetCredits(companyId: string, companyName: string) {
     if (!window.confirm(`Reset ${companyName}'s credits used this month to 0?`)) return;
     setBusyId(companyId);
@@ -350,7 +368,7 @@ export function SuperAdmin() {
                     </td>
                     <td className="px-4 py-2 text-lavender">{c.user_count}</td>
                     <td className="px-4 py-2 text-lavender">
-                      {c.credits_used} / {c.credits_limit}
+                      {c.unlimited_credits ? `${c.credits_used} / Unlimited` : `${c.credits_used} / ${c.credits_limit}`}
                     </td>
                     <td className="whitespace-nowrap px-4 py-2 text-lavender">{new Date(c.created_at).toLocaleDateString()}</td>
                     <td className="px-4 py-2 text-lavender">{c.chat_messages_today}</td>
@@ -362,6 +380,13 @@ export function SuperAdmin() {
                           onClick={() => resetCredits(c.id, c.name)}
                         >
                           {busyId === c.id ? "…" : "Reset credits"}
+                        </button>
+                        <button
+                          className="btn-secondary"
+                          disabled={busyId === c.id}
+                          onClick={() => setUnlimited(c.id, c.name, !c.unlimited_credits)}
+                        >
+                          {busyId === c.id ? "…" : c.unlimited_credits ? "Remove unlimited" : "Set unlimited"}
                         </button>
                         {c.plan === "pro" ? (
                           <button

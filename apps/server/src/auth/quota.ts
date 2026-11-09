@@ -27,20 +27,32 @@ export interface QuotaStatus {
   used: number;
   limit: number;
   remaining: number;
+  /** True when the company has the superadmin "unlimited credits" override.
+   * limit/remaining are 0 in that case and should not be shown or enforced. */
+  unlimited: boolean;
 }
 
 export async function checkQuota(ctx: Pick<ToolContext, "company_id" | "plan">): Promise<QuotaStatus> {
   const limit = PLAN_LIMITS[ctx.plan];
-  const { data } = await db()
-    .from("monthly_usage")
-    .select("credits_used")
-    .eq("company_id", ctx.company_id)
-    .eq("month", currentMonth())
-    .maybeSingle();
+  const [{ data }, { data: company }] = await Promise.all([
+    db()
+      .from("monthly_usage")
+      .select("credits_used")
+      .eq("company_id", ctx.company_id)
+      .eq("month", currentMonth())
+      .maybeSingle(),
+    // If this lookup errors (e.g. the column isn't migrated yet) `company` is
+    // null and we fall back to normal plan enforcement.
+    db().from("companies").select("unlimited_credits").eq("id", ctx.company_id).maybeSingle(),
+  ]);
   const used = (data as { credits_used: number } | null)?.credits_used ?? 0;
 
+  if ((company as { unlimited_credits?: boolean } | null)?.unlimited_credits === true) {
+    return { allowed: true, used, limit: 0, remaining: 0, unlimited: true };
+  }
+
   const remaining = Math.max(0, limit - used);
-  return { allowed: used < limit, used, limit, remaining };
+  return { allowed: used < limit, used, limit, remaining, unlimited: false };
 }
 
 /** Atomically increment usage for the current month. Returns the new count. */
@@ -181,7 +193,13 @@ export async function chargeCredit(
       }
     })().catch((err) => logger.error({ err, companyId: ctx.company_id }, "first-credit-event handling failed"));
   }
-  return { allowed: true, used, limit: status.limit, remaining: Math.max(0, status.limit - used) };
+  return {
+    allowed: true,
+    used,
+    limit: status.limit,
+    remaining: status.unlimited ? 0 : Math.max(0, status.limit - used),
+    unlimited: status.unlimited,
+  };
 }
 
 const NOTICE_THRESHOLDS = [0.5, 0.75, 0.9, 1] as const;

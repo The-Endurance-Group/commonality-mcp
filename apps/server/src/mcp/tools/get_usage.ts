@@ -8,6 +8,7 @@ import { text } from "./_result.js";
 export const get_usage: ToolHandler<Record<string, never>> = {
   async run(_args, ctx: ToolContext) {
     const q = await checkQuota(ctx);
+    if (q.unlimited) return text(`Plan: ${ctx.plan}. Unlimited credits. Used ${q.used} this month.`);
     return text(`Plan: ${ctx.plan}. Used ${q.used} of ${q.limit} credits this month. ${q.remaining} remaining.`);
   },
 };

@@ -8,7 +8,7 @@ import { apiFetch } from "../lib/api";
 import { useAuthStore } from "../lib/store";
 import { ACTION_LABELS, ResultCell, type CreditEventResult, type CreditEventSnapshot } from "./Billing";
 
-interface Usage { plan: string; used: number; limit: number; remaining: number }
+interface Usage { plan: string; used: number; limit: number; remaining: number; unlimited?: boolean }
 interface CreditEvent {
   id: string;
   action: string;
@@ -113,7 +113,7 @@ export function Dashboard() {
     <div className="space-y-8">
       <section className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Stat label="Plan" value={usage.data ? usage.data.plan.charAt(0).toUpperCase() + usage.data.plan.slice(1) : "-"} />
-        <Stat label="Credits used" value={usage.data ? `${usage.data.used} / ${usage.data.limit}` : "-"} />
+        <Stat label="Credits used" value={usage.data ? (usage.data.unlimited ? `${usage.data.used} (unlimited)` : `${usage.data.used} / ${usage.data.limit}`) : "-"} />
         <Stat
           label="Team members"
           value={
