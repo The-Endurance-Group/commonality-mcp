@@ -54,6 +54,7 @@ export type Database = {
           salesforce_client_secret: string | null
           salesforce_instance_url: string | null
           stripe_customer_id: string | null
+          unlimited_credits: boolean
           website: string | null
         }
         Insert: {
@@ -70,6 +71,7 @@ export type Database = {
           salesforce_client_secret?: string | null
           salesforce_instance_url?: string | null
           stripe_customer_id?: string | null
+          unlimited_credits?: boolean
           website?: string | null
         }
         Update: {
@@ -86,6 +88,7 @@ export type Database = {
           salesforce_client_secret?: string | null
           salesforce_instance_url?: string | null
           stripe_customer_id?: string | null
+          unlimited_credits?: boolean
           website?: string | null
         }
         Relationships: []

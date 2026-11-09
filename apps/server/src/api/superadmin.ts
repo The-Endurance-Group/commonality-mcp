@@ -23,6 +23,7 @@ interface CompanyRow {
   plan: "free" | "pro";
   domain: string | null;
   created_at: string;
+  unlimited_credits: boolean | null;
 }
 
 // GET /api/superadmin/companies - every company, with team size and this
@@ -30,7 +31,7 @@ interface CompanyRow {
 superadminRouter.get("/companies", async (_req, res) => {
   const { data: companies, error } = await db()
     .from("companies")
-    .select("id, name, plan, domain, created_at")
+    .select("id, name, plan, domain, created_at, unlimited_credits")
     .order("created_at", { ascending: false });
   if (error) {
     res.status(502).json({ error: "companies_fetch_failed", message: error.message });
@@ -87,6 +88,7 @@ superadminRouter.get("/companies", async (_req, res) => {
       user_count: userCountByCompany.get(c.id) ?? 0,
       credits_used: usedByCompany.get(c.id) ?? 0,
       credits_limit: PLAN_LIMITS[c.plan],
+      unlimited_credits: c.unlimited_credits === true,
       chat_messages_today: chatTodayByCompany.get(c.id) ?? 0,
     })),
   });
@@ -273,4 +275,28 @@ superadminRouter.post("/companies/:id/plan", async (req, res) => {
     return;
   }
   res.json({ ok: true });
+});
+
+// POST /api/superadmin/companies/:id/unlimited - grant or revoke unlimited
+// monthly credits (support/comp override). Independent of `plan`: it doesn't
+// touch Stripe or the team-size limit, and usage is still counted/audited.
+superadminRouter.post("/companies/:id/unlimited", async (req, res) => {
+  const { unlimited } = (req.body ?? {}) as { unlimited?: unknown };
+  if (typeof unlimited !== "boolean") {
+    res.status(400).json({ error: "invalid_unlimited" });
+    return;
+  }
+  const { error, count } = await db()
+    .from("companies")
+    .update({ unlimited_credits: unlimited }, { count: "exact" })
+    .eq("id", req.params.id);
+  if (error) {
+    res.status(502).json({ error: "unlimited_update_failed", message: error.message });
+    return;
+  }
+  if (!count) {
+    res.status(404).json({ error: "company_not_found" });
+    return;
+  }
+  res.json({ ok: true, unlimited });
 });
