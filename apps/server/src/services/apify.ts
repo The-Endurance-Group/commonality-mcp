@@ -35,6 +35,12 @@ function getClient(): ApifyClient {
   return new ApifyClient({ token });
 }
 
+// Safe subset of an Apify/network error for logs: no request headers or token.
+export function describeApifyError(err: unknown) {
+  const e = err as { message?: string; statusCode?: number; type?: string; name?: string };
+  return { name: e?.name, message: e?.message ?? String(err), statusCode: e?.statusCode, type: e?.type };
+}
+
 function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   let timer: ReturnType<typeof setTimeout>;
   return Promise.race([
