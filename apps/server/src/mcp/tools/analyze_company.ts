@@ -3,6 +3,7 @@ import { chargeCredit, checkQuota, isProspectUnlocked, quotaExceededMessage } fr
 import {
   DEFAULT_POSTS_COUNT,
   MAX_POSTS_COUNT,
+  describeApifyError,
   getCompanyPosts,
   searchCompanies,
   searchProfiles,
@@ -10,6 +11,7 @@ import {
   summarizePostsSnapshot,
   summarizeProfilesSnapshot,
 } from "../../services/apify.js";
+import { logger } from "../../logger.js";
 import { text } from "./_result.js";
 import { analyzeProspectUrl, summarizeBackground, summarizePath, type ProspectAnalysis } from "./_prospect.js";
 
@@ -152,7 +154,8 @@ export const analyze_company: ToolHandler<Args> = {
       let companies;
       try {
         companies = await searchCompanies(args.company_name);
-      } catch {
+      } catch (err) {
+        logger.error({ err: describeApifyError(err), tool: "analyze_company", step: "company_search" }, "company lookup failed");
         return text("Couldn't look up that company right now. Please try again.", true);
       }
       await chargeCredit(ctx, "search_company_by_name", {
@@ -222,7 +225,8 @@ export const analyze_company: ToolHandler<Args> = {
       let candidates: { name: string; title: string; linkedinUrl: string }[];
       try {
         candidates = await searchProfiles({ currentCompanies: [args.company_url], currentJobTitles: role }, ROLE_SEARCH_LIMIT);
-      } catch {
+      } catch (err) {
+        logger.error({ err: describeApifyError(err), tool: "analyze_company", step: "role_search" }, "company people search failed");
         return text("Couldn't search that company's people right now. Please try again.", true);
       }
       // 1 credit for the whole role search, even if it takes the one allowed

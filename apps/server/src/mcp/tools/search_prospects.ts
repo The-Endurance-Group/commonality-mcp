@@ -1,6 +1,7 @@
 import type { ToolContext, ToolHandler } from "@commonality/shared";
 import { chargeCredit, checkQuota, quotaExceededMessage } from "../../auth/quota.js";
-import { searchProfiles, summarizeProfilesSnapshot, type ProfileSearchFilters } from "../../services/apify.js";
+import { describeApifyError, searchProfiles, summarizeProfilesSnapshot, type ProfileSearchFilters } from "../../services/apify.js";
+import { logger } from "../../logger.js";
 import { text } from "./_result.js";
 
 interface SearchArgs {
@@ -33,7 +34,8 @@ export const search_prospects: ToolHandler<SearchArgs> = {
     let profiles;
     try {
       profiles = await searchProfiles(filters, limit);
-    } catch {
+    } catch (err) {
+      logger.error({ err: describeApifyError(err), tool: "search_prospects" }, "profile search failed");
       return text("Search failed. Try again.", true);
     }
     const targetBits = [args.query, args.titles?.join("/"), args.companies?.join("/")].filter(Boolean);
