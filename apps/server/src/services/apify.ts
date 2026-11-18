@@ -340,9 +340,11 @@ function isLikelyInputValidationError(err: unknown): boolean {
 
 // Direct LinkedIn people-search: returns real, currently-employed profiles matching
 // LinkedIn's own job-title/location/company filters (no AI guessing involved).
-// profileScraperMode "Short" returns basic profile fields incl. linkedinUrl with no
-// per-profile scraping cost ($0.10/search page of up to 25 results) - the actor
-// defaults to "Full" (which scrapes each profile, $0.004/profile extra).
+// profileScraperMode "Full" scrapes each profile ($0.10/search page of up to 25
+// results plus $0.004/profile) and returns publicIdentifier, so results carry the
+// public vanity URL. "Short" is cheaper but returns only the internal member-URN
+// URL (linkedin.com/in/ACwAAA...), which never matches a user's uploaded
+// 1st-degree connections, silently breaking warm-path matching.
 export async function searchProfiles(filters: ProfileSearchFilters, limit = 25): Promise<ApifyProfile[]> {
   try {
     return await runProfileSearch(filters, limit);
@@ -423,7 +425,7 @@ async function runProfileSearch(filters: ProfileSearchFilters, limit: number): P
   }
   const items = await runActor(
     PROFILE_SEARCH_ACTOR,
-    { ...actorInput, profileScraperMode: "Short", maxItems: limit, takePages: 1 },
+    { ...actorInput, profileScraperMode: "Full", maxItems: limit, takePages: 1 },
     PROFILE_SEARCH_WAIT_SECS,
     PROFILE_SEARCH_TIMEOUT_MS
   );
