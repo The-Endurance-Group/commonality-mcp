@@ -83,6 +83,10 @@ async function runActor(actorId: string, input: Record<string, unknown>, waitSec
     client.dataset(run.defaultDatasetId).listItems(),
     timeoutMs
   );
+  // Diagnostic for "search returns nothing" reports: shows whether the vendor
+  // run itself came back empty (account/limit problem) vs. rows being dropped
+  // later by our own parsing. Safe subset only: no input, no token.
+  logger.info({ actorId, runId: started.id, status: run.status, itemCount: items.length }, "actor run finished");
   return items as any[];
 }
 
@@ -450,5 +454,12 @@ async function runProfileSearch(filters: ProfileSearchFilters, limit: number): P
     });
     if (out.length >= limit) break;
   }
-  return out.filter((e) => e.name);
+  const result = out.filter((e) => e.name);
+  if (items.length > 0 && result.length === 0) {
+    logger.warn(
+      { rawCount: items.length, sampleKeys: Object.keys(items[0] ?? {}).slice(0, 25) },
+      "profile search rows were all dropped while parsing"
+    );
+  }
+  return result;
 }
